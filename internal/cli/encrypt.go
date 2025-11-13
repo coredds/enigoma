@@ -51,7 +51,11 @@ PREPROCESSING (for presets):
   --remove-spaces     Remove spaces from input
   --uppercase         Convert to uppercase  
   --letters-only      Keep only A-Z, a-z
-  --alphanumeric-only Keep only letters and numbers`,
+  --alphanumeric-only Keep only letters and numbers
+
+DRY RUN:
+  enigoma encrypt --text "Hello World" --preset classic --dry-run
+  Shows what would happen without actually encrypting`,
 	RunE: runEncrypt,
 }
 
@@ -84,11 +88,17 @@ func init() {
 	// Output formatting
 	encryptCmd.Flags().StringP("format", "", "text", "Output format (text, hex, base64)")
 	encryptCmd.Flags().BoolP("preserve-case", "", false, "Preserve original case (when possible)")
+	
+	// Execution options
+	encryptCmd.Flags().Bool("dry-run", false, "Show what would happen without executing")
 }
 
 // nolint:gocyclo // This function handles multiple encryption paths
 func runEncrypt(cmd *cobra.Command, args []string) error {
 	setupVerbose(cmd)
+
+	// Check for dry-run mode
+	dryRun, _ := cmd.Flags().GetBool("dry-run")
 
 	// Get input text
 	text, err := getInputText(cmd)
@@ -101,6 +111,7 @@ func runEncrypt(cmd *cobra.Command, args []string) error {
 	}
 
 	// Apply input preprocessing
+	originalText := text
 	text = preprocessInput(cmd, text)
 
 	// Apply auto-detection preprocessing if using auto-config
@@ -111,6 +122,11 @@ func runEncrypt(cmd *cobra.Command, args []string) error {
 	// Prevalidate operation
 	if err := prevalidateOperation(cmd, text); err != nil {
 		return err
+	}
+	
+	// If dry-run, show what would happen and exit
+	if dryRun {
+		return showDryRunInfo(cmd, originalText, text)
 	}
 
 	// Create Enigma machine with configuration-first workflow
@@ -576,4 +592,120 @@ func filterAlphanumericOnly(text string) string {
 		}
 	}
 	return filtered.String()
+}
+
+// showDryRunInfo displays what would happen without executing the encryption
+func showDryRunInfo(cmd *cobra.Command, originalText, processedText string) error {
+	fmt.Println("=== DRY RUN MODE ===")
+	fmt.Println("No encryption will be performed. Showing what would happen:")
+	fmt.Println()
+	
+	// Input information
+	fmt.Println("INPUT:")
+	fmt.Printf("  Original text: %q\n", truncateForDisplay(originalText, 100))
+	fmt.Printf("  Text length: %d characters\n", len(originalText))
+	
+	if originalText != processedText {
+		fmt.Printf("  After preprocessing: %q\n", truncateForDisplay(processedText, 100))
+		fmt.Printf("  Processed length: %d characters\n", len(processedText))
+	}
+	fmt.Println()
+	
+	// Configuration information
+	fmt.Println("CONFIGURATION:")
+	
+	if configFile, _ := cmd.Flags().GetString("config"); configFile != "" {
+		fmt.Printf("  Using config file: %s\n", configFile)
+	} else if autoConfigPath, _ := cmd.Flags().GetString("auto-config"); autoConfigPath != "" {
+		fmt.Printf("  Auto-config mode: Will detect alphabet and save to %s\n", autoConfigPath)
+		
+		// Detect unique characters
+		uniqueChars := make(map[rune]bool)
+		for _, r := range processedText {
+			uniqueChars[r] = true
+		}
+		
+		// Convert to sorted slice for display
+		chars := make([]rune, 0, len(uniqueChars))
+		for r := range uniqueChars {
+			chars = append(chars, r)
+		}
+		
+		fmt.Printf("  Detected alphabet size: %d characters\n", len(chars))
+		if len(chars) > 0 {
+			fmt.Printf("  Sample characters: %s\n", truncateForDisplay(string(chars), 50))
+		}
+		
+		security, _ := cmd.Flags().GetString("security")
+		fmt.Printf("  Security level: %s\n", security)
+	} else if preset, _ := cmd.Flags().GetString("preset"); preset != "" {
+		fmt.Printf("  Using preset: %s\n", preset)
+		
+		if saveConfig, _ := cmd.Flags().GetString("save-config"); saveConfig != "" {
+			fmt.Printf("  Will save config to: %s\n", saveConfig)
+		}
+	} else {
+		alphabetName, _ := cmd.Flags().GetString("alphabet")
+		security, _ := cmd.Flags().GetString("security")
+		fmt.Printf("  Alphabet: %s\n", alphabetName)
+		fmt.Printf("  Security level: %s\n", security)
+		
+		if saveConfig, _ := cmd.Flags().GetString("save-config"); saveConfig != "" {
+			fmt.Printf("  Will save config to: %s\n", saveConfig)
+		}
+	}
+	fmt.Println()
+	
+	// Preprocessing information
+	if hasPreprocessing(cmd) {
+		fmt.Println("PREPROCESSING:")
+		if removeSpaces, _ := cmd.Flags().GetBool("remove-spaces"); removeSpaces {
+			fmt.Println("  ✓ Remove spaces")
+		}
+		if uppercase, _ := cmd.Flags().GetBool("uppercase"); uppercase {
+			fmt.Println("  ✓ Convert to uppercase")
+		}
+		if lettersOnly, _ := cmd.Flags().GetBool("letters-only"); lettersOnly {
+			fmt.Println("  ✓ Keep only letters (A-Z, a-z)")
+		}
+		if alphanumericOnly, _ := cmd.Flags().GetBool("alphanumeric-only"); alphanumericOnly {
+			fmt.Println("  ✓ Keep only letters and numbers")
+		}
+		fmt.Println()
+	}
+	
+	// Output information
+	fmt.Println("OUTPUT:")
+	format, _ := cmd.Flags().GetString("format")
+	fmt.Printf("  Format: %s\n", format)
+	
+	if outputFile, _ := cmd.Flags().GetString("output"); outputFile != "" {
+		fmt.Printf("  Output file: %s\n", outputFile)
+	} else {
+		fmt.Println("  Output: stdout")
+	}
+	fmt.Println()
+	
+	fmt.Println("NEXT STEPS:")
+	fmt.Println("  Remove --dry-run flag to perform actual encryption")
+	
+	return nil
+}
+
+// hasPreprocessing checks if any preprocessing flags are enabled
+func hasPreprocessing(cmd *cobra.Command) bool {
+	removeSpaces, _ := cmd.Flags().GetBool("remove-spaces")
+	uppercase, _ := cmd.Flags().GetBool("uppercase")
+	lettersOnly, _ := cmd.Flags().GetBool("letters-only")
+	alphanumericOnly, _ := cmd.Flags().GetBool("alphanumeric-only")
+	
+	return removeSpaces || uppercase || lettersOnly || alphanumericOnly
+}
+
+// truncateForDisplay truncates text for display purposes
+func truncateForDisplay(text string, maxLen int) string {
+	if len(text) <= maxLen {
+		return text
+	}
+	return text[:maxLen] + "..."
 }
