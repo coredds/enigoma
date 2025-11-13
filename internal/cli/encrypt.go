@@ -88,7 +88,7 @@ func init() {
 	// Output formatting
 	encryptCmd.Flags().StringP("format", "", "text", "Output format (text, hex, base64)")
 	encryptCmd.Flags().BoolP("preserve-case", "", false, "Preserve original case (when possible)")
-	
+
 	// Execution options
 	encryptCmd.Flags().Bool("dry-run", false, "Show what would happen without executing")
 }
@@ -123,7 +123,7 @@ func runEncrypt(cmd *cobra.Command, args []string) error {
 	if err := prevalidateOperation(cmd, text); err != nil {
 		return err
 	}
-	
+
 	// If dry-run, show what would happen and exit
 	if dryRun {
 		return showDryRunInfo(cmd, originalText, text)
@@ -595,52 +595,53 @@ func filterAlphanumericOnly(text string) string {
 }
 
 // showDryRunInfo displays what would happen without executing the encryption
+// nolint:gocyclo // This function displays different information based on multiple flag combinations
 func showDryRunInfo(cmd *cobra.Command, originalText, processedText string) error {
 	fmt.Println("=== DRY RUN MODE ===")
 	fmt.Println("No encryption will be performed. Showing what would happen:")
 	fmt.Println()
-	
+
 	// Input information
 	fmt.Println("INPUT:")
 	fmt.Printf("  Original text: %q\n", truncateForDisplay(originalText, 100))
 	fmt.Printf("  Text length: %d characters\n", len(originalText))
-	
+
 	if originalText != processedText {
 		fmt.Printf("  After preprocessing: %q\n", truncateForDisplay(processedText, 100))
 		fmt.Printf("  Processed length: %d characters\n", len(processedText))
 	}
 	fmt.Println()
-	
+
 	// Configuration information
 	fmt.Println("CONFIGURATION:")
-	
+
 	if configFile, _ := cmd.Flags().GetString("config"); configFile != "" {
 		fmt.Printf("  Using config file: %s\n", configFile)
 	} else if autoConfigPath, _ := cmd.Flags().GetString("auto-config"); autoConfigPath != "" {
 		fmt.Printf("  Auto-config mode: Will detect alphabet and save to %s\n", autoConfigPath)
-		
+
 		// Detect unique characters
 		uniqueChars := make(map[rune]bool)
 		for _, r := range processedText {
 			uniqueChars[r] = true
 		}
-		
+
 		// Convert to sorted slice for display
 		chars := make([]rune, 0, len(uniqueChars))
 		for r := range uniqueChars {
 			chars = append(chars, r)
 		}
-		
+
 		fmt.Printf("  Detected alphabet size: %d characters\n", len(chars))
 		if len(chars) > 0 {
 			fmt.Printf("  Sample characters: %s\n", truncateForDisplay(string(chars), 50))
 		}
-		
+
 		security, _ := cmd.Flags().GetString("security")
 		fmt.Printf("  Security level: %s\n", security)
 	} else if preset, _ := cmd.Flags().GetString("preset"); preset != "" {
 		fmt.Printf("  Using preset: %s\n", preset)
-		
+
 		if saveConfig, _ := cmd.Flags().GetString("save-config"); saveConfig != "" {
 			fmt.Printf("  Will save config to: %s\n", saveConfig)
 		}
@@ -649,13 +650,13 @@ func showDryRunInfo(cmd *cobra.Command, originalText, processedText string) erro
 		security, _ := cmd.Flags().GetString("security")
 		fmt.Printf("  Alphabet: %s\n", alphabetName)
 		fmt.Printf("  Security level: %s\n", security)
-		
+
 		if saveConfig, _ := cmd.Flags().GetString("save-config"); saveConfig != "" {
 			fmt.Printf("  Will save config to: %s\n", saveConfig)
 		}
 	}
 	fmt.Println()
-	
+
 	// Preprocessing information
 	if hasPreprocessing(cmd) {
 		fmt.Println("PREPROCESSING:")
@@ -673,22 +674,22 @@ func showDryRunInfo(cmd *cobra.Command, originalText, processedText string) erro
 		}
 		fmt.Println()
 	}
-	
+
 	// Output information
 	fmt.Println("OUTPUT:")
 	format, _ := cmd.Flags().GetString("format")
 	fmt.Printf("  Format: %s\n", format)
-	
+
 	if outputFile, _ := cmd.Flags().GetString("output"); outputFile != "" {
 		fmt.Printf("  Output file: %s\n", outputFile)
 	} else {
 		fmt.Println("  Output: stdout")
 	}
 	fmt.Println()
-	
+
 	fmt.Println("NEXT STEPS:")
 	fmt.Println("  Remove --dry-run flag to perform actual encryption")
-	
+
 	return nil
 }
 
@@ -698,7 +699,7 @@ func hasPreprocessing(cmd *cobra.Command) bool {
 	uppercase, _ := cmd.Flags().GetBool("uppercase")
 	lettersOnly, _ := cmd.Flags().GetBool("letters-only")
 	alphanumericOnly, _ := cmd.Flags().GetBool("alphanumeric-only")
-	
+
 	return removeSpaces || uppercase || lettersOnly || alphanumericOnly
 }
 
