@@ -47,20 +47,21 @@ coverage.out
 bin/
 dist/
 build/
+coverage.html
 
 # Documentation build artifacts
 docs/_build/
 
-# eniGOma specific
+# enigoma specific
 *.log
 debug_*
-test_*
+test_output.txt
 
-# eniGOma CLI binaries (avoid committing compiled binaries)
-eniGOma
-eniGOma.exe
-cmd/eniGOma/eniGOma
-cmd/eniGOma/eniGOma.exe
+# enigoma CLI binaries (avoid committing compiled binaries)
+enigoma
+enigoma.exe
+cmd/enigoma/enigoma
+cmd/enigoma/enigoma.exe
 
 # Release artifacts (built locally for manual GitHub release upload)
 releases/
