@@ -22,6 +22,12 @@ help:
 	@echo "  make install       - Install CLI to GOPATH/bin"
 	@echo "  make all           - Run check and test, then build"
 	@echo ""
+	@echo "Docker:"
+	@echo "  make docker-build  - Build Docker image"
+	@echo "  make docker-run    - Run Docker container"
+	@echo "  make docker-test   - Test Docker build"
+	@echo "  make docker-clean  - Clean Docker images"
+	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean         - Remove build artifacts"
 	@echo "  make clean-all     - Remove all generated files"
@@ -133,3 +139,29 @@ watch-test:
 # Version info
 version:
 	@go run ./cmd/enigoma --version
+
+# Docker targets
+docker-build:
+	@echo "Building Docker image..."
+	@docker build -t enigoma:latest .
+	@echo "Docker image built: enigoma:latest"
+
+docker-run:
+	@echo "Running Docker container..."
+	@docker run --rm enigoma:latest --version
+
+docker-test:
+	@echo "Testing Docker build..."
+	@docker build -t enigoma:test .
+	@docker run --rm enigoma:test test
+
+docker-compose-up:
+	@docker-compose up
+
+docker-compose-down:
+	@docker-compose down
+
+docker-clean:
+	@echo "Cleaning Docker images..."
+	@docker rmi -f enigoma:latest enigoma:test 2>/dev/null || true
+	@echo "Docker images cleaned"

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  enigoma:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: enigoma:latest
+    container_name: enigoma
+    volumes:
+      - ./configs:/home/enigoma/configs:ro
+    environment:
+      - ENIGOMA_CONFIG_PATH=/home/enigoma/configs
+    command: ["--help"]
+    
+  # Example service for encryption
+  encrypt:
+    image: enigoma:latest
+    volumes:
+      - ./configs:/home/enigoma/configs
+      - ./data:/home/enigoma/data
+    command: ["encrypt", "--text", "Hello World", "--auto-config", "/home/enigoma/configs/my-key.json"]

@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+.github
+
+# Build artifacts
+bin/
+dist/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test and coverage
+*.test
+*.out
+*.prof
+coverage.out
+coverage.html
+test_output.txt
+
+# Dependencies
+vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Release
+releases/
+release-notes.md
+
+# Temporary
+*.tmp
+*.temp
+.env
+.env.local

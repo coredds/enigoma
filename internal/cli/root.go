@@ -42,6 +42,7 @@ func init() {
 	rootCmd.AddCommand(demoCmd)
 	rootCmd.AddCommand(examplesCmd)
 	rootCmd.AddCommand(testCmd)
+	rootCmd.AddCommand(versionCmd)
 
 	// Global flags
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
