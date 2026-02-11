@@ -1,6 +1,6 @@
 # enigoma
 
-[![Version](https://img.shields.io/badge/version-0.4.2-blue.svg)](https://github.com/coredds/enigoma/releases)
+[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](https://github.com/coredds/enigoma/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/coredds/enigoma.svg)](https://pkg.go.dev/github.com/coredds/enigoma)
 [![CI](https://github.com/coredds/enigoma/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/coredds/enigoma/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org)
@@ -57,7 +57,7 @@ enigoma is a Go library that simulates the famous Enigma machine used during Wor
 
 ```bash
 # Inside your Go module:
-go get github.com/coredds/enigoma@v0.4.2
+go get github.com/coredds/enigoma@v0.5.0
 ```
 
 Or get the latest version:
@@ -481,7 +481,7 @@ enigoma maintains historical Enigma machine behaviors:
 
 ## Version History
 
-Current version: **0.4.2**
+Current version: **0.5.0**
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.
 

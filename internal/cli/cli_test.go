@@ -814,7 +814,7 @@ func createTestRootCmd() *cobra.Command {
 	testRootCmd := &cobra.Command{
 		Use:     "enigoma",
 		Short:   "A highly customizable, Unicode-capable Enigma machine implementation",
-		Version: "0.2.1",
+		Version: "0.5.0",
 	}
 
 	// Create fresh command instances to avoid state pollution
