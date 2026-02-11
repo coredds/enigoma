@@ -1,6 +1,6 @@
 // Package cli provides the test command for the enigoma CLI.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 
@@ -174,7 +174,7 @@ func testUnicodeSupport() error {
 
 	encrypted, err := machine.Encrypt(message)
 	if err != nil {
-		return fmt.Errorf("Unicode encryption failed: %v", err)
+		return fmt.Errorf("unicode encryption failed: %w", err)
 	}
 
 	if err := machine.Reset(); err != nil {
@@ -182,11 +182,11 @@ func testUnicodeSupport() error {
 	}
 	decrypted, err := machine.Decrypt(encrypted)
 	if err != nil {
-		return fmt.Errorf("Unicode decryption failed: %v", err)
+		return fmt.Errorf("unicode decryption failed: %w", err)
 	}
 
 	if message != decrypted {
-		return fmt.Errorf("Unicode round-trip failed: %q != %q", message, decrypted)
+		return fmt.Errorf("unicode round-trip failed: %q != %q", message, decrypted)
 	}
 
 	return nil

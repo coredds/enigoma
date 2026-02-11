@@ -1,6 +1,6 @@
 // Package enigma provides convenience functions for zero-config usage.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package enigma
 
@@ -16,18 +16,18 @@ import (
 func QuickEncrypt(text string, security SecurityLevel) (encrypted string, config string, err error) {
 	machine, err := NewFromText(text, security)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create machine: %v", err)
+		return "", "", fmt.Errorf("failed to create machine: %w", err)
 	}
 
 	// Save configuration BEFORE encryption to preserve initial state
 	config, err = machine.SaveSettingsToJSON()
 	if err != nil {
-		return "", "", fmt.Errorf("failed to save configuration: %v", err)
+		return "", "", fmt.Errorf("failed to save configuration: %w", err)
 	}
 
 	encrypted, err = machine.Encrypt(text)
 	if err != nil {
-		return "", "", fmt.Errorf("encryption failed: %v", err)
+		return "", "", fmt.Errorf("encryption failed: %w", err)
 	}
 
 	return encrypted, config, nil
@@ -43,7 +43,7 @@ func NewFromText(text string, security SecurityLevel) (*Enigma, error) {
 	// Auto-detect alphabet from text
 	detectedAlphabet, err := alphabet.AutoDetectFromText(text)
 	if err != nil {
-		return nil, fmt.Errorf("failed to auto-detect alphabet from text %q: %v. Try using enigma.NewEnigmaSimple(enigoma.AlphabetLatinUpper) for manual setup", text, err)
+		return nil, fmt.Errorf("failed to auto-detect alphabet from text %q: %w. Try using enigma.NewEnigmaSimple(enigoma.AlphabetLatinUpper) for manual setup", text, err)
 	}
 
 	// Create machine with detected alphabet and specified security
@@ -52,7 +52,7 @@ func NewFromText(text string, security SecurityLevel) (*Enigma, error) {
 		WithRandomSettings(security),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create machine: %v", err)
+		return nil, fmt.Errorf("failed to create machine: %w", err)
 	}
 
 	return machine, nil
@@ -70,12 +70,12 @@ func EncryptText(text string) (encrypted string, config string, err error) {
 func DecryptWithConfig(encryptedText string, configJSON string) (decrypted string, err error) {
 	machine, err := NewFromJSON(configJSON)
 	if err != nil {
-		return "", fmt.Errorf("failed to load configuration: %v. Make sure you're using the same config that was used for encryption", err)
+		return "", fmt.Errorf("failed to load configuration: %w. Make sure you're using the same config that was used for encryption", err)
 	}
 
 	decrypted, err = machine.Decrypt(encryptedText)
 	if err != nil {
-		return "", fmt.Errorf("decryption failed: %v. Make sure you're using the correct configuration and encrypted text", err)
+		return "", fmt.Errorf("decryption failed: %w. Make sure you're using the correct configuration and encrypted text", err)
 	}
 
 	return decrypted, nil

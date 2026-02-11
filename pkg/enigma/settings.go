@@ -1,12 +1,13 @@
 // Package enigma provides settings management for the Enigma machine.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package enigma
 
 import (
 	"encoding/json"
 	"fmt"
+	"unicode/utf8"
 
 	"github.com/coredds/enigoma/internal/alphabet"
 	"github.com/coredds/enigoma/internal/plugboard"
@@ -48,7 +49,7 @@ func (e *Enigma) GetSettings() (*EnigmaSettings, error) {
 	for i, r := range e.rotors {
 		spec, err := rotor.ToSpec(r, e.alphabet)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get spec for rotor %d: %v", i, err)
+			return nil, fmt.Errorf("failed to get spec for rotor %d: %w", i, err)
 		}
 		rotorSpecs[i] = spec
 	}
@@ -56,13 +57,13 @@ func (e *Enigma) GetSettings() (*EnigmaSettings, error) {
 	// Get reflector specification
 	reflectorSpec, err := reflector.ToSpec(e.reflector, e.alphabet)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get reflector spec: %v", err)
+		return nil, fmt.Errorf("failed to get reflector spec: %w", err)
 	}
 
 	// Get plugboard pairs
 	plugboardPairs, err := e.plugboard.GetPairsMap()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get plugboard pairs: %v", err)
+		return nil, fmt.Errorf("failed to get plugboard pairs: %w", err)
 	}
 
 	// Get current rotor positions
@@ -88,7 +89,7 @@ func (e *Enigma) LoadSettings(settings *EnigmaSettings) error {
 	// Create alphabet
 	alph, err := alphabet.New(settings.Alphabet)
 	if err != nil {
-		return fmt.Errorf("failed to create alphabet: %v", err)
+		return fmt.Errorf("failed to create alphabet: %w", err)
 	}
 	e.alphabet = alph
 
@@ -97,7 +98,7 @@ func (e *Enigma) LoadSettings(settings *EnigmaSettings) error {
 	for i, spec := range settings.RotorSpecs {
 		r, err := rotor.CreateFromSpec(spec, e.alphabet)
 		if err != nil {
-			return fmt.Errorf("failed to create rotor %d: %v", i, err)
+			return fmt.Errorf("failed to create rotor %d: %w", i, err)
 		}
 		rotors[i] = r
 	}
@@ -106,20 +107,20 @@ func (e *Enigma) LoadSettings(settings *EnigmaSettings) error {
 	// Create reflector
 	refl, err := reflector.CreateFromSpec(settings.ReflectorSpec, e.alphabet)
 	if err != nil {
-		return fmt.Errorf("failed to create reflector: %v", err)
+		return fmt.Errorf("failed to create reflector: %w", err)
 	}
 	e.reflector = refl
 
 	// Create plugboard
 	pb, err := plugboard.New(e.alphabet)
 	if err != nil {
-		return fmt.Errorf("failed to create plugboard: %v", err)
+		return fmt.Errorf("failed to create plugboard: %w", err)
 	}
 
 	if len(settings.PlugboardPairs) > 0 {
 		err = pb.SetPairsFromMap(settings.PlugboardPairs)
 		if err != nil {
-			return fmt.Errorf("failed to set plugboard pairs: %v", err)
+			return fmt.Errorf("failed to set plugboard pairs: %w", err)
 		}
 	}
 	e.plugboard = pb
@@ -211,7 +212,7 @@ func (s *EnigmaSettings) UnmarshalJSON(data []byte) error {
 
 	// Convert string pairs back to rune pairs
 	for k, v := range js.PlugboardPairs {
-		if len(k) != 1 || len(v) != 1 {
+		if utf8.RuneCountInString(k) != 1 || utf8.RuneCountInString(v) != 1 {
 			return fmt.Errorf("invalid plugboard pair: %s->%s", k, v)
 		}
 		kRune := []rune(k)[0]
@@ -226,12 +227,12 @@ func (s *EnigmaSettings) UnmarshalJSON(data []byte) error {
 func (e *Enigma) SaveSettingsToJSON() (string, error) {
 	settings, err := e.GetSettings()
 	if err != nil {
-		return "", fmt.Errorf("failed to get settings: %v", err)
+		return "", fmt.Errorf("failed to get settings: %w", err)
 	}
 
 	data, err := json.MarshalIndent(settings, "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal settings: %v", err)
+		return "", fmt.Errorf("failed to marshal settings: %w", err)
 	}
 
 	return string(data), nil
@@ -241,7 +242,7 @@ func (e *Enigma) SaveSettingsToJSON() (string, error) {
 func (e *Enigma) LoadSettingsFromJSON(jsonData string) error {
 	var settings EnigmaSettings
 	if err := json.Unmarshal([]byte(jsonData), &settings); err != nil {
-		return fmt.Errorf("failed to unmarshal settings: %v", err)
+		return fmt.Errorf("failed to unmarshal settings: %w", err)
 	}
 
 	return e.LoadSettings(&settings)
@@ -260,7 +261,7 @@ func NewFromSettings(settings *EnigmaSettings) (*Enigma, error) {
 func NewFromJSON(jsonData string) (*Enigma, error) {
 	var settings EnigmaSettings
 	if err := json.Unmarshal([]byte(jsonData), &settings); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal settings: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal settings: %w", err)
 	}
 
 	return NewFromSettings(&settings)

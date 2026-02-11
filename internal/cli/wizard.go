@@ -1,6 +1,6 @@
 // Package cli provides the wizard command for the enigoma CLI.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 
@@ -332,7 +332,7 @@ func needsPreprocessing(text string) bool {
 
 func hasSpecialChars(text string) bool {
 	for _, r := range text {
-		if !((r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == ' ') {
+		if (r < 'A' || r > 'Z') && (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != ' ' {
 			return true
 		}
 	}

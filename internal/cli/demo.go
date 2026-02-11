@@ -1,6 +1,6 @@
 // Package cli provides the demo command for the enigoma CLI.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 
@@ -81,7 +81,7 @@ func runDemo(cmd *cobra.Command, args []string) error {
 
 	encryptedUnicode, err := unicodeMachine.Encrypt(unicodeMessage)
 	if err != nil {
-		return fmt.Errorf("Unicode encryption failed: %v", err)
+		return fmt.Errorf("unicode encryption failed: %w", err)
 	}
 	fmt.Printf("Encrypted: %q\n", encryptedUnicode)
 
@@ -90,7 +90,7 @@ func runDemo(cmd *cobra.Command, args []string) error {
 	}
 	decryptedUnicode, err := unicodeMachine.Decrypt(encryptedUnicode)
 	if err != nil {
-		return fmt.Errorf("Unicode decryption failed: %v", err)
+		return fmt.Errorf("unicode decryption failed: %w", err)
 	}
 	fmt.Printf("Decrypted: %q\n", decryptedUnicode)
 	fmt.Printf("✅ Unicode round-trip successful: %t\n", unicodeMessage == decryptedUnicode)

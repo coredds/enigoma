@@ -1,6 +1,6 @@
 // Package enigma provides the main Enigma machine implementation.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package enigma
 
@@ -29,7 +29,7 @@ func New(opts ...Option) (*Enigma, error) {
 	// Apply options
 	for _, opt := range opts {
 		if err := opt(e); err != nil {
-			return nil, fmt.Errorf("failed to apply option: %v", err)
+			return nil, fmt.Errorf("failed to apply option: %w", err)
 		}
 	}
 
@@ -47,7 +47,7 @@ func New(opts ...Option) (*Enigma, error) {
 		// Create empty plugboard if none provided
 		pb, err := plugboard.New(e.alphabet)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create plugboard: %v", err)
+			return nil, fmt.Errorf("failed to create plugboard: %w", err)
 		}
 		e.plugboard = pb
 	}
@@ -55,7 +55,7 @@ func New(opts ...Option) (*Enigma, error) {
 	// Store initial settings for reset functionality
 	settings, err := e.GetSettings()
 	if err != nil {
-		return nil, fmt.Errorf("failed to capture initial settings: %v", err)
+		return nil, fmt.Errorf("failed to capture initial settings: %w", err)
 	}
 	e.initialSettings = *settings
 
@@ -81,13 +81,13 @@ func (e *Enigma) processText(text string) (string, error) {
 
 	// Validate input text
 	if invalidRune, err := e.alphabet.ValidateString(text); err != nil {
-		return "", fmt.Errorf("invalid character %c in input text: %v", invalidRune, err)
+		return "", fmt.Errorf("invalid character %c in input text: %w", invalidRune, err)
 	}
 
 	// Convert text to indices
 	indices, err := e.alphabet.StringToIndices(text)
 	if err != nil {
-		return "", fmt.Errorf("failed to convert text to indices: %v", err)
+		return "", fmt.Errorf("failed to convert text to indices: %w", err)
 	}
 
 	// Process each character
@@ -99,7 +99,7 @@ func (e *Enigma) processText(text string) (string, error) {
 	// Convert back to string
 	result, err := e.alphabet.IndicesToString(outputIndices)
 	if err != nil {
-		return "", fmt.Errorf("failed to convert indices to string: %v", err)
+		return "", fmt.Errorf("failed to convert indices to string: %w", err)
 	}
 
 	return result, nil
@@ -233,7 +233,7 @@ func (e *Enigma) Clone() (*Enigma, error) {
 	// Clone plugboard
 	pb, err := e.plugboard.Clone()
 	if err != nil {
-		return nil, fmt.Errorf("failed to clone plugboard: %v", err)
+		return nil, fmt.Errorf("failed to clone plugboard: %w", err)
 	}
 	clone.plugboard = pb
 

@@ -1,6 +1,6 @@
 // Package enigma provides functional options for configuring Enigma machines.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package enigma
 
@@ -35,7 +35,7 @@ func WithAlphabet(runes []rune) Option {
 	return func(e *Enigma) error {
 		alph, err := alphabet.New(runes)
 		if err != nil {
-			return fmt.Errorf("failed to create alphabet: %v", err)
+			return fmt.Errorf("failed to create alphabet: %w", err)
 		}
 		e.alphabet = alph
 		return nil
@@ -65,7 +65,7 @@ func WithCustomComponents(rotors []rotor.Rotor, refl reflector.Reflector, pb *pl
 			var err error
 			e.plugboard, err = pb.Clone()
 			if err != nil {
-				return fmt.Errorf("failed to clone plugboard: %v", err)
+				return fmt.Errorf("failed to clone plugboard: %w", err)
 			}
 		}
 
@@ -88,21 +88,21 @@ func WithRandomSettings(level SecurityLevel) Option {
 		for i := 0; i < config.rotorCount; i++ {
 			r, err := rotor.RandomRotor(fmt.Sprintf("R%d", i+1), e.alphabet)
 			if err != nil {
-				return fmt.Errorf("failed to generate random rotor %d: %v", i+1, err)
+				return fmt.Errorf("failed to generate random rotor %d: %w", i+1, err)
 			}
 
 			// Set random initial position
 			maxPos := big.NewInt(int64(e.alphabet.Size()))
 			posBig, err := rand.Int(rand.Reader, maxPos)
 			if err != nil {
-				return fmt.Errorf("failed to generate random position: %v", err)
+				return fmt.Errorf("failed to generate random position: %w", err)
 			}
 			r.SetPosition(int(posBig.Int64()))
 
 			// Set random ring setting
 			ringBig, err := rand.Int(rand.Reader, maxPos)
 			if err != nil {
-				return fmt.Errorf("failed to generate random ring setting: %v", err)
+				return fmt.Errorf("failed to generate random ring setting: %w", err)
 			}
 			r.SetRingSetting(int(ringBig.Int64()))
 
@@ -112,13 +112,13 @@ func WithRandomSettings(level SecurityLevel) Option {
 		// Generate random reflector
 		refl, err := reflector.RandomReflector("UKW", e.alphabet)
 		if err != nil {
-			return fmt.Errorf("failed to generate random reflector: %v", err)
+			return fmt.Errorf("failed to generate random reflector: %w", err)
 		}
 
 		// Generate random plugboard
 		pb, err := plugboard.New(e.alphabet)
 		if err != nil {
-			return fmt.Errorf("failed to create plugboard: %v", err)
+			return fmt.Errorf("failed to create plugboard: %w", err)
 		}
 
 		if config.plugboardPairs > 0 {
@@ -131,7 +131,7 @@ func WithRandomSettings(level SecurityLevel) Option {
 
 			err = pb.RandomPairs(actualPairs)
 			if err != nil {
-				return fmt.Errorf("failed to generate random plugboard pairs: %v", err)
+				return fmt.Errorf("failed to generate random plugboard pairs: %w", err)
 			}
 		}
 
@@ -158,7 +158,7 @@ func WithRotorConfiguration(rotorSpecs []rotor.RotorSpec) Option {
 		for i, spec := range rotorSpecs {
 			r, err := rotor.CreateFromSpec(spec, e.alphabet)
 			if err != nil {
-				return fmt.Errorf("failed to create rotor %d from spec: %v", i, err)
+				return fmt.Errorf("failed to create rotor %d from spec: %w", i, err)
 			}
 			rotors[i] = r
 		}
@@ -177,7 +177,7 @@ func WithReflectorConfiguration(reflectorSpec reflector.ReflectorSpec) Option {
 
 		refl, err := reflector.CreateFromSpec(reflectorSpec, e.alphabet)
 		if err != nil {
-			return fmt.Errorf("failed to create reflector from spec: %v", err)
+			return fmt.Errorf("failed to create reflector from spec: %w", err)
 		}
 
 		e.reflector = refl
@@ -194,13 +194,13 @@ func WithPlugboardConfiguration(pairs map[rune]rune) Option {
 
 		pb, err := plugboard.New(e.alphabet)
 		if err != nil {
-			return fmt.Errorf("failed to create plugboard: %v", err)
+			return fmt.Errorf("failed to create plugboard: %w", err)
 		}
 
 		if len(pairs) > 0 {
 			err = pb.SetPairsFromMap(pairs)
 			if err != nil {
-				return fmt.Errorf("failed to set plugboard pairs: %v", err)
+				return fmt.Errorf("failed to set plugboard pairs: %w", err)
 			}
 		}
 
@@ -220,7 +220,7 @@ func WithRandomRotorPositions() Option {
 		for _, r := range e.rotors {
 			posBig, err := rand.Int(rand.Reader, maxPos)
 			if err != nil {
-				return fmt.Errorf("failed to generate random position: %v", err)
+				return fmt.Errorf("failed to generate random position: %w", err)
 			}
 			r.SetPosition(int(posBig.Int64()))
 		}
