@@ -1,3 +1,0 @@
-# This is a symlink to .goreleaser/config.yaml for compatibility
-# See .goreleaser/config.yaml for the actual configuration
-_import: .goreleaser/config.yaml

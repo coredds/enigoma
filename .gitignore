@@ -39,6 +39,13 @@ Thumbs.db
 *.temp
 coverage.out
 
+# Coverage directory
+coverage/
+
+# Backup files
+*.bck.*
+*.bck
+
 # Local development
 .env
 .env.local

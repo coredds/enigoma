@@ -1,51 +1,51 @@
+# GoReleaser configuration for enigoma
+# See https://goreleaser.com for documentation
+
 version: 2
-project_name: enigoma
+
+before:
+  hooks:
+    - go mod tidy
 
 builds:
-  - id: enigoma-cli
-    main: ./cmd/enigoma/main.go
+  - id: enigoma
+    main: ./cmd/enigoma
     binary: enigoma
+    env:
+      - CGO_ENABLED=0
     goos:
       - linux
-      - darwin
       - windows
+      - darwin
     goarch:
       - amd64
       - arm64
     ldflags:
-      - "-s -w"
-    # Removed post-hook that was using GOPATH
-    # Schema files are already included in archives section
-  - id: enigoma-example
-    main: ./cmd/example/main.go
-    binary: enigoma-example
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - "-s -w"
+      - -s -w -X github.com/coredds/enigoma.Version={{.Version}}
+    ignore:
+      - goos: windows
+        goarch: arm64
 
 archives:
-  - format: tar.gz
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: enigoma
+    builds:
+      - enigoma
+    format_overrides:
+      - goos: windows
+        format: zip
     files:
       - LICENSE
       - README.md
+      - CHANGELOG.md
+      - USAGE.md
+      - examples/**/*
       - schemas/**/*
 
 checksum:
-  name_template: "checksums.txt"
+  name_template: 'checksums.txt'
 
-release:
-  github:
-    owner: coredds
-    name: enigoma
-  draft: false
-  prerelease: false
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
 
 changelog:
   sort: asc
@@ -53,3 +53,31 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: coredds
+    name: enigoma
+  prerelease: auto
+  draft: false
+  name_template: "enigoma v{{.Version}}"
+  header: |
+    # enigoma v{{.Version}}
+    
+    A highly customizable, Unicode-capable Enigma machine implementation in Go.
+    
+    ## What's Changed
+  footer: |
+    ## Installation
+    
+    ```bash
+    # Install with Go
+    go install github.com/coredds/enigoma/cmd/enigoma@{{.Version}}
+    
+    # Or download the binary for your platform below
+    ```
+    
+    **Full documentation**: https://github.com/coredds/enigoma
