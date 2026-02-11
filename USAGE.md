@@ -1,6 +1,6 @@
 # enigoma Usage Guide
 
-## Auto-Detection (since v0.3.0)
+## Auto-Detection
 
 The easiest way to use enigoma: just encrypt any text in any language.
 
@@ -182,6 +182,7 @@ enigoma decrypt --text "SGVsbG8=" --config my-key.json --format base64
 # Hex output and decrypt
 enigoma encrypt --text "Hello" --auto-config my-key.json --format hex
 enigoma decrypt --text "48656c6c6f" --config my-key.json --format hex
+```
 
 ## Presets and decryptability
 
@@ -199,7 +200,7 @@ enigoma decrypt --text "ENCRYPTED_OUTPUT" --config my-key.json
 
 Saved configuration files include a `schema_version` field. This allows the project to evolve the configuration format safely over time.
 
-### Configuration Validation (since v0.3.4)
+### Configuration Validation
 
 enigoma provides a configuration validation feature to ensure your configuration files are valid:
 
@@ -216,7 +217,7 @@ This will check that:
 
 If validation succeeds, you'll see:
 ```
-✅ Configuration is VALID
+Configuration is VALID
    Schema Version: 1
    Alphabet Size: 26 characters
    Rotors: 5
@@ -225,4 +226,3 @@ If validation succeeds, you'll see:
 ```
 
 If validation fails, you'll see detailed error messages to help you fix the issues.
-```

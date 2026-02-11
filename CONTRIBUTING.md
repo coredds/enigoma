@@ -21,17 +21,30 @@ Thank you for considering contributing to enigoma! We welcome contributions from
 
 4. **Make Changes**: Implement your changes, ensuring you follow the project's coding standards and best practices.
 
-5. **Run Tests**: Ensure all tests pass by running the test suite.
+5. **Run Tests and Lint**: Ensure all tests and linting pass.
 
    ```bash
    go test ./...
+   golangci-lint run
    ```
 
-6. **Commit Changes**: Commit your changes with a clear and descriptive commit message.
+6. **Commit Changes**: Use short, descriptive commit messages. No emojis.
 
    ```bash
-   git commit -m "Add feature: your feature description"
+   # Good examples:
+   git commit -m "add fuzz tests for settings serialization"
+   git commit -m "fix unicode plugboard deserialization"
+   git commit -m "update CI workflow action versions"
+
+   # Bad examples:
+   git commit -m "Fixed stuff"
+   git commit -m "🚀 Add amazing new feature"
    ```
+
+   Rules:
+   - One line, max ~50 characters
+   - Start with a lowercase verb (`add`, `fix`, `update`, `remove`, `refactor`)
+   - No trailing period, no emojis
 
 7. **Push to GitHub**: Push your changes to your forked repository.
 

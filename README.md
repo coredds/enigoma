@@ -3,7 +3,7 @@
 [![Version](https://img.shields.io/badge/version-0.4.2-blue.svg)](https://github.com/coredds/enigoma/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/coredds/enigoma.svg)](https://pkg.go.dev/github.com/coredds/enigoma)
 [![CI](https://github.com/coredds/enigoma/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/coredds/enigoma/actions/workflows/ci.yml)
-[![Go Version](https://img.shields.io/badge/go-1.23+-blue.svg)](https://golang.org)
+[![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <p align="center">
@@ -39,19 +39,19 @@ enigoma is a Go library that simulates the famous Enigma machine used during Wor
 - Custom alphabet support for specialized use cases
 - Adjustable complexity levels (Low, Medium, High, Extreme)
 
-### New in v0.4.0: Enhanced Usability
-- **Zero-Config Functions**: `enigma.EncryptText("Hello!")` - encrypt in one line
+### Usability
+- **Zero-Config Functions**: `enigma.EncryptText("Hello!")` — encrypt in one line
 - **Discovery Commands**: `enigoma demo`, `enigoma examples`, `enigoma test`
 - **Interactive Wizard**: `enigoma wizard` for beginner-friendly setup
 - **Smart Preprocessing**: `--remove-spaces`, `--uppercase`, `--letters-only` flags
-- **Enhanced Error Messages**: All errors now include actionable suggestions
+- **Enhanced Error Messages**: All errors include actionable suggestions
 
 ### Developer Experience
 - Functional options pattern for clean configuration
 - Comprehensive error handling
 - Full JSON serialization of machine state
 - Deep cloning support
-- Extensive unit tests (>95% coverage)
+- Extensive unit tests with table-driven patterns and fuzz testing
 
 ## Installation
 
@@ -68,7 +68,7 @@ go get github.com/coredds/enigoma@latest
 
 ## Quick Start
 
-### Zero-Config Usage (New in v0.4.0)
+### Zero-Config Usage
 
 ```go
 package main
@@ -144,7 +144,7 @@ enigoma includes a powerful CLI with a configuration-first workflow for secure e
 # Install the CLI
 go install github.com/coredds/enigoma/cmd/enigoma@latest
 
-# New Discovery Commands (v0.4.0)
+# Discovery commands
 enigoma demo      # Interactive demonstration
 enigoma examples  # Copy-paste ready examples  
 enigoma test      # Verify installation
@@ -154,10 +154,10 @@ enigoma wizard    # Interactive setup
 enigoma encrypt --text "Hello World!" --auto-config my-key.json
 enigoma decrypt --text "ENCRYPTED_OUTPUT" --config my-key.json
 
-# Enhanced preprocessing (v0.4.0)
+# Preprocessing options
 enigoma encrypt --text "Hello World!" --preset classic --remove-spaces --uppercase
 
-# Stdin usage (now works with Windows line endings!)
+# Stdin usage
 echo "Hello via stdin" | enigoma encrypt --auto-config my-key.json
 
 # Output encoding (base64)
@@ -228,7 +228,7 @@ enigoma preset --describe classic --verbose
 
 ## Configuration-First Approach
 
-**New in v0.3.0**: enigoma uses a configuration-first approach that ensures you can always decrypt your data!
+enigoma uses a configuration-first approach that ensures you can always decrypt your data.
 
 ### How It Works
 
@@ -238,11 +238,11 @@ enigoma preset --describe classic --verbose
 
 This approach provides several benefits:
 
-- **✅ Always Decryptable**: Configuration file provides the decryption key
-- **✅ Smart Auto-Detection**: Automatically detects optimal character set from your input
-- **✅ Unicode Everything**: Full support for mixed languages, emojis, and symbols
-- **✅ Reusable Keys**: One configuration can encrypt multiple messages
-- **✅ Shareable**: Send the config file to enable decryption
+- **Always Decryptable**: Configuration file provides the decryption key
+- **Smart Auto-Detection**: Automatically detects optimal character set from your input
+- **Unicode Everything**: Full support for mixed languages, emojis, and symbols
+- **Reusable Keys**: One configuration can encrypt multiple messages
+- **Shareable**: Send the config file to enable decryption
 
 ### Basic Workflow
 
@@ -275,45 +275,6 @@ enigoma encrypt --text "Test unicode: 🙂" --auto-config test.json --verbose
 ```
 
 
-
-### Library Usage
-
-```go
-package main
-
-import (
-    "fmt"
-    "log"
-    
-    "github.com/coredds/enigoma"
-    "github.com/coredds/enigoma/pkg/enigma"
-)
-
-func main() {
-    // Create a classic Enigma machine
-    machine, err := enigma.NewEnigmaClassic()
-    if err != nil {
-        log.Fatal(err)
-    }
-
-    message := "HELLO WORLD"
-    
-    // Encrypt
-    encrypted, err := machine.Encrypt(message)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("Encrypted: %s\n", encrypted)
-
-    // Reset to initial state and decrypt
-    machine.Reset()
-    decrypted, err := machine.Decrypt(encrypted)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("Decrypted: %s\n", decrypted)
-}
-```
 
 ### Unicode Support
 
@@ -439,14 +400,22 @@ enigoma follows a modular architecture:
 
 ```
 enigoma/
-├── pkg/enigma/          # Main Enigma machine implementation
+├── pkg/enigma/          # Public API
+│   ├── enigma.go        # Enigma struct, Encrypt/Decrypt
+│   ├── options.go       # Functional options (WithAlphabet, WithRandomSettings, etc.)
+│   ├── settings.go      # JSON serialization/deserialization
+│   ├── convenience.go   # QuickEncrypt, EncryptText, NewFromText
+│   └── historical.go    # Historical M3/M4 variants
 ├── internal/
-│   ├── alphabet/        # Character set management
-│   ├── rotor/          # Rotor component
-│   ├── reflector/      # Reflector component
-│   └── plugboard/      # Plugboard component
-├── cmd/example/        # Example applications
-└── alphabets.go        # Predefined alphabets
+│   ├── alphabet/        # Character set management with auto-detection
+│   ├── rotor/           # Rotor component (permutation + stepping)
+│   ├── reflector/       # Reflector with reciprocal mapping validation
+│   ├── plugboard/       # Plugboard (Steckerbrett) pair management
+│   └── cli/             # Cobra CLI commands
+├── cmd/enigoma/         # CLI entry point
+├── cmd/example/         # Library usage demo
+├── alphabets.go         # Predefined alphabets (Latin, Greek, Cyrillic, etc.)
+└── version.go           # Library version constant
 ```
 
 ### Key Interfaces
@@ -457,17 +426,20 @@ enigoma/
 
 ## Testing
 
-Run the comprehensive test suite:
+Run the test suite:
 
 ```bash
-go test ./...
+go test ./...                  # Run all tests
+go test -race ./...            # With race detector
+go test -coverprofile=c.out ./...  # With coverage
 ```
 
-The library includes:
-- Unit tests for all components (>95% coverage)
-- Integration tests for complete workflows
-- Property-based testing for Enigma invariants
-- Benchmarks for performance validation
+The test suite includes:
+- Table-driven unit tests for all core components
+- Round-trip encryption/decryption verification at all security levels
+- Fuzz testing for settings serialization
+- CLI integration tests for complete workflows
+- Unicode and multi-language round-trip tests
 
 ## Examples
 
@@ -513,28 +485,19 @@ Current version: **0.4.2**
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.
 
-## Performance
-
-The following benchmarks provide an overview of the typical performance for encryption and decryption operations using the Enigma machine:
-
-```text
-BenchmarkEncrypt-8    1000000    1000 ns/op
-BenchmarkDecrypt-8    1000000    1100 ns/op
-```
-
-These benchmarks were run on a typical development machine and may vary based on hardware and configuration.
-
 ## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines. In short:
 
 1. Fork the repository
 2. Create a feature branch
 3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+4. Ensure `go test ./...` and `golangci-lint run` pass
+5. Submit a pull request with short, descriptive commits
 
 ## Security Notice
 
-⚠️ **Important**: This library is for educational and simulation purposes only. 
+**Important**: This library is for educational and simulation purposes only.
 
 Do not use enigoma for securing sensitive data in production systems. Modern cryptographic algorithms (AES-GCM, ChaCha20-Poly1305) should be used for real-world security applications.
 
