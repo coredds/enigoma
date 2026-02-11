@@ -1,0 +1,51 @@
+---
+description: Enigoma project architecture, conventions, and development workflow
+alwaysApply: true
+---
+
+# Enigoma Project
+
+A Go library and CLI implementing a configurable, Unicode-capable Enigma machine.
+
+## Architecture
+
+- `pkg/enigma/` — Public API: `Enigma` struct, functional options, settings serialization, convenience functions, historical variants
+- `internal/alphabet/` — Character set management with Unicode support
+- `internal/rotor/` — Rotor interface and `BasicRotor` implementation
+- `internal/reflector/` — Reflector with reciprocal mapping validation
+- `internal/plugboard/` — Plugboard (Steckerbrett) with pair management
+- `internal/cli/` — Cobra-based CLI commands (encrypt, decrypt, keygen, wizard, etc.)
+- `cmd/enigoma/` — CLI entry point; `cmd/example/` — library usage demo
+- `alphabets.go` — Predefined alphabets (Latin, Greek, Cyrillic, Portuguese, ASCII)
+- `version.go` — Library version constant
+
+## Key Patterns
+
+- **Functional options**: `enigma.New(WithAlphabet(...), WithRandomSettings(Medium))`
+- **Interfaces**: `rotor.Rotor`, `reflector.Reflector` — components are cloneable and serializable
+- **Cryptographic randomness**: Always use `crypto/rand` for security-sensitive randomness; `math/rand` only for deterministic seeded modes (mark with `#nosec G404`)
+- **Error wrapping**: Use `%w` (not `%v`) in `fmt.Errorf` to preserve error chains
+- **Error strings**: Lowercase, no capitalization (Go convention enforced by staticcheck ST1005)
+
+## Commit Messages
+
+- **Short**: one line, max ~50 characters, no body unless strictly necessary
+- **No emojis**: never use emojis in commit messages
+- **Lowercase start**: begin with a lowercase verb (`fix`, `add`, `update`, `remove`, `refactor`)
+- **No trailing period**
+- Examples: `fix unicode plugboard deserialization`, `add convenience function tests`
+
+## Development Commands
+
+```
+go test ./...                  # Run all tests
+go test -race ./...            # Tests with race detector
+go vet ./...                   # Static analysis
+golangci-lint run              # Lint (v2 config in .golangci.yml)
+go build -o bin/enigoma ./cmd/enigoma  # Build CLI
+```
+
+## Module
+
+- Module: `github.com/coredds/enigoma`
+- Copyright: David Duarte, MIT License

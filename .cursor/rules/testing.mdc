@@ -1,0 +1,54 @@
+---
+description: Testing conventions and patterns
+globs: "**/*_test.go"
+alwaysApply: false
+---
+
+# Testing Patterns
+
+## Table-Driven Tests
+
+Always use table-driven tests with `t.Run`:
+
+```go
+tests := []struct {
+    name      string
+    input     string
+    wantError bool
+}{
+    {name: "valid input", input: "HELLO", wantError: false},
+    {name: "empty input", input: "", wantError: true},
+}
+
+for _, tt := range tests {
+    t.Run(tt.name, func(t *testing.T) {
+        _, err := machine.Encrypt(tt.input)
+        if (err != nil) != tt.wantError {
+            t.Errorf("Encrypt() error = %v, wantError %v", err, tt.wantError)
+        }
+    })
+}
+```
+
+## Test Helpers
+
+Use `createTest*` helper functions for common setup:
+
+```go
+func createTestAlphabet() *alphabet.Alphabet {
+    alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F'})
+    return alph
+}
+```
+
+## Round-Trip Verification
+
+Every encryption change must verify the reciprocal property:
+1. Encrypt plaintext
+2. Reset machine to initial state
+3. Decrypt ciphertext
+4. Assert plaintext == decrypted
+
+## Fuzz Tests
+
+The project uses Go's native fuzzing (`*_fuzz_test.go`). Fuzz targets live alongside unit tests in the same package.

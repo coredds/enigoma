@@ -1,0 +1,40 @@
+---
+description: CI/CD and GitHub Actions conventions
+globs: ".github/**/*.yml"
+alwaysApply: false
+---
+
+# CI/CD Conventions
+
+## Action Versions
+
+Pin to major version tags (not `@master`):
+
+```yaml
+# GOOD
+uses: actions/checkout@v4
+uses: actions/setup-go@v5
+uses: golangci/golangci-lint-action@v6
+uses: goreleaser/goreleaser-action@v6
+uses: codecov/codecov-action@v5
+
+# BAD — breaks without warning
+uses: securego/gosec@master
+```
+
+## Go Version Strategy
+
+- `go.mod`: Set to the minimum supported version (currently `1.24`)
+- CI test matrix: Test the two most recent Go releases
+- Release workflow: Use `>=1.24` to get latest stable
+
+## Linting
+
+- golangci-lint uses v2 config format (`.golangci.yml` with `version: "2"`)
+- The `golangci-lint-action@v6` handles installation automatically in CI
+
+## Releases
+
+- GoReleaser v2 config in `.goreleaser.yml`
+- Version injected via ldflags: `-X github.com/coredds/enigoma.Version={{.Version}}`
+- Triggered by `v*` tags on push
