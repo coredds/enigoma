@@ -7,12 +7,18 @@ import (
 )
 
 func createTestAlphabet() *alphabet.Alphabet {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D'})
+	alph, err := alphabet.New([]rune{'A', 'B', 'C', 'D'})
+	if err != nil {
+		panic("createTestAlphabet: " + err.Error())
+	}
 	return alph
 }
 
 func createTestAlphabetOdd() *alphabet.Alphabet {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C'})
+	alph, err := alphabet.New([]rune{'A', 'B', 'C'})
+	if err != nil {
+		panic("createTestAlphabetOdd: " + err.Error())
+	}
 	return alph
 }
 

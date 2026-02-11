@@ -11,17 +11,26 @@ import (
 )
 
 func createTestAlphabet() *alphabet.Alphabet {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F'})
+	alph, err := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F'})
+	if err != nil {
+		panic("createTestAlphabet: " + err.Error())
+	}
 	return alph
 }
 
 func createTestRotor(id string, mapping string, notches []rune, alph *alphabet.Alphabet) rotor.Rotor {
-	r, _ := rotor.NewRotor(id, alph, mapping, notches)
+	r, err := rotor.NewRotor(id, alph, mapping, notches)
+	if err != nil {
+		panic("createTestRotor: " + err.Error())
+	}
 	return r
 }
 
 func createTestReflector(id string, mapping string, alph *alphabet.Alphabet) reflector.Reflector {
-	refl, _ := reflector.NewReflector(id, alph, mapping)
+	refl, err := reflector.NewReflector(id, alph, mapping)
+	if err != nil {
+		panic("createTestReflector: " + err.Error())
+	}
 	return refl
 }
 

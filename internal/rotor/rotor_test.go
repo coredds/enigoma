@@ -7,7 +7,10 @@ import (
 )
 
 func createTestAlphabet() *alphabet.Alphabet {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E'})
+	alph, err := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E'})
+	if err != nil {
+		panic("createTestAlphabet: " + err.Error())
+	}
 	return alph
 }
 

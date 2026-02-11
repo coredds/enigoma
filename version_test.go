@@ -29,8 +29,19 @@ func TestVersionConstant(t *testing.T) {
 		t.Error("Version constant is empty")
 	}
 
-	// Version should start with "0.4"
-	if !strings.HasPrefix(Version, "0.4") {
-		t.Errorf("Version should start with '0.4', got %s", Version)
+	// Version should follow semantic versioning format (X.Y.Z)
+	parts := strings.Split(Version, ".")
+	if len(parts) != 3 {
+		t.Errorf("Version %q does not follow semver format X.Y.Z", Version)
+	}
+	for i, part := range parts {
+		if part == "" {
+			t.Errorf("Version %q has empty component at position %d", Version, i)
+		}
+		for _, c := range part {
+			if c < '0' || c > '9' {
+				t.Errorf("Version %q has non-numeric character %q in component %d", Version, string(c), i)
+			}
+		}
 	}
 }

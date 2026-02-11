@@ -1,6 +1,6 @@
 // Package cli provides unit tests for the enigoma CLI.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 
@@ -639,6 +639,173 @@ func TestAutoConfigJSONOutput(t *testing.T) {
 
 	// Clean up
 	os.Remove("auto-config.json")
+}
+
+// --- Unit tests for helper functions ---
+
+func TestFilterLettersOnly(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"only letters", "HELLO", "HELLO"},
+		{"mixed case", "Hello World", "HelloWorld"},
+		{"numbers removed", "ABC123", "ABC"},
+		{"special chars removed", "A!B@C#", "ABC"},
+		{"empty string", "", ""},
+		{"only numbers", "12345", ""},
+		{"only special chars", "!@#$%", ""},
+		{"unicode removed", "ABCαβγ", "ABC"},
+		{"spaces removed", "A B C", "ABC"},
+		{"tabs and newlines removed", "A\tB\nC", "ABC"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterLettersOnly(tt.input)
+			if result != tt.expected {
+				t.Errorf("filterLettersOnly(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestFilterAlphanumericOnly(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"only letters", "HELLO", "HELLO"},
+		{"letters and numbers", "ABC123", "ABC123"},
+		{"special chars removed", "A!B@C#1$2%3", "ABC123"},
+		{"empty string", "", ""},
+		{"only special chars", "!@#$%", ""},
+		{"spaces removed", "A B 1", "AB1"},
+		{"mixed case and numbers", "Hello123World", "Hello123World"},
+		{"unicode removed", "ABCαβγ123", "ABC123"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := filterAlphanumericOnly(tt.input)
+			if result != tt.expected {
+				t.Errorf("filterAlphanumericOnly(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestParseRotorPositions(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		expected []int
+		wantErr  bool
+	}{
+		{
+			name:     "single position",
+			input:    []string{"5"},
+			expected: []int{5},
+			wantErr:  false,
+		},
+		{
+			name:     "multiple positions",
+			input:    []string{"1", "5", "12"},
+			expected: []int{1, 5, 12},
+			wantErr:  false,
+		},
+		{
+			name:     "zero position",
+			input:    []string{"0"},
+			expected: []int{0},
+			wantErr:  false,
+		},
+		{
+			name:     "positions with spaces",
+			input:    []string{" 1 ", " 5 "},
+			expected: []int{1, 5},
+			wantErr:  false,
+		},
+		{
+			name:    "invalid position",
+			input:   []string{"abc"},
+			wantErr: true,
+		},
+		{
+			name:    "partially invalid",
+			input:   []string{"1", "abc", "3"},
+			wantErr: true,
+		},
+		{
+			name:     "empty slice",
+			input:    []string{},
+			expected: []int{},
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parseRotorPositions(tt.input)
+			if tt.wantErr {
+				if err == nil {
+					t.Error("parseRotorPositions() expected error")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("parseRotorPositions() unexpected error: %v", err)
+				return
+			}
+			if len(result) != len(tt.expected) {
+				t.Errorf("parseRotorPositions() len = %d, want %d", len(result), len(tt.expected))
+				return
+			}
+			for i := range result {
+				if result[i] != tt.expected[i] {
+					t.Errorf("parseRotorPositions()[%d] = %d, want %d", i, result[i], tt.expected[i])
+				}
+			}
+		})
+	}
+}
+
+func TestParseIntFromString(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected int
+		wantErr  bool
+	}{
+		{"positive number", "42", 42, false},
+		{"zero", "0", 0, false},
+		{"negative number", "-5", -5, false},
+		{"with spaces", "  42  ", 42, false},
+		{"invalid string", "abc", 0, true},
+		{"empty string", "", 0, true},
+		{"float string", "3.14", 3, false}, // Sscanf reads integer part
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := parseIntFromString(tt.input)
+			if tt.wantErr {
+				if err == nil {
+					t.Error("parseIntFromString() expected error")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("parseIntFromString() unexpected error: %v", err)
+				return
+			}
+			if result != tt.expected {
+				t.Errorf("parseIntFromString(%q) = %d, want %d", tt.input, result, tt.expected)
+			}
+		})
+	}
 }
 
 // createTestRootCmd creates a fresh root command for testing.

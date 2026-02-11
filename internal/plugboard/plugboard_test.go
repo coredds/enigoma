@@ -7,7 +7,10 @@ import (
 )
 
 func createTestAlphabet() *alphabet.Alphabet {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F'})
+	alph, err := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F'})
+	if err != nil {
+		panic("createTestAlphabet: " + err.Error())
+	}
 	return alph
 }
 
@@ -301,16 +304,27 @@ func TestPlugboard_RandomPairs(t *testing.T) {
 				t.Errorf("RandomPairs(%d) resulted in %d pairs", tt.n, pb.PairCount())
 			}
 
-			// Test that all pairs are reciprocal
-			pairs, err := pb.GetPairs()
-			if err != nil {
-				t.Errorf("GetPairs() error: %v", err)
-				return
+			// Verify all pairs are reciprocal: Process(Process(i)) == i
+			alph := createTestAlphabet()
+			for i := 0; i < alph.Size(); i++ {
+				out := pb.Process(i)
+				back := pb.Process(out)
+				if back != i {
+					t.Errorf("RandomPairs(%d): non-reciprocal mapping %d->%d->%d", tt.n, i, out, back)
+				}
 			}
 
-			for range pairs {
-				output1 := pb.Process(0) // This test is a bit weak, but validates basic functionality
-				_ = output1              // Just to avoid unused variable
+			// Verify no character maps to itself among the paired characters
+			if tt.n > 0 {
+				pairedCount := 0
+				for i := 0; i < alph.Size(); i++ {
+					if pb.Process(i) != i {
+						pairedCount++
+					}
+				}
+				if pairedCount != tt.n*2 {
+					t.Errorf("RandomPairs(%d): expected %d paired characters, got %d", tt.n, tt.n*2, pairedCount)
+				}
 			}
 		})
 	}

@@ -299,6 +299,239 @@ func TestAlphabet_Roundtrip(t *testing.T) {
 	}
 }
 
+// --- AutoDetectFromText tests ---
+
+func TestAutoDetectFromText(t *testing.T) {
+	tests := []struct {
+		name        string
+		text        string
+		options     []AutoDetectOption
+		wantErr     bool
+		wantEvenLen bool
+		wantMinSize int
+	}{
+		{
+			name:        "simple latin text",
+			text:        "HELLO",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4, // H, E, L, O (4 unique + possible padding = 4)
+		},
+		{
+			name:    "empty text",
+			text:    "",
+			wantErr: true,
+		},
+		{
+			name:        "unicode greek text",
+			text:        "αβγδ",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4,
+		},
+		{
+			name:        "text with spaces",
+			text:        "A B C",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4, // A, B, C, space
+		},
+		{
+			name:        "single character gets padded",
+			text:        "A",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 2, // A + padding char
+		},
+		{
+			name:        "odd unique chars get padded",
+			text:        "ABC",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4, // A, B, C + padding
+		},
+		{
+			name:        "even unique chars no padding needed",
+			text:        "ABCD",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4,
+		},
+		{
+			name:        "with max size limit",
+			text:        "ABCDEFGHIJ",
+			options:     []AutoDetectOption{WithMaxSize(4)},
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 2,
+		},
+		{
+			name:        "without padding",
+			text:        "ABC",
+			options:     []AutoDetectOption{WithoutPadding()},
+			wantErr:     false,
+			wantEvenLen: false, // padding disabled, 3 unique chars
+			wantMinSize: 3,
+		},
+		{
+			name:        "with control characters included",
+			text:        "AB\x01\x02",
+			options:     []AutoDetectOption{WithControlCharacters()},
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4, // A, B, \x01, \x02
+		},
+		{
+			name:        "control characters excluded by default",
+			text:        "AB\x01\x02",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 2, // only A, B (control chars excluded)
+		},
+		{
+			name:        "text with windows line endings",
+			text:        "AB\r\nCD",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 4,
+		},
+		{
+			name:        "mixed unicode text",
+			text:        "Hello Мир 世界",
+			wantErr:     false,
+			wantEvenLen: true,
+			wantMinSize: 8,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			alph, err := AutoDetectFromText(tt.text, tt.options...)
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("AutoDetectFromText() expected error but got none")
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("AutoDetectFromText() unexpected error: %v", err)
+				return
+			}
+			if alph == nil {
+				t.Fatal("AutoDetectFromText() returned nil alphabet")
+			}
+			if tt.wantEvenLen && alph.Size()%2 != 0 {
+				t.Errorf("AutoDetectFromText() alphabet size %d is odd, expected even", alph.Size())
+			}
+			if alph.Size() < tt.wantMinSize {
+				t.Errorf("AutoDetectFromText() alphabet size %d < expected min %d", alph.Size(), tt.wantMinSize)
+			}
+		})
+	}
+}
+
+func TestAutoDetectFromText_ContainsInputChars(t *testing.T) {
+	text := "HELLO WORLD"
+	alph, err := AutoDetectFromText(text)
+	if err != nil {
+		t.Fatalf("AutoDetectFromText() error: %v", err)
+	}
+
+	// Every character in the input should be in the detected alphabet
+	for _, r := range text {
+		if !alph.Contains(r) {
+			t.Errorf("Detected alphabet missing input character %c (U+%04X)", r, r)
+		}
+	}
+}
+
+func TestAutoDetectFromText_Deterministic(t *testing.T) {
+	text := "HELLO WORLD"
+	alph1, err := AutoDetectFromText(text)
+	if err != nil {
+		t.Fatalf("AutoDetectFromText() first call error: %v", err)
+	}
+	alph2, err := AutoDetectFromText(text)
+	if err != nil {
+		t.Fatalf("AutoDetectFromText() second call error: %v", err)
+	}
+
+	runes1 := alph1.Runes()
+	runes2 := alph2.Runes()
+	if len(runes1) != len(runes2) {
+		t.Fatalf("Non-deterministic: sizes differ %d vs %d", len(runes1), len(runes2))
+	}
+	for i := range runes1 {
+		if runes1[i] != runes2[i] {
+			t.Errorf("Non-deterministic: rune[%d] = %c vs %c", i, runes1[i], runes2[i])
+		}
+	}
+}
+
+func TestAutoDetectFromText_OnlyControlChars(t *testing.T) {
+	// Text with only control characters (excluded by default) should fail
+	text := "\x01\x02\x03"
+	_, err := AutoDetectFromText(text)
+	if err == nil {
+		t.Error("AutoDetectFromText() with only control chars should return error")
+	}
+}
+
+func TestPreprocessTextForAutoDetection(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"windows line endings", "Hello\r\nWorld", "Hello\nWorld"},
+		{"old mac line endings", "Hello\rWorld", "Hello\nWorld"},
+		{"unix line endings unchanged", "Hello\nWorld", "Hello\nWorld"},
+		{"trims leading whitespace", "  Hello", "Hello"},
+		{"trims trailing whitespace", "Hello  ", "Hello"},
+		{"trims both", "  Hello  ", "Hello"},
+		{"empty string", "", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := PreprocessTextForAutoDetection(tt.input)
+			if result != tt.expected {
+				t.Errorf("PreprocessTextForAutoDetection(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+func TestIsControlCharacter(t *testing.T) {
+	tests := []struct {
+		name     string
+		r        rune
+		expected bool
+	}{
+		{"space is not control", ' ', false},
+		{"tab is not control", '\t', false},
+		{"newline is not control", '\n', false},
+		{"null is control", '\x00', true},
+		{"bell is control", '\x07', true},
+		{"escape is control", '\x1b', true},
+		{"DEL is control", '\x7f', true},
+		{"0x80 is control", '\x80', true},
+		{"0x9f is control", '\x9f', true},
+		{"0xa0 is not control", '\xa0', false},
+		{"regular letter is not control", 'A', false},
+		{"unicode char is not control", '世', false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := isControlCharacter(tt.r)
+			if result != tt.expected {
+				t.Errorf("isControlCharacter(%q) = %v, want %v", tt.r, result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestAlphabet_Runes(t *testing.T) {
 	originalRunes := []rune{'C', 'A', 'B'}
 	alphabet, err := New(originalRunes)
