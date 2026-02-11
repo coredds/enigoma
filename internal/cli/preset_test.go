@@ -1,6 +1,6 @@
 // Package cli provides unit tests for preset functionality.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 

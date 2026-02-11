@@ -1,7 +1,7 @@
 // Package rotor provides the rotor component implementation for the Enigma machine.
 // A rotor performs substitution permutations and steps during encryption.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package rotor
 

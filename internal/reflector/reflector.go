@@ -1,7 +1,7 @@
 // Package reflector provides the reflector component implementation for the Enigma machine.
 // A reflector ensures reciprocal character mapping - if A maps to B, then B maps to A.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package reflector
 

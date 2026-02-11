@@ -1,6 +1,6 @@
 // Package cli provides the keygen command for the enigoma CLI.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 

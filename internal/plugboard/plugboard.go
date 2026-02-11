@@ -1,7 +1,7 @@
 // Package plugboard provides the plugboard (Steckerbrett) component implementation
 // for the Enigma machine. It handles reciprocal character swapping.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package plugboard
 

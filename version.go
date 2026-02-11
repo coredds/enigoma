@@ -1,6 +1,6 @@
 // Package enigoma provides version information for the library.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package enigoma
 

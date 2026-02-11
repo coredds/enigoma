@@ -1,6 +1,6 @@
 // Package cli provides the command-line interface for enigoma.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 
