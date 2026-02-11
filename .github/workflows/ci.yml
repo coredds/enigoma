@@ -31,7 +31,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: latest
+          version: v2.9.0
 
   security:
     name: Security Scanning
@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2
+        uses: securego/gosec@v2.23.0
         with:
           args: '-no-fail -fmt sarif -out gosec-results.sarif ./...'
       

@@ -8,18 +8,20 @@ alwaysApply: false
 
 ## Action Versions
 
-Pin to major version tags (not `@master`):
+Pin to specific version tags (not `@master` or `@latest`):
 
 ```yaml
-# GOOD
+# GOOD — pinned versions
 uses: actions/checkout@v4
 uses: actions/setup-go@v5
 uses: golangci/golangci-lint-action@v6
 uses: goreleaser/goreleaser-action@v6
 uses: codecov/codecov-action@v5
+uses: securego/gosec@v2.23.0
 
 # BAD — breaks without warning
 uses: securego/gosec@master
+uses: securego/gosec@v2  # tag doesn't exist
 ```
 
 ## Go Version Strategy
@@ -31,7 +33,7 @@ uses: securego/gosec@master
 ## Linting
 
 - golangci-lint uses v2 config format (`.golangci.yml` with `version: "2"`)
-- The `golangci-lint-action@v6` handles installation automatically in CI
+- Pin `golangci-lint-action@v6` to an explicit v2 version (e.g., `version: v2.9.0`), since `latest` resolves to v1
 
 ## Releases
 
