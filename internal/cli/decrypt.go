@@ -1,6 +1,6 @@
 // Package cli provides the decrypt command for the enigoma CLI.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package cli
 
@@ -169,21 +169,10 @@ func parseInputFormat(text string, cmd *cobra.Command) (string, error) {
 	}
 }
 
-// preprocessInputForDecrypt applies text preprocessing for decrypt command
+// preprocessInputForDecrypt applies text preprocessing for decrypt command.
+// Reuses the same preprocessing logic as the encrypt command.
 func preprocessInputForDecrypt(cmd *cobra.Command, text string) string {
-	result := text
-
-	// Apply basic transformations
-	result = applyBasicTransformationsDecrypt(cmd, result)
-
-	// Apply character filtering
-	result = applyCharacterFilteringDecrypt(cmd, result)
-
-	if verbose, _ := cmd.Flags().GetBool("verbose"); verbose && result != text {
-		fmt.Fprintf(cmd.ErrOrStderr(), "Input preprocessed: %q -> %q\n", text, result)
-	}
-
-	return result
+	return preprocessInput(cmd, text)
 }
 
 // enhanceDecryptionError provides helpful suggestions when decryption fails
@@ -220,54 +209,3 @@ func enhanceDecryptionError(err error, text string, cmd *cobra.Command) error {
 	return fmt.Errorf("decryption failed: %v", err)
 }
 
-// applyBasicTransformationsDecrypt applies remove-spaces and uppercase transformations for decrypt
-func applyBasicTransformationsDecrypt(cmd *cobra.Command, text string) string {
-	result := text
-
-	if removeSpaces, _ := cmd.Flags().GetBool("remove-spaces"); removeSpaces {
-		result = strings.ReplaceAll(result, " ", "")
-	}
-
-	if uppercase, _ := cmd.Flags().GetBool("uppercase"); uppercase {
-		result = strings.ToUpper(result)
-	}
-
-	return result
-}
-
-// applyCharacterFilteringDecrypt applies letters-only and alphanumeric-only filtering for decrypt
-func applyCharacterFilteringDecrypt(cmd *cobra.Command, text string) string {
-	result := text
-
-	if lettersOnly, _ := cmd.Flags().GetBool("letters-only"); lettersOnly {
-		result = filterLettersOnlyDecrypt(result)
-	}
-
-	if alphanumericOnly, _ := cmd.Flags().GetBool("alphanumeric-only"); alphanumericOnly {
-		result = filterAlphanumericOnlyDecrypt(result)
-	}
-
-	return result
-}
-
-// filterLettersOnlyDecrypt keeps only letters (A-Z, a-z) for decrypt
-func filterLettersOnlyDecrypt(text string) string {
-	var filtered strings.Builder
-	for _, r := range text {
-		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') {
-			filtered.WriteRune(r)
-		}
-	}
-	return filtered.String()
-}
-
-// filterAlphanumericOnlyDecrypt keeps only letters and numbers for decrypt
-func filterAlphanumericOnlyDecrypt(text string) string {
-	var filtered strings.Builder
-	for _, r := range text {
-		if (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
-			filtered.WriteRune(r)
-		}
-	}
-	return filtered.String()
-}

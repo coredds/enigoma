@@ -1,12 +1,13 @@
 // Package alphabet provides utilities for managing character sets (alphabets)
 // used by the Enigma machine components.
 //
-// Copyright (c) 2025 David Duarte
+// Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
 package alphabet
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -174,13 +175,7 @@ func AutoDetectFromText(text string, options ...AutoDetectOption) (*Alphabet, er
 	}
 
 	// Sort by Unicode codepoint for deterministic behavior
-	for i := 0; i < len(runes)-1; i++ {
-		for j := i + 1; j < len(runes); j++ {
-			if runes[i] > runes[j] {
-				runes[i], runes[j] = runes[j], runes[i]
-			}
-		}
-	}
+	slices.Sort(runes)
 
 	// Ensure even size for reflector compatibility
 	if config.addPadding && len(runes)%2 != 0 {
