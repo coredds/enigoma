@@ -25,13 +25,13 @@ package main
 import (
     "fmt"
     "log"
+
     "github.com/coredds/enigoma"
-    "github.com/coredds/enigoma/pkg/enigma"
 )
 
 func main() {
     // Create Enigma machine with Portuguese alphabet
-    machine, err := enigma.NewEnigmaSimple(enigoma.AlphabetPortuguese)
+    machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetPortuguese)
     if err != nil {
         log.Fatal(err)
     }
@@ -93,7 +93,7 @@ phrases := []string{
 
 ### Greek Example
 ```go
-machine, err := enigma.NewEnigmaSimple(enigoma.AlphabetGreek)
+machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetGreek)
 message := "Αβγδε ζητα" // Greek text
 ```
 
@@ -106,16 +106,16 @@ customAlphabet := []rune{
     ' ', '.', '!',  /* punctuation */
 }
 
-machine, err := enigma.New(enigma.WithAlphabet(customAlphabet))
+machine, err := enigoma.New(enigoma.WithAlphabet(customAlphabet))
 ```
 
 ## Advanced Portuguese Usage
 
 ### Security Levels with Portuguese
 ```go
-machine, err := enigma.New(
-    enigma.WithAlphabet(enigoma.AlphabetPortuguese),
-    enigma.WithRandomSettings(enigma.High), // High security
+machine, err := enigoma.New(
+    enigoma.WithAlphabet(enigoma.AlphabetPortuguese),
+    enigoma.WithRandomSettings(enigoma.High), // High security
 )
 ```
 
@@ -125,7 +125,7 @@ machine, err := enigma.New(
 jsonData, err := machine.SaveSettingsToJSON()
 
 // Later: restore exact same configuration
-newMachine, err := enigma.NewFromJSON(jsonData)
+newMachine, err := enigoma.NewFromJSON(jsonData)
 ```
 
 ## Example Configurations

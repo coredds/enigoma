@@ -132,13 +132,13 @@ func exportPreset(presetName string, cmd *cobra.Command) error {
 	// Create machine with preset
 	machine, err := createMachineFromPreset(presetName)
 	if err != nil {
-		return fmt.Errorf("failed to create machine from preset: %v", err)
+		return fmt.Errorf("failed to create machine from preset: %w", err)
 	}
 
 	// Get configuration as JSON
 	jsonData, err := machine.SaveSettingsToJSON()
 	if err != nil {
-		return fmt.Errorf("failed to serialize configuration: %v", err)
+		return fmt.Errorf("failed to serialize configuration: %w", err)
 	}
 
 	// Output configuration
@@ -148,7 +148,7 @@ func exportPreset(presetName string, cmd *cobra.Command) error {
 	} else {
 		err := writeStringToFile(jsonData, outputFile)
 		if err != nil {
-			return fmt.Errorf("failed to write configuration to file: %v", err)
+			return fmt.Errorf("failed to write configuration to file: %w", err)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "Preset '%s' configuration saved to: %s\n", presetName, outputFile)
 	}

@@ -1,14 +1,13 @@
-// Package enigma provides functional options for configuring Enigma machines.
+// package enigoma provides functional options for configuring Enigma machines.
 //
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
-package enigma
+package enigoma
 
 import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	mrand "math/rand"
 
 	"github.com/coredds/enigoma/internal/alphabet"
 	"github.com/coredds/enigoma/internal/plugboard"
@@ -29,6 +28,22 @@ const (
 	Extreme
 )
 
+// String returns the name of the security level.
+func (s SecurityLevel) String() string {
+	switch s {
+	case Low:
+		return "Low"
+	case Medium:
+		return "Medium"
+	case High:
+		return "High"
+	case Extreme:
+		return "Extreme"
+	default:
+		return "Unknown"
+	}
+}
+
 // WithAlphabet sets the character set for the Enigma machine.
 // All rotors, plugboard, and reflector will be built/validated against this alphabet.
 func WithAlphabet(runes []rune) Option {
@@ -43,7 +58,7 @@ func WithAlphabet(runes []rune) Option {
 }
 
 // WithCustomComponents allows detailed manual configuration of components.
-func WithCustomComponents(rotors []rotor.Rotor, refl reflector.Reflector, pb *plugboard.Plugboard) Option {
+func WithCustomComponents(rotors []*rotor.Rotor, refl *reflector.Reflector, pb *plugboard.Plugboard) Option {
 	return func(e *Enigma) error {
 		if len(rotors) == 0 {
 			return fmt.Errorf("at least one rotor must be provided")
@@ -52,7 +67,7 @@ func WithCustomComponents(rotors []rotor.Rotor, refl reflector.Reflector, pb *pl
 			return fmt.Errorf("reflector cannot be nil")
 		}
 
-		e.rotors = make([]rotor.Rotor, len(rotors))
+		e.rotors = make([]*rotor.Rotor, len(rotors))
 		for i, r := range rotors {
 			if r == nil {
 				return fmt.Errorf("rotor %d cannot be nil", i)
@@ -84,7 +99,7 @@ func WithRandomSettings(level SecurityLevel) Option {
 		config := getSecurityConfig(level)
 
 		// Generate random rotors
-		rotors := make([]rotor.Rotor, config.rotorCount)
+		rotors := make([]*rotor.Rotor, config.rotorCount)
 		for i := 0; i < config.rotorCount; i++ {
 			r, err := rotor.RandomRotor(fmt.Sprintf("R%d", i+1), e.alphabet)
 			if err != nil {
@@ -154,7 +169,7 @@ func WithRotorConfiguration(rotorSpecs []rotor.RotorSpec) Option {
 			return fmt.Errorf("at least one rotor spec must be provided")
 		}
 
-		rotors := make([]rotor.Rotor, len(rotorSpecs))
+		rotors := make([]*rotor.Rotor, len(rotorSpecs))
 		for i, spec := range rotorSpecs {
 			r, err := rotor.CreateFromSpec(spec, e.alphabet)
 			if err != nil {
@@ -229,23 +244,6 @@ func WithRandomRotorPositions() Option {
 	}
 }
 
-// WithRandomRotorPositionsSeed sets rotor positions using a deterministic PRNG seeded with the provided value.
-// This is useful for reproducible configurations in testing or when a stable output is desired.
-func WithRandomRotorPositionsSeed(seed int64) Option {
-	return func(e *Enigma) error {
-		if e.alphabet == nil {
-			return fmt.Errorf("alphabet must be set before setting random positions")
-		}
-
-		rng := mrand.New(mrand.NewSource(seed)) // #nosec G404 - Using math/rand is intentional for deterministic seeding
-		maxPos := e.alphabet.Size()
-		for _, r := range e.rotors {
-			r.SetPosition(rng.Intn(maxPos))
-		}
-		return nil
-	}
-}
-
 // WithRotorPositions sets specific initial positions for rotors.
 func WithRotorPositions(positions []int) Option {
 	return func(e *Enigma) error {
@@ -308,13 +306,8 @@ func NewEnigmaSimple(alphabet []rune) (*Enigma, error) {
 // NewEnigmaClassic creates an Enigma machine similar to the historical M3.
 // Uses uppercase Latin alphabet and 3 rotors.
 func NewEnigmaClassic() (*Enigma, error) {
-	alphabet := []rune{
-		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-	}
-
 	return New(
-		WithAlphabet(alphabet),
+		WithAlphabet(AlphabetLatinUpper),
 		WithRandomSettings(Low),
 	)
 }

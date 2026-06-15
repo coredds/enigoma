@@ -14,21 +14,7 @@ import (
 )
 
 // Rotor represents a single rotor with its internal wiring and notch positions.
-type Rotor interface {
-	ID() string
-	Forward(inputIdx int) int
-	Backward(inputIdx int) int
-	IsAtNotch() bool
-	Step()
-	SetPosition(pos int)
-	SetRingSetting(ring int)
-	GetPosition() int
-	GetRingSetting() int
-	Clone() Rotor
-}
-
-// BasicRotor implements the Rotor interface with standard Enigma behavior.
-type BasicRotor struct {
+type Rotor struct {
 	id          string
 	alphabet    *alphabet.Alphabet
 	forwardMap  []int
@@ -42,7 +28,7 @@ type BasicRotor struct {
 // NewRotor creates a new rotor with the specified parameters.
 // forwardMapping should be a string of runes representing the output for each input
 // rune in order of the alphabet.
-func NewRotor(id string, alph *alphabet.Alphabet, forwardMapping string, notches []rune) (Rotor, error) {
+func NewRotor(id string, alph *alphabet.Alphabet, forwardMapping string, notches []rune) (*Rotor, error) {
 	if alph == nil {
 		return nil, fmt.Errorf("alphabet cannot be nil")
 	}
@@ -62,7 +48,7 @@ func NewRotor(id string, alph *alphabet.Alphabet, forwardMapping string, notches
 	for i, r := range forwardMappingRunes {
 		outputIdx, err := alph.RuneToIndex(r)
 		if err != nil {
-			return nil, fmt.Errorf("invalid character in forward mapping at position %d: %v", i, err)
+			return nil, fmt.Errorf("invalid character in forward mapping at position %d: %w", i, err)
 		}
 
 		if used[outputIdx] {
@@ -79,12 +65,12 @@ func NewRotor(id string, alph *alphabet.Alphabet, forwardMapping string, notches
 	for i, r := range notches {
 		idx, err := alph.RuneToIndex(r)
 		if err != nil {
-			return nil, fmt.Errorf("invalid notch character: %v", err)
+			return nil, fmt.Errorf("invalid notch character: %w", err)
 		}
 		notchIndices[i] = idx
 	}
 
-	return &BasicRotor{
+	return &Rotor{
 		id:          id,
 		alphabet:    alph,
 		forwardMap:  forwardMap,
@@ -97,7 +83,7 @@ func NewRotor(id string, alph *alphabet.Alphabet, forwardMapping string, notches
 }
 
 // RandomRotor generates a cryptographically random rotor with random notch positions.
-func RandomRotor(id string, alph *alphabet.Alphabet) (Rotor, error) {
+func RandomRotor(id string, alph *alphabet.Alphabet) (*Rotor, error) {
 	if alph == nil {
 		return nil, fmt.Errorf("alphabet cannot be nil")
 	}
@@ -109,7 +95,7 @@ func RandomRotor(id string, alph *alphabet.Alphabet) (Rotor, error) {
 	for i := size - 1; i > 0; i-- {
 		jBig, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate random number: %v", err)
+			return nil, fmt.Errorf("failed to generate random number: %w", err)
 		}
 		j := int(jBig.Int64())
 		runes[i], runes[j] = runes[j], runes[i]
@@ -118,7 +104,7 @@ func RandomRotor(id string, alph *alphabet.Alphabet) (Rotor, error) {
 	// Generate 1-3 random notch positions
 	numNotchesBig, err := rand.Int(rand.Reader, big.NewInt(3))
 	if err != nil {
-		return nil, fmt.Errorf("failed to generate random notch count: %v", err)
+		return nil, fmt.Errorf("failed to generate random notch count: %w", err)
 	}
 	numNotches := int(numNotchesBig.Int64()) + 1
 
@@ -130,7 +116,7 @@ func RandomRotor(id string, alph *alphabet.Alphabet) (Rotor, error) {
 		for {
 			posBig, err := rand.Int(rand.Reader, big.NewInt(int64(size)))
 			if err != nil {
-				return nil, fmt.Errorf("failed to generate random notch position: %v", err)
+				return nil, fmt.Errorf("failed to generate random notch position: %w", err)
 			}
 			pos = int(posBig.Int64())
 			if !notchPositions[pos] {
@@ -145,12 +131,12 @@ func RandomRotor(id string, alph *alphabet.Alphabet) (Rotor, error) {
 }
 
 // ID returns the identifier of the rotor.
-func (r *BasicRotor) ID() string {
+func (r *Rotor) ID() string {
 	return r.id
 }
 
 // Forward performs the forward substitution through the rotor.
-func (r *BasicRotor) Forward(inputIdx int) int {
+func (r *Rotor) Forward(inputIdx int) int {
 	if inputIdx < 0 || inputIdx >= r.size {
 		return inputIdx // Invalid input, return as-is
 	}
@@ -166,7 +152,7 @@ func (r *BasicRotor) Forward(inputIdx int) int {
 }
 
 // Backward performs the backward substitution through the rotor.
-func (r *BasicRotor) Backward(inputIdx int) int {
+func (r *Rotor) Backward(inputIdx int) int {
 	if inputIdx < 0 || inputIdx >= r.size {
 		return inputIdx // Invalid input, return as-is
 	}
@@ -182,7 +168,7 @@ func (r *BasicRotor) Backward(inputIdx int) int {
 }
 
 // IsAtNotch returns true if the rotor is at a notch position.
-func (r *BasicRotor) IsAtNotch() bool {
+func (r *Rotor) IsAtNotch() bool {
 	for _, notch := range r.notches {
 		if r.position == notch {
 			return true
@@ -192,32 +178,32 @@ func (r *BasicRotor) IsAtNotch() bool {
 }
 
 // Step advances the rotor position by one.
-func (r *BasicRotor) Step() {
+func (r *Rotor) Step() {
 	r.position = (r.position + 1) % r.size
 }
 
 // SetPosition sets the rotor position.
-func (r *BasicRotor) SetPosition(pos int) {
+func (r *Rotor) SetPosition(pos int) {
 	r.position = ((pos % r.size) + r.size) % r.size
 }
 
 // SetRingSetting sets the ring setting of the rotor.
-func (r *BasicRotor) SetRingSetting(ring int) {
+func (r *Rotor) SetRingSetting(ring int) {
 	r.ringSetting = ((ring % r.size) + r.size) % r.size
 }
 
 // GetPosition returns the current rotor position.
-func (r *BasicRotor) GetPosition() int {
+func (r *Rotor) GetPosition() int {
 	return r.position
 }
 
 // GetRingSetting returns the current ring setting.
-func (r *BasicRotor) GetRingSetting() int {
+func (r *Rotor) GetRingSetting() int {
 	return r.ringSetting
 }
 
 // Clone creates a deep copy of the rotor.
-func (r *BasicRotor) Clone() Rotor {
+func (r *Rotor) Clone() *Rotor {
 	forwardMap := make([]int, len(r.forwardMap))
 	copy(forwardMap, r.forwardMap)
 
@@ -227,7 +213,7 @@ func (r *BasicRotor) Clone() Rotor {
 	notches := make([]int, len(r.notches))
 	copy(notches, r.notches)
 
-	return &BasicRotor{
+	return &Rotor{
 		id:          r.id,
 		alphabet:    r.alphabet,
 		forwardMap:  forwardMap,
@@ -249,50 +235,44 @@ type RotorSpec struct {
 }
 
 // CreateFromSpec creates a rotor from a specification.
-func CreateFromSpec(spec RotorSpec, alph *alphabet.Alphabet) (Rotor, error) {
-	rotor, err := NewRotor(spec.ID, alph, spec.ForwardMapping, spec.Notches)
+func CreateFromSpec(spec RotorSpec, alph *alphabet.Alphabet) (*Rotor, error) {
+	r, err := NewRotor(spec.ID, alph, spec.ForwardMapping, spec.Notches)
 	if err != nil {
 		return nil, err
 	}
 
-	rotor.SetPosition(spec.Position)
-	rotor.SetRingSetting(spec.RingSetting)
+	r.SetPosition(spec.Position)
+	r.SetRingSetting(spec.RingSetting)
 
-	return rotor, nil
+	return r, nil
 }
 
 // ToSpec converts a rotor to a specification for serialization.
-func ToSpec(rotor Rotor, alph *alphabet.Alphabet) (RotorSpec, error) {
-	// This is a bit tricky since we need to reconstruct the forward mapping
-	// We'll need to access the internal state
-	if br, ok := rotor.(*BasicRotor); ok {
-		forwardMapping := make([]rune, br.size)
-		for i := 0; i < br.size; i++ {
-			outputIdx := br.forwardMap[i]
-			r, err := alph.IndexToRune(outputIdx)
-			if err != nil {
-				return RotorSpec{}, err
-			}
-			forwardMapping[i] = r
+func ToSpec(r *Rotor, alph *alphabet.Alphabet) (RotorSpec, error) {
+	forwardMapping := make([]rune, r.size)
+	for i := 0; i < r.size; i++ {
+		outputIdx := r.forwardMap[i]
+		ch, err := alph.IndexToRune(outputIdx)
+		if err != nil {
+			return RotorSpec{}, err
 		}
-
-		notches := make([]rune, len(br.notches))
-		for i, notchIdx := range br.notches {
-			r, err := alph.IndexToRune(notchIdx)
-			if err != nil {
-				return RotorSpec{}, err
-			}
-			notches[i] = r
-		}
-
-		return RotorSpec{
-			ID:             br.id,
-			ForwardMapping: string(forwardMapping),
-			Notches:        notches,
-			Position:       br.position,
-			RingSetting:    br.ringSetting,
-		}, nil
+		forwardMapping[i] = ch
 	}
 
-	return RotorSpec{}, fmt.Errorf("unsupported rotor type")
+	notches := make([]rune, len(r.notches))
+	for i, notchIdx := range r.notches {
+		ch, err := alph.IndexToRune(notchIdx)
+		if err != nil {
+			return RotorSpec{}, err
+		}
+		notches[i] = ch
+	}
+
+	return RotorSpec{
+		ID:             r.id,
+		ForwardMapping: string(forwardMapping),
+		Notches:        notches,
+		Position:       r.position,
+		RingSetting:    r.ringSetting,
+	}, nil
 }

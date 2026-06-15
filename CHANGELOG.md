@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-06-15
+
+### Changed
+- **Flattened package layout**: `pkg/enigma/` merged into root `github.com/coredds/enigoma`
+- **Removed rotor/reflector interfaces**: `rotor.Rotor` and `reflector.Reflector` interfaces replaced with concrete structs
+- **Simplified public API**: removed `EncryptText`, `NewWithAutoDetection`, `WithRandomRotorPositionsSeed`, `NewAlphabetFromPredefined`, `GetAlphabetSize`
+- **Removed `Metadata` struct** from settings — unused and always nil
+- **Deduplicated Latin alphabet**: `NewEnigmaM3`, `NewEnigmaM4`, `NewEnigmaClassic` use single `AlphabetLatinUpper`
+- **Added `SecurityLevel.String()`** method
+- **Error wrapping**: switched `%v` to `%w` across all packages for proper error chains
+- **Consolidated CI**: merged `lint-test.yml` into `ci.yml`, added govulncheck, coverage, and race detection
+
+### Removed
+- CLI commands `demo`, `examples`, `test`
+- `cmd/example/` — replaced by `example_test.go` with runnable examples
+- `pkg/enigma/` directory and import path
+- Plugboard `pairs` field — redundant with `mapping`
+
+### Fixed
+- JSON schema: `reflector_spec.mapping` corrected from `object` to `string` type
+- JSON schema: removed unused `metadata` property
+
 ## [0.5.0] - 2026-02-11
 
 ### Added
@@ -13,7 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `PreprocessTextForAutoDetection` and `isControlCharacter` unit tests
 - Settings round-trip tests verifying encryption output matches after JSON save/load
 - CLI helper unit tests (`filterLettersOnly`, `filterAlphanumericOnly`, `parseRotorPositions`, `parseIntFromString`)
-- Cursor rules and CLAUDE.md for AI-assisted development
 - Commit message conventions (short, no emojis, lowercase verb start)
 
 ### Fixed
@@ -65,7 +86,7 @@ Users upgrading from v0.4.0 need to update their imports:
 ```go
 // Old:
 import "github.com/coredds/eniGOma"
-import "github.com/coredds/eniGOma/pkg/enigma"
+import "github.com/coredds/enigoma"
 
 // New:
 import "github.com/coredds/enigoma"

@@ -14,14 +14,7 @@ import (
 )
 
 // Reflector represents the reflector component of an Enigma machine.
-type Reflector interface {
-	ID() string
-	Reflect(inputIdx int) int
-	Clone() Reflector
-}
-
-// BasicReflector implements the Reflector interface with reciprocal mapping.
-type BasicReflector struct {
+type Reflector struct {
 	id       string
 	alphabet *alphabet.Alphabet
 	mapping  []int
@@ -31,56 +24,21 @@ type BasicReflector struct {
 // NewReflector creates a new reflector with the specified mapping.
 // The mapping string should represent reciprocal pairs where each character
 // maps to another character bidirectionally.
-func NewReflector(id string, alph *alphabet.Alphabet, mapping string) (Reflector, error) {
-	if alph == nil {
-		return nil, fmt.Errorf("alphabet cannot be nil")
+func NewReflector(id string, alph *alphabet.Alphabet, mapping string) (*Reflector, error) {
+	if err := ValidateReflectorMapping(alph, mapping); err != nil {
+		return nil, err
 	}
 
 	size := alph.Size()
 	mappingRunes := []rune(mapping)
-	if len(mappingRunes) != size {
-		return nil, fmt.Errorf("mapping length (%d) must match alphabet size (%d)",
-			len(mappingRunes), size)
-	}
 
-	// Convert mapping string to indices and validate reciprocity
 	reflectMap := make([]int, size)
-	used := make([]bool, size)
-
 	for i, r := range mappingRunes {
-		outputIdx, err := alph.RuneToIndex(r)
-		if err != nil {
-			return nil, fmt.Errorf("invalid character in mapping at position %d: %v", i, err)
-		}
-
-		// Check for self-mapping (not allowed in Enigma reflectors)
-		if i == outputIdx {
-			inputRune, _ := alph.IndexToRune(i)
-			return nil, fmt.Errorf("character %c cannot map to itself in a reflector", inputRune)
-		}
-
-		if used[outputIdx] {
-			outputRune, _ := alph.IndexToRune(outputIdx)
-			return nil, fmt.Errorf("character %c is used multiple times in mapping", outputRune)
-		}
-
+		outputIdx, _ := alph.RuneToIndex(r)
 		reflectMap[i] = outputIdx
-		used[outputIdx] = true
 	}
 
-	// Validate reciprocal mapping: if A->B then B->A
-	for i := 0; i < size; i++ {
-		output := reflectMap[i]
-		if reflectMap[output] != i {
-			inputRune, _ := alph.IndexToRune(i)
-			outputRune, _ := alph.IndexToRune(output)
-			backRune, _ := alph.IndexToRune(reflectMap[output])
-			return nil, fmt.Errorf("non-reciprocal mapping: %c->%c but %c->%c",
-				inputRune, outputRune, outputRune, backRune)
-		}
-	}
-
-	return &BasicReflector{
+	return &Reflector{
 		id:       id,
 		alphabet: alph,
 		mapping:  reflectMap,
@@ -89,7 +47,7 @@ func NewReflector(id string, alph *alphabet.Alphabet, mapping string) (Reflector
 }
 
 // RandomReflector generates a cryptographically random reflector with reciprocal mapping.
-func RandomReflector(id string, alph *alphabet.Alphabet) (Reflector, error) {
+func RandomReflector(id string, alph *alphabet.Alphabet) (*Reflector, error) {
 	if alph == nil {
 		return nil, fmt.Errorf("alphabet cannot be nil")
 	}
@@ -112,7 +70,7 @@ func RandomReflector(id string, alph *alphabet.Alphabet) (Reflector, error) {
 	for i := size - 1; i > 0; i-- {
 		jBig, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate random number: %v", err)
+			return nil, fmt.Errorf("failed to generate random number: %w", err)
 		}
 		j := int(jBig.Int64())
 		available[i], available[j] = available[j], available[i]
@@ -131,12 +89,12 @@ func RandomReflector(id string, alph *alphabet.Alphabet) (Reflector, error) {
 }
 
 // ID returns the identifier of the reflector.
-func (r *BasicReflector) ID() string {
+func (r *Reflector) ID() string {
 	return r.id
 }
 
 // Reflect performs the reflection operation on the input index.
-func (r *BasicReflector) Reflect(inputIdx int) int {
+func (r *Reflector) Reflect(inputIdx int) int {
 	if inputIdx < 0 || inputIdx >= r.size {
 		return inputIdx // Invalid input, return as-is
 	}
@@ -144,11 +102,11 @@ func (r *BasicReflector) Reflect(inputIdx int) int {
 }
 
 // Clone creates a deep copy of the reflector.
-func (r *BasicReflector) Clone() Reflector {
+func (r *Reflector) Clone() *Reflector {
 	mapping := make([]int, len(r.mapping))
 	copy(mapping, r.mapping)
 
-	return &BasicReflector{
+	return &Reflector{
 		id:       r.id,
 		alphabet: r.alphabet,
 		mapping:  mapping,
@@ -163,30 +121,26 @@ type ReflectorSpec struct {
 }
 
 // CreateFromSpec creates a reflector from a specification.
-func CreateFromSpec(spec ReflectorSpec, alph *alphabet.Alphabet) (Reflector, error) {
+func CreateFromSpec(spec ReflectorSpec, alph *alphabet.Alphabet) (*Reflector, error) {
 	return NewReflector(spec.ID, alph, spec.Mapping)
 }
 
 // ToSpec converts a reflector to a specification for serialization.
-func ToSpec(reflector Reflector, alph *alphabet.Alphabet) (ReflectorSpec, error) {
-	if br, ok := reflector.(*BasicReflector); ok {
-		mapping := make([]rune, br.size)
-		for i := 0; i < br.size; i++ {
-			outputIdx := br.mapping[i]
-			r, err := alph.IndexToRune(outputIdx)
-			if err != nil {
-				return ReflectorSpec{}, err
-			}
-			mapping[i] = r
+func ToSpec(r *Reflector, alph *alphabet.Alphabet) (ReflectorSpec, error) {
+	mapping := make([]rune, r.size)
+	for i := 0; i < r.size; i++ {
+		outputIdx := r.mapping[i]
+		ch, err := alph.IndexToRune(outputIdx)
+		if err != nil {
+			return ReflectorSpec{}, err
 		}
-
-		return ReflectorSpec{
-			ID:      br.id,
-			Mapping: string(mapping),
-		}, nil
+		mapping[i] = ch
 	}
 
-	return ReflectorSpec{}, fmt.Errorf("unsupported reflector type")
+	return ReflectorSpec{
+		ID:      r.id,
+		Mapping: string(mapping),
+	}, nil
 }
 
 // ValidateReflectorMapping validates that a mapping string represents a valid reflector.
@@ -210,7 +164,7 @@ func ValidateReflectorMapping(alph *alphabet.Alphabet, mapping string) error {
 	for i, r := range mappingRunes {
 		outputIdx, err := alph.RuneToIndex(r)
 		if err != nil {
-			return fmt.Errorf("invalid character in mapping at position %d: %v", i, err)
+			return fmt.Errorf("invalid character in mapping at position %d: %w", i, err)
 		}
 
 		if i == outputIdx {

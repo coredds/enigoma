@@ -37,7 +37,7 @@ import (
     "fmt"
     "log"
     "os"
-    "github.com/coredds/enigoma/pkg/enigma"
+    "github.com/coredds/enigoma"
 )
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
     }
     
     // Create machine from configuration
-    machine, err := enigma.NewFromJSON(string(data))
+    machine, err := enigoma.NewFromJSON(string(data))
     if err != nil {
         log.Fatal(err)
     }

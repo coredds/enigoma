@@ -1,4 +1,4 @@
-package enigma
+package enigoma
 
 import (
 	"strings"
@@ -18,7 +18,7 @@ func createTestAlphabet() *alphabet.Alphabet {
 	return alph
 }
 
-func createTestRotor(id string, mapping string, notches []rune, alph *alphabet.Alphabet) rotor.Rotor {
+func createTestRotor(id string, mapping string, notches []rune, alph *alphabet.Alphabet) *rotor.Rotor {
 	r, err := rotor.NewRotor(id, alph, mapping, notches)
 	if err != nil {
 		panic("createTestRotor: " + err.Error())
@@ -26,7 +26,7 @@ func createTestRotor(id string, mapping string, notches []rune, alph *alphabet.A
 	return r
 }
 
-func createTestReflector(id string, mapping string, alph *alphabet.Alphabet) reflector.Reflector {
+func createTestReflector(id string, mapping string, alph *alphabet.Alphabet) *reflector.Reflector {
 	refl, err := reflector.NewReflector(id, alph, mapping)
 	if err != nil {
 		panic("createTestReflector: " + err.Error())
@@ -94,7 +94,7 @@ func TestEnigma_EncryptDecrypt(t *testing.T) {
 
 	enigma, err := New(
 		WithAlphabet(alph.Runes()),
-		WithCustomComponents([]rotor.Rotor{r1}, refl, pb),
+		WithCustomComponents([]*rotor.Rotor{r1}, refl, pb),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create enigma: %v", err)
@@ -203,7 +203,7 @@ func TestEnigma_RotorStepping(t *testing.T) {
 
 	enigma, err := New(
 		WithAlphabet(alph.Runes()),
-		WithCustomComponents([]rotor.Rotor{r1, r2}, refl, nil),
+		WithCustomComponents([]*rotor.Rotor{r1, r2}, refl, nil),
 	)
 	if err != nil {
 		t.Fatalf("Failed to create enigma: %v", err)

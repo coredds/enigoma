@@ -1,8 +1,8 @@
-// Package enigma provides historical Enigma machine variants.
+// package enigoma provides historical Enigma machine variants.
 //
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
-package enigma
+package enigoma
 
 import (
 	"github.com/coredds/enigoma/internal/reflector"
@@ -54,11 +54,6 @@ var (
 // This was the standard Army and Navy Enigma with rotors I, II, and III,
 // and reflector B.
 func NewEnigmaM3() (*Enigma, error) {
-	// Define the alphabet (uppercase Latin)
-	alphabet := []rune{
-		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-	}
 
 	// Define the rotor specifications
 	rotorSpecs := []rotor.RotorSpec{
@@ -93,23 +88,20 @@ func NewEnigmaM3() (*Enigma, error) {
 
 	// Create the machine
 	return New(
-		WithAlphabet(alphabet),
+		WithAlphabet(AlphabetLatinUpper),
 		WithRotorConfiguration(rotorSpecs),
 		WithReflectorConfiguration(reflectorSpec),
 	)
 }
+
+// Note: ReflectorSpec.Mapping expects a string, not a map.
+// The reflector implementation handles converting the string to the appropriate mapping.
 
 // NewEnigmaM4 creates a historically accurate Enigma M4 Naval machine.
 // This was used by the German Navy (Kriegsmarine) with four rotors:
 // a thin rotor (Beta or Gamma) followed by three regular rotors,
 // and a thin reflector (B Thin or C Thin).
 func NewEnigmaM4() (*Enigma, error) {
-	// Define the alphabet (uppercase Latin)
-	alphabet := []rune{
-		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-		'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-	}
-
 	// Define the rotor specifications
 	rotorSpecs := []rotor.RotorSpec{
 		{
@@ -150,11 +142,8 @@ func NewEnigmaM4() (*Enigma, error) {
 
 	// Create the machine
 	return New(
-		WithAlphabet(alphabet),
+		WithAlphabet(AlphabetLatinUpper),
 		WithRotorConfiguration(rotorSpecs),
 		WithReflectorConfiguration(reflectorSpec),
 	)
 }
-
-// Note: ReflectorSpec.Mapping expects a string, not a map.
-// The reflector implementation handles converting the string to the appropriate mapping.

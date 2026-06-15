@@ -1,4 +1,4 @@
-package enigma
+package enigoma
 
 import (
 	"testing"
@@ -12,7 +12,6 @@ func TestSettingsJSONRoundTrip(t *testing.T) {
 	machine, err := New(
 		WithAlphabet(alphabet),
 		WithRandomSettings(Low),
-		WithRandomRotorPositionsSeed(42),
 	)
 	if err != nil {
 		t.Fatalf("failed to create machine: %v", err)
@@ -45,7 +44,6 @@ func TestSettingsJSONRoundTrip_EncryptionMatch(t *testing.T) {
 	machine1, err := New(
 		WithAlphabet(alphabet),
 		WithRandomSettings(Low),
-		WithRandomRotorPositionsSeed(42),
 	)
 	if err != nil {
 		t.Fatalf("failed to create machine1: %v", err)
@@ -86,7 +84,6 @@ func TestSettingsJSONRoundTrip_DecryptionWorks(t *testing.T) {
 	machine, err := New(
 		WithAlphabet(alphabet),
 		WithRandomSettings(Low),
-		WithRandomRotorPositionsSeed(42),
 	)
 	if err != nil {
 		t.Fatalf("failed to create machine: %v", err)

@@ -1,4 +1,4 @@
-package enigma
+package enigoma
 
 import (
 	"testing"
@@ -271,21 +271,5 @@ func TestSecurityLevels_Integration(t *testing.T) {
 					level, plaintext, encrypted, decrypted)
 			}
 		})
-	}
-}
-
-// String method for SecurityLevel for better test output
-func (s SecurityLevel) String() string {
-	switch s {
-	case Low:
-		return "Low"
-	case Medium:
-		return "Medium"
-	case High:
-		return "High"
-	case Extreme:
-		return "Extreme"
-	default:
-		return "Unknown"
 	}
 }

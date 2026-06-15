@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredds/enigoma/pkg/enigma"
+	"github.com/coredds/enigoma"
 	"github.com/spf13/cobra"
 )
 
@@ -600,7 +600,7 @@ func TestSaveConfigFileContents(t *testing.T) {
 		t.Fatalf("Failed to read config file: %v", err)
 	}
 
-	var settings enigma.EnigmaSettings
+	var settings enigoma.EnigmaSettings
 	if err := json.Unmarshal(configData, &settings); err != nil {
 		t.Fatalf("Failed to unmarshal config file: %v", err)
 	}
@@ -628,7 +628,7 @@ func TestAutoConfigJSONOutput(t *testing.T) {
 		t.Fatalf("Failed to read auto-config file: %v", err)
 	}
 
-	var settings enigma.EnigmaSettings
+	var settings enigoma.EnigmaSettings
 	if err := json.Unmarshal(configData, &settings); err != nil {
 		t.Fatalf("Failed to unmarshal auto-config file: %v", err)
 	}

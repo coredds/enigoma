@@ -1,8 +1,8 @@
-// Package enigma provides settings management for the Enigma machine.
+// package enigoma provides settings management for the Enigma machine.
 //
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
-package enigma
+package enigoma
 
 import (
 	"encoding/json"
@@ -23,16 +23,6 @@ type EnigmaSettings struct {
 	ReflectorSpec         reflector.ReflectorSpec `json:"reflector_spec"`
 	PlugboardPairs        map[rune]rune           `json:"plugboard_pairs"`
 	CurrentRotorPositions []int                   `json:"current_rotor_positions"`
-	Metadata              *Metadata               `json:"metadata,omitempty"`
-}
-
-// Metadata contains optional information about the configuration.
-type Metadata struct {
-	CreatedAt   string   `json:"created_at,omitempty"`
-	CreatedBy   string   `json:"created_by,omitempty"`
-	Description string   `json:"description,omitempty"`
-	Preset      string   `json:"preset,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
 }
 
 // GetSettings returns the current configuration and state of the Enigma machine.
@@ -76,7 +66,6 @@ func (e *Enigma) GetSettings() (*EnigmaSettings, error) {
 		ReflectorSpec:         reflectorSpec,
 		PlugboardPairs:        plugboardPairs,
 		CurrentRotorPositions: currentPositions,
-		Metadata:              nil, // Default to no metadata
 	}, nil
 }
 
@@ -94,7 +83,7 @@ func (e *Enigma) LoadSettings(settings *EnigmaSettings) error {
 	e.alphabet = alph
 
 	// Create rotors
-	rotors := make([]rotor.Rotor, len(settings.RotorSpecs))
+	rotors := make([]*rotor.Rotor, len(settings.RotorSpecs))
 	for i, spec := range settings.RotorSpecs {
 		r, err := rotor.CreateFromSpec(spec, e.alphabet)
 		if err != nil {
@@ -159,7 +148,6 @@ func (s *EnigmaSettings) MarshalJSON() ([]byte, error) {
 		ReflectorSpec         reflector.ReflectorSpec `json:"reflector_spec"`
 		PlugboardPairs        map[string]string       `json:"plugboard_pairs"`
 		CurrentRotorPositions []int                   `json:"current_rotor_positions"`
-		Metadata              *Metadata               `json:"metadata,omitempty"`
 	}
 
 	js := jsonSettings{
@@ -169,7 +157,6 @@ func (s *EnigmaSettings) MarshalJSON() ([]byte, error) {
 		ReflectorSpec:         s.ReflectorSpec,
 		CurrentRotorPositions: s.CurrentRotorPositions,
 		PlugboardPairs:        make(map[string]string),
-		Metadata:              s.Metadata,
 	}
 
 	// Convert rune pairs to string pairs
@@ -189,7 +176,6 @@ func (s *EnigmaSettings) UnmarshalJSON(data []byte) error {
 		ReflectorSpec         reflector.ReflectorSpec `json:"reflector_spec"`
 		PlugboardPairs        map[string]string       `json:"plugboard_pairs"`
 		CurrentRotorPositions []int                   `json:"current_rotor_positions"`
-		Metadata              *Metadata               `json:"metadata,omitempty"`
 	}
 
 	var js jsonSettings
@@ -207,7 +193,6 @@ func (s *EnigmaSettings) UnmarshalJSON(data []byte) error {
 	s.RotorSpecs = js.RotorSpecs
 	s.ReflectorSpec = js.ReflectorSpec
 	s.CurrentRotorPositions = js.CurrentRotorPositions
-	s.Metadata = js.Metadata
 	s.PlugboardPairs = make(map[rune]rune)
 
 	// Convert string pairs back to rune pairs

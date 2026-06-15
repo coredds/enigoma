@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coredds/enigoma/pkg/enigma"
+	"github.com/coredds/enigoma"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +73,7 @@ func validateConfig(configFile string, cmd *cobra.Command) error {
 	// Try to read and parse the configuration
 	data, err := os.ReadFile(configFile)
 	if err != nil {
-		return fmt.Errorf("failed to read config file: %v", err)
+		return fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	// Validate by attempting to load configuration
@@ -83,7 +83,7 @@ func validateConfig(configFile string, cmd *cobra.Command) error {
 	}
 
 	// Try to create machine from configuration
-	machine, err := enigma.NewFromJSON(string(data))
+	machine, err := enigoma.NewFromJSON(string(data))
 	if err != nil {
 		fmt.Fprintf(cmd.OutOrStdout(), "❌ Configuration is INVALID (machine creation): %v\n", err)
 		return nil
@@ -106,13 +106,13 @@ func showConfig(configFile string, cmd *cobra.Command) error {
 	// Read configuration
 	data, err := os.ReadFile(configFile)
 	if err != nil {
-		return fmt.Errorf("failed to read config file: %v", err)
+		return fmt.Errorf("failed to read config file: %w", err)
 	}
 
 	// Create machine from configuration
-	machine, err := enigma.NewFromJSON(string(data))
+	machine, err := enigoma.NewFromJSON(string(data))
 	if err != nil {
-		return fmt.Errorf("failed to parse configuration: %v", err)
+		return fmt.Errorf("failed to parse configuration: %w", err)
 	}
 
 	// Show basic information
@@ -130,7 +130,7 @@ func showConfig(configFile string, cmd *cobra.Command) error {
 		// Get full settings
 		settings, err := machine.GetSettings()
 		if err != nil {
-			return fmt.Errorf("failed to get detailed settings: %v", err)
+			return fmt.Errorf("failed to get detailed settings: %w", err)
 		}
 
 		fmt.Fprintf(cmd.OutOrStdout(), "Alphabet: %s\n", string(settings.Alphabet))
@@ -166,25 +166,25 @@ func testConfig(configFile string, cmd *cobra.Command) error {
 	// Create machine from configuration
 	machine, err := createMachineFromConfig(configFile)
 	if err != nil {
-		return fmt.Errorf("failed to create machine from config: %v", err)
+		return fmt.Errorf("failed to create machine from config: %w", err)
 	}
 
 	// Test encryption
 	encrypted, err := machine.Encrypt(testText)
 	if err != nil {
-		return fmt.Errorf("encryption test failed: %v", err)
+		return fmt.Errorf("encryption test failed: %w", err)
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Encrypted: %s\n", encrypted)
 
 	// Reset machine and test decryption
 	if err := machine.Reset(); err != nil {
-		return fmt.Errorf("failed to reset machine: %v", err)
+		return fmt.Errorf("failed to reset machine: %w", err)
 	}
 
 	decrypted, err := machine.Decrypt(encrypted)
 	if err != nil {
-		return fmt.Errorf("decryption test failed: %v", err)
+		return fmt.Errorf("decryption test failed: %w", err)
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "Decrypted: %s\n", decrypted)
@@ -213,19 +213,19 @@ func convertConfig(configFile string, cmd *cobra.Command) error {
 	// Read and validate input configuration
 	machine, err := createMachineFromConfig(configFile)
 	if err != nil {
-		return fmt.Errorf("failed to read input configuration: %v", err)
+		return fmt.Errorf("failed to read input configuration: %w", err)
 	}
 
 	// Export to new format (currently just re-export as JSON)
 	jsonData, err := machine.SaveSettingsToJSON()
 	if err != nil {
-		return fmt.Errorf("failed to convert configuration: %v", err)
+		return fmt.Errorf("failed to convert configuration: %w", err)
 	}
 
 	// Write to output file
 	err = writeStringToFile(jsonData, outputFile)
 	if err != nil {
-		return fmt.Errorf("failed to write converted configuration: %v", err)
+		return fmt.Errorf("failed to write converted configuration: %w", err)
 	}
 
 	fmt.Fprintf(cmd.OutOrStdout(), "✅ Configuration converted successfully\n")

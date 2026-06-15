@@ -142,7 +142,7 @@ func TestRandomReflector_OddSize(t *testing.T) {
 	}
 }
 
-func TestBasicReflector_Reflect(t *testing.T) {
+func TestReflector_Reflect(t *testing.T) {
 	alph := createTestAlphabet()
 	// Mapping: A<->B, C<->D (BADC)
 	reflector, err := NewReflector("test", alph, "BADC")
@@ -171,7 +171,7 @@ func TestBasicReflector_Reflect(t *testing.T) {
 	}
 }
 
-func TestBasicReflector_Reciprocity(t *testing.T) {
+func TestReflector_Reciprocity(t *testing.T) {
 	alph := createTestAlphabet()
 	reflector, err := NewReflector("test", alph, "BADC")
 	if err != nil {
@@ -188,7 +188,7 @@ func TestBasicReflector_Reciprocity(t *testing.T) {
 	}
 }
 
-func TestBasicReflector_NoSelfMapping(t *testing.T) {
+func TestReflector_NoSelfMapping(t *testing.T) {
 	alph := createTestAlphabet()
 	reflector, err := NewReflector("test", alph, "BADC")
 	if err != nil {
@@ -204,7 +204,7 @@ func TestBasicReflector_NoSelfMapping(t *testing.T) {
 	}
 }
 
-func TestBasicReflector_InvalidInput(t *testing.T) {
+func TestReflector_InvalidInput(t *testing.T) {
 	alph := createTestAlphabet()
 	reflector, err := NewReflector("test", alph, "BADC")
 	if err != nil {
@@ -230,7 +230,7 @@ func TestBasicReflector_InvalidInput(t *testing.T) {
 	}
 }
 
-func TestBasicReflector_Clone(t *testing.T) {
+func TestReflector_Clone(t *testing.T) {
 	alph := createTestAlphabet()
 	original, err := NewReflector("test", alph, "BADC")
 	if err != nil {

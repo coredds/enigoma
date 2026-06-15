@@ -4,8 +4,6 @@
 // Licensed under the MIT License
 package enigoma
 
-import "github.com/coredds/enigoma/internal/alphabet"
-
 // Common predefined alphabets that can be used with enigoma.
 var (
 	// AlphabetLatinUpper contains uppercase Latin letters A-Z
@@ -87,13 +85,3 @@ var (
 		' ', '.', ',', '!', '?', ';', ':', '-', '\'', '"', '(', ')',
 	}
 )
-
-// NewAlphabetFromPredefined creates an alphabet.Alphabet from one of the predefined sets.
-func NewAlphabetFromPredefined(runes []rune) (*alphabet.Alphabet, error) {
-	return alphabet.New(runes)
-}
-
-// GetAlphabetSize returns the size of a predefined alphabet.
-func GetAlphabetSize(runes []rune) int {
-	return len(runes)
-}

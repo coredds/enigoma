@@ -18,7 +18,6 @@ import (
 type Plugboard struct {
 	alphabet *alphabet.Alphabet
 	mapping  map[int]int
-	pairs    map[int]int // For tracking which characters are paired
 	size     int
 }
 
@@ -31,7 +30,6 @@ func New(alph *alphabet.Alphabet) (*Plugboard, error) {
 	return &Plugboard{
 		alphabet: alph,
 		mapping:  make(map[int]int),
-		pairs:    make(map[int]int),
 		size:     alph.Size(),
 	}, nil
 }
@@ -40,12 +38,12 @@ func New(alph *alphabet.Alphabet) (*Plugboard, error) {
 func (p *Plugboard) AddPair(r1, r2 rune) error {
 	idx1, err := p.alphabet.RuneToIndex(r1)
 	if err != nil {
-		return fmt.Errorf("invalid character %c: %v", r1, err)
+		return fmt.Errorf("invalid character %c: %w", r1, err)
 	}
 
 	idx2, err := p.alphabet.RuneToIndex(r2)
 	if err != nil {
-		return fmt.Errorf("invalid character %c: %v", r2, err)
+		return fmt.Errorf("invalid character %c: %w", r2, err)
 	}
 
 	if idx1 == idx2 {
@@ -53,18 +51,16 @@ func (p *Plugboard) AddPair(r1, r2 rune) error {
 	}
 
 	// Check if either character is already paired
-	if _, exists := p.pairs[idx1]; exists {
+	if _, exists := p.mapping[idx1]; exists {
 		return fmt.Errorf("character %c is already paired", r1)
 	}
-	if _, exists := p.pairs[idx2]; exists {
+	if _, exists := p.mapping[idx2]; exists {
 		return fmt.Errorf("character %c is already paired", r2)
 	}
 
 	// Add the reciprocal mapping
 	p.mapping[idx1] = idx2
 	p.mapping[idx2] = idx1
-	p.pairs[idx1] = idx2
-	p.pairs[idx2] = idx1
 
 	return nil
 }
@@ -73,11 +69,11 @@ func (p *Plugboard) AddPair(r1, r2 rune) error {
 func (p *Plugboard) RemovePair(r rune) error {
 	idx, err := p.alphabet.RuneToIndex(r)
 	if err != nil {
-		return fmt.Errorf("invalid character %c: %v", r, err)
+		return fmt.Errorf("invalid character %c: %w", r, err)
 	}
 
 	// Check if the character is paired
-	partner, exists := p.pairs[idx]
+	partner, exists := p.mapping[idx]
 	if !exists {
 		return fmt.Errorf("character %c is not paired", r)
 	}
@@ -85,8 +81,6 @@ func (p *Plugboard) RemovePair(r rune) error {
 	// Remove the reciprocal mapping
 	delete(p.mapping, idx)
 	delete(p.mapping, partner)
-	delete(p.pairs, idx)
-	delete(p.pairs, partner)
 
 	return nil
 }
@@ -94,7 +88,6 @@ func (p *Plugboard) RemovePair(r rune) error {
 // Clear removes all plugboard connections.
 func (p *Plugboard) Clear() {
 	p.mapping = make(map[int]int)
-	p.pairs = make(map[int]int)
 }
 
 // Process applies the plugboard mapping to a character index.
@@ -150,7 +143,7 @@ func (p *Plugboard) RandomPairs(n int) error {
 	for i := p.size - 1; i > 0; i-- {
 		jBig, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
 		if err != nil {
-			return fmt.Errorf("failed to generate random number: %v", err)
+			return fmt.Errorf("failed to generate random number: %w", err)
 		}
 		j := int(jBig.Int64())
 		available[i], available[j] = available[j], available[i]
@@ -163,8 +156,6 @@ func (p *Plugboard) RandomPairs(n int) error {
 
 		p.mapping[idx1] = idx2
 		p.mapping[idx2] = idx1
-		p.pairs[idx1] = idx2
-		p.pairs[idx2] = idx1
 	}
 
 	return nil
@@ -175,7 +166,7 @@ func (p *Plugboard) GetPairs() ([][2]rune, error) {
 	var pairs [][2]rune
 	processed := make(map[int]bool)
 
-	for idx1, idx2 := range p.pairs {
+	for idx1, idx2 := range p.mapping {
 		if processed[idx1] {
 			continue
 		}
@@ -249,7 +240,7 @@ func (p *Plugboard) SetPairsFromMap(pairs map[rune]rune) error {
 
 // PairCount returns the number of character pairs currently configured.
 func (p *Plugboard) PairCount() int {
-	return len(p.pairs) / 2
+	return len(p.mapping) / 2
 }
 
 // Clone creates a deep copy of the plugboard.
@@ -257,16 +248,11 @@ func (p *Plugboard) Clone() (*Plugboard, error) {
 	clone := &Plugboard{
 		alphabet: p.alphabet,
 		mapping:  make(map[int]int),
-		pairs:    make(map[int]int),
 		size:     p.size,
 	}
 
 	for k, v := range p.mapping {
 		clone.mapping[k] = v
-	}
-
-	for k, v := range p.pairs {
-		clone.pairs[k] = v
 	}
 
 	return clone, nil

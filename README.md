@@ -1,14 +1,10 @@
 # enigoma
 
-[![Version](https://img.shields.io/badge/version-0.5.0-blue.svg)](https://github.com/coredds/enigoma/releases)
+[![Version](https://img.shields.io/badge/version-0.6.0-blue.svg)](https://github.com/coredds/enigoma/releases)
 [![Go Reference](https://pkg.go.dev/badge/github.com/coredds/enigoma.svg)](https://pkg.go.dev/github.com/coredds/enigoma)
 [![CI](https://github.com/coredds/enigoma/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/coredds/enigoma/actions/workflows/ci.yml)
 [![Go Version](https://img.shields.io/badge/go-1.24+-blue.svg)](https://golang.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-<p align="center">
-  <img src="enigoma_machine.png" alt="enigoma machine" width="432" />
-</p>
 
 A highly customizable, Unicode-capable Enigma machine implementation in Go.
 
@@ -40,8 +36,7 @@ enigoma is a Go library that simulates the famous Enigma machine used during Wor
 - Adjustable complexity levels (Low, Medium, High, Extreme)
 
 ### Usability
-- **Zero-Config Functions**: `enigma.EncryptText("Hello!")` — encrypt in one line
-- **Discovery Commands**: `enigoma demo`, `enigoma examples`, `enigoma test`
+- **Zero-Config Functions**: `QuickEncrypt("Hello!", enigoma.Medium)` — encrypt in one line
 - **Interactive Wizard**: `enigoma wizard` for beginner-friendly setup
 - **Smart Preprocessing**: `--remove-spaces`, `--uppercase`, `--letters-only` flags
 - **Enhanced Error Messages**: All errors include actionable suggestions
@@ -57,7 +52,7 @@ enigoma is a Go library that simulates the famous Enigma machine used during Wor
 
 ```bash
 # Inside your Go module:
-go get github.com/coredds/enigoma@v0.5.0
+go get github.com/coredds/enigoma@v0.6.0
 ```
 
 Or get the latest version:
@@ -76,20 +71,20 @@ package main
 import (
     "fmt"
     "log"
-    
-    "github.com/coredds/enigoma/pkg/enigma"
+
+    "github.com/coredds/enigoma"
 )
 
 func main() {
-    // Simplest possible usage - one line encryption!
-    encrypted, config, err := enigma.EncryptText("Hello World! 🌟")
+    // Encrypt with auto-detected alphabet and medium security
+    encrypted, config, err := enigoma.QuickEncrypt("Hello World!", enigoma.Medium)
     if err != nil {
         log.Fatal(err)
     }
     fmt.Printf("Encrypted: %s\n", encrypted)
-    
+
     // Decrypt using the config
-    decrypted, err := enigma.DecryptWithConfig(encrypted, config)
+    decrypted, err := enigoma.DecryptWithConfig(encrypted, config)
     if err != nil {
         log.Fatal(err)
     }
@@ -105,20 +100,19 @@ package main
 import (
     "fmt"
     "log"
-    
+
     "github.com/coredds/enigoma"
-    "github.com/coredds/enigoma/pkg/enigma"
 )
 
 func main() {
     // Create a classic Enigma machine
-    machine, err := enigma.NewEnigmaClassic()
+    machine, err := enigoma.NewEnigmaClassic()
     if err != nil {
         log.Fatal(err)
     }
 
-    message := "HELLO WORLD"
-    
+    message := "HELLOWORLD"
+
     // Encrypt
     encrypted, err := machine.Encrypt(message)
     if err != nil {
@@ -127,7 +121,9 @@ func main() {
     fmt.Printf("Encrypted: %s\n", encrypted)
 
     // Reset to initial state and decrypt
-    machine.Reset()
+    if err := machine.Reset(); err != nil {
+        log.Fatal(err)
+    }
     decrypted, err := machine.Decrypt(encrypted)
     if err != nil {
         log.Fatal(err)
@@ -144,11 +140,8 @@ enigoma includes a powerful CLI with a configuration-first workflow for secure e
 # Install the CLI
 go install github.com/coredds/enigoma/cmd/enigoma@latest
 
-# Discovery commands
-enigoma demo      # Interactive demonstration
-enigoma examples  # Copy-paste ready examples  
-enigoma test      # Verify installation
-enigoma wizard    # Interactive setup
+# Interactive wizard for beginners
+enigoma wizard
 
 # Quick start with auto-config (recommended)
 enigoma encrypt --text "Hello World!" --auto-config my-key.json
@@ -174,14 +167,12 @@ enigoma decrypt --text "48656c6c6f" --config my-key.json --format hex
 #### CLI Commands
 
 - **`encrypt`** - Encrypt text or files using an Enigma machine
-- **`decrypt`** - Decrypt text or files using an Enigma machine  
+- **`decrypt`** - Decrypt text or files using an Enigma machine
 - **`keygen`** - Generate random Enigma machine configurations
 - **`preset`** - List and describe available machine presets
 - **`config`** - Manage and validate configuration files
-- **`demo`** - Interactive demonstration of features
-- **`examples`** - Copy-paste ready examples for common use cases
-- **`test`** - Test installation and functionality
 - **`wizard`** - Interactive beginner-friendly setup
+- **`version`** - Print version information
 
 #### Available Presets
 
@@ -280,7 +271,7 @@ enigoma encrypt --text "Test unicode: 🙂" --auto-config test.json --verbose
 
 ```go
 // Create an Enigma with Greek alphabet
-machine, err := enigma.NewEnigmaSimple(enigoma.AlphabetGreek)
+machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetGreek)
 if err != nil {
     log.Fatal(err)
 }
@@ -294,10 +285,10 @@ fmt.Printf("Encrypted Greek: %s\n", encrypted)
 
 ```go
 // Create a high-security Enigma
-machine, err := enigma.New(
-    enigma.WithAlphabet(enigoma.AlphabetASCIIPrintable),
-    enigma.WithRandomSettings(enigma.High),
-    enigma.WithPlugboardConfiguration(map[rune]rune{
+machine, err := enigoma.New(
+    enigoma.WithAlphabet(enigoma.AlphabetASCIIPrintable),
+    enigoma.WithRandomSettings(enigoma.High),
+    enigoma.WithPlugboardConfiguration(map[rune]rune{
         'A': 'Z', 'Z': 'A',
         '1': '9', '9': '1',
     }),
@@ -346,7 +337,7 @@ enigoma keygen --alphabet latin --output latin-key.json
 enigoma encrypt --text "HELLO WORLD" --config latin-key.json
 
 # Library: Use predefined alphabet directly
-machine, err := enigma.NewEnigmaSimple(enigoma.AlphabetGreek)
+machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetGreek)
 ```
 
 Tip: For most use cases, prefer `--auto-config` which automatically detects the optimal alphabet from your input text.
@@ -361,7 +352,7 @@ settings, err := machine.GetSettings()
 jsonData, err := machine.SaveSettingsToJSON()
 
 // Restore machine state
-newMachine, err := enigma.NewFromJSON(jsonData)
+newMachine, err := enigoma.NewFromJSON(jsonData)
 ```
 
 ### Machine Cloning
@@ -387,9 +378,9 @@ rotorSpecs := []rotor.RotorSpec{
     },
 }
 
-machine, err := enigma.New(
-    enigma.WithAlphabet(enigoma.AlphabetLatinUpper),
-    enigma.WithRotorConfiguration(rotorSpecs),
+machine, err := enigoma.New(
+    enigoma.WithAlphabet(enigoma.AlphabetLatinUpper),
+    enigoma.WithRotorConfiguration(rotorSpecs),
     // ... other options
 )
 ```
@@ -400,29 +391,27 @@ enigoma follows a modular architecture:
 
 ```
 enigoma/
-├── pkg/enigma/          # Public API
-│   ├── enigma.go        # Enigma struct, Encrypt/Decrypt
-│   ├── options.go       # Functional options (WithAlphabet, WithRandomSettings, etc.)
-│   ├── settings.go      # JSON serialization/deserialization
-│   ├── convenience.go   # QuickEncrypt, EncryptText, NewFromText
-│   └── historical.go    # Historical M3/M4 variants
-├── internal/
-│   ├── alphabet/        # Character set management with auto-detection
-│   ├── rotor/           # Rotor component (permutation + stepping)
-│   ├── reflector/       # Reflector with reciprocal mapping validation
-│   ├── plugboard/       # Plugboard (Steckerbrett) pair management
-│   └── cli/             # Cobra CLI commands
-├── cmd/enigoma/         # CLI entry point
-├── cmd/example/         # Library usage demo
+├── enigma.go            # Enigma struct, Encrypt/Decrypt
+├── options.go           # Functional options (WithAlphabet, WithRandomSettings, etc.)
+├── settings.go          # JSON serialization/deserialization
+├── convenience.go       # QuickEncrypt, NewFromText, DecryptWithConfig
+├── historical.go        # Historical M3/M4 variants
 ├── alphabets.go         # Predefined alphabets (Latin, Greek, Cyrillic, etc.)
-└── version.go           # Library version constant
+├── version.go           # Library version constant
+├── cmd/enigoma/         # CLI entry point
+└── internal/
+    ├── alphabet/        # Character set management with auto-detection
+    ├── rotor/           # Rotor component (permutation + stepping)
+    ├── reflector/       # Reflector with reciprocal mapping validation
+    ├── plugboard/       # Plugboard (Steckerbrett) pair management
+    └── cli/             # Cobra CLI commands
 ```
 
-### Key Interfaces
+### Key Components
 
-- `Rotor` - Defines rotor behavior (forward/backward mapping, stepping)
-- `Reflector` - Defines reflector behavior (reciprocal mapping)
-- `Plugboard` - Manages character pair swapping
+- **Rotor** — substitution permutations, notch-based stepping, ring settings
+- **Reflector** — reciprocal mapping with validation
+- **Plugboard** — character pair swapping
 
 ## Testing
 
@@ -462,13 +451,13 @@ enigoma keygen --security high --output my-config.json
 
 ### Code Examples
 
-See the `cmd/example/` directory for complete code examples:
+Run the example tests to see enigoma in action:
 
-- Basic encryption/decryption
-- Unicode alphabet usage
-- Security level comparisons
-- Settings serialization
-- Custom component configuration
+```bash
+go test -run Example -v
+```
+
+Examples cover basic encryption, historical M3/M4 variants, Unicode support, settings serialization, and zero-config usage.
 
 ## Historical Accuracy
 
@@ -481,7 +470,7 @@ enigoma maintains historical Enigma machine behaviors:
 
 ## Version History
 
-Current version: **0.5.0**
+Current version: **0.6.0**
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed version history and release notes.
 

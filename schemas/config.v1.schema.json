@@ -79,13 +79,8 @@
           "minLength": 1
         },
         "mapping": {
-          "type": "object",
-          "description": "Character mapping for the reflector",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 1
-          }
+          "type": "string",
+          "description": "Character mapping for the reflector"
         }
       }
     },
@@ -104,36 +99,6 @@
       "items": {
         "type": "integer",
         "minimum": 0
-      }
-    },
-    "metadata": {
-      "type": "object",
-      "description": "Optional metadata about this configuration",
-      "properties": {
-        "created_at": {
-          "type": "string",
-          "format": "date-time",
-          "description": "When this configuration was created"
-        },
-        "created_by": {
-          "type": "string",
-          "description": "Who or what created this configuration"
-        },
-        "description": {
-          "type": "string",
-          "description": "Human-readable description of this configuration"
-        },
-        "preset": {
-          "type": "string",
-          "description": "Preset this configuration was based on"
-        },
-        "tags": {
-          "type": "array",
-          "description": "Tags for categorizing this configuration",
-          "items": {
-            "type": "string"
-          }
-        }
       }
     }
   }

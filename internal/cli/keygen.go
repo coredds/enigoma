@@ -6,9 +6,10 @@ package cli
 
 import (
 	"fmt"
+	mrand "math/rand"
 	"os"
 
-	"github.com/coredds/enigoma/pkg/enigma"
+	"github.com/coredds/enigoma"
 	"github.com/spf13/cobra"
 )
 
@@ -55,19 +56,19 @@ func runKeygen(cmd *cobra.Command, args []string) error {
 	// Create machine based on parameters
 	machine, err := createMachineFromFlags(cmd, "")
 	if err != nil {
-		return fmt.Errorf("failed to create Enigma machine: %v", err)
+		return fmt.Errorf("failed to create Enigma machine: %w", err)
 	}
 
 	// Apply rotor positions if requested
 	if randomPos, _ := cmd.Flags().GetBool("random-positions"); randomPos {
 		if cmd.Flags().Changed("seed") {
 			seed, _ := cmd.Flags().GetInt64("seed")
-			if err := enigma.WithRandomRotorPositionsSeed(seed)(machine); err != nil {
-				return fmt.Errorf("failed to set seeded rotor positions: %v", err)
+			if err := setSeededRotorPositions(machine, seed); err != nil {
+				return fmt.Errorf("failed to set seeded rotor positions: %w", err)
 			}
 		} else {
-			if err := enigma.WithRandomRotorPositions()(machine); err != nil {
-				return fmt.Errorf("failed to set random rotor positions: %v", err)
+			if err := enigoma.WithRandomRotorPositions()(machine); err != nil {
+				return fmt.Errorf("failed to set random rotor positions: %w", err)
 			}
 		}
 	}
@@ -87,7 +88,7 @@ func runKeygen(cmd *cobra.Command, args []string) error {
 	// Convert to JSON
 	jsonData, err := machine.SaveSettingsToJSON()
 	if err != nil {
-		return fmt.Errorf("failed to serialize settings: %v", err)
+		return fmt.Errorf("failed to serialize settings: %w", err)
 	}
 
 	// Output the configuration
@@ -101,7 +102,7 @@ func runKeygen(cmd *cobra.Command, args []string) error {
 	} else {
 		err := writeStringToFile(jsonData, outputFile)
 		if err != nil {
-			return fmt.Errorf("failed to write configuration to file: %v", err)
+			return fmt.Errorf("failed to write configuration to file: %w", err)
 		}
 		fmt.Fprintf(cmd.OutOrStdout(), "Configuration saved to: %s\n", outputFile)
 	}
@@ -109,7 +110,7 @@ func runKeygen(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func showConfigurationDescription(machine *enigma.Enigma, cmd *cobra.Command) {
+func showConfigurationDescription(machine *enigoma.Enigma, cmd *cobra.Command) {
 	fmt.Fprintf(cmd.OutOrStdout(), "Configuration Description:\n")
 	fmt.Fprintf(cmd.OutOrStdout(), "  Alphabet Size: %d characters\n", machine.GetAlphabetSize())
 	fmt.Fprintf(cmd.OutOrStdout(), "  Rotors: %d\n", machine.GetRotorCount())
@@ -118,7 +119,7 @@ func showConfigurationDescription(machine *enigma.Enigma, cmd *cobra.Command) {
 	fmt.Fprintf(cmd.OutOrStdout(), "\n")
 }
 
-func showConfigurationStats(machine *enigma.Enigma, cmd *cobra.Command) {
+func showConfigurationStats(machine *enigoma.Enigma, cmd *cobra.Command) {
 	alphabetSize := machine.GetAlphabetSize()
 	rotorCount := machine.GetRotorCount()
 	plugboardPairs := machine.GetPlugboardPairCount()
@@ -176,4 +177,13 @@ func calculatePlugboardCombinations(alphabetSize, pairs int) int64 {
 
 func writeStringToFile(content, filename string) error {
 	return os.WriteFile(filename, []byte(content), 0600)
+}
+
+func setSeededRotorPositions(machine *enigoma.Enigma, seed int64) error {
+	rng := mrand.New(mrand.NewSource(seed)) // #nosec G404
+	positions := make([]int, machine.GetRotorCount())
+	for i := range positions {
+		positions[i] = rng.Intn(machine.GetAlphabetSize())
+	}
+	return machine.SetRotorPositions(positions)
 }

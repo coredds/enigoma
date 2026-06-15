@@ -65,7 +65,7 @@ func askOperation(reader *bufio.Reader) (string, error) {
 
 	choice, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to read input: %v", err)
+		return "", fmt.Errorf("failed to read input: %w", err)
 	}
 
 	choice = strings.TrimSpace(choice)
@@ -162,7 +162,7 @@ func runEncryptWizard(reader *bufio.Reader) error {
 	encryptCmd.SetArgs(cmdArgs[1:]) // Remove 'encrypt' from args
 	err = encryptCmd.Execute()
 	if err != nil {
-		return fmt.Errorf("encryption failed: %v", err)
+		return fmt.Errorf("encryption failed: %w", err)
 	}
 
 	// Success message
@@ -188,7 +188,7 @@ func runDecryptWizard(reader *bufio.Reader) error {
 	fmt.Print("\n🔑 Enter the path to your configuration file (.json): ")
 	configFile, err := reader.ReadString('\n')
 	if err != nil {
-		return fmt.Errorf("failed to read config file path: %v", err)
+		return fmt.Errorf("failed to read config file path: %w", err)
 	}
 	configFile = strings.TrimSpace(configFile)
 
@@ -212,7 +212,7 @@ func runDecryptWizard(reader *bufio.Reader) error {
 
 	formatChoice, err := reader.ReadString('\n')
 	if err != nil {
-		return fmt.Errorf("failed to read format choice: %v", err)
+		return fmt.Errorf("failed to read format choice: %w", err)
 	}
 
 	formatChoice = strings.TrimSpace(formatChoice)
@@ -250,7 +250,7 @@ func runDecryptWizard(reader *bufio.Reader) error {
 	decryptCmd.SetArgs(cmdArgs[1:]) // Remove 'decrypt' from args
 	err = decryptCmd.Execute()
 	if err != nil {
-		return fmt.Errorf("decryption failed: %v", err)
+		return fmt.Errorf("decryption failed: %w", err)
 	}
 
 	fmt.Println("\n✅ Decryption completed!")
@@ -348,7 +348,7 @@ func getWizardInputText(reader *bufio.Reader) (inputText, inputFile string, err 
 
 	inputChoice, err := reader.ReadString('\n')
 	if err != nil {
-		return "", "", fmt.Errorf("failed to read input: %v", err)
+		return "", "", fmt.Errorf("failed to read input: %w", err)
 	}
 
 	inputChoice = strings.TrimSpace(inputChoice)
@@ -357,7 +357,7 @@ func getWizardInputText(reader *bufio.Reader) (inputText, inputFile string, err 
 		fmt.Print("\n📝 Enter the text to encrypt: ")
 		inputText, err = reader.ReadString('\n')
 		if err != nil {
-			return "", "", fmt.Errorf("failed to read text: %v", err)
+			return "", "", fmt.Errorf("failed to read text: %w", err)
 		}
 		inputText = strings.TrimSpace(inputText)
 		return inputText, "", nil
@@ -365,7 +365,7 @@ func getWizardInputText(reader *bufio.Reader) (inputText, inputFile string, err 
 		fmt.Print("\n📁 Enter the file path: ")
 		inputFile, err = reader.ReadString('\n')
 		if err != nil {
-			return "", "", fmt.Errorf("failed to read file path: %v", err)
+			return "", "", fmt.Errorf("failed to read file path: %w", err)
 		}
 		inputFile = strings.TrimSpace(inputFile)
 
@@ -390,7 +390,7 @@ func getWizardSecurityLevel(reader *bufio.Reader) (string, error) {
 
 	secChoice, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to read security choice: %v", err)
+		return "", fmt.Errorf("failed to read security choice: %w", err)
 	}
 
 	secChoice = strings.TrimSpace(secChoice)
@@ -418,7 +418,7 @@ func getWizardApproach(reader *bufio.Reader) (string, error) {
 
 	approachChoice, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to read approach choice: %v", err)
+		return "", fmt.Errorf("failed to read approach choice: %w", err)
 	}
 
 	return strings.TrimSpace(approachChoice), nil
@@ -429,7 +429,7 @@ func getWizardConfigFile(reader *bufio.Reader) (string, error) {
 	fmt.Print("\n💾 Enter a name for your configuration file (without extension): ")
 	configName, err := reader.ReadString('\n')
 	if err != nil {
-		return "", fmt.Errorf("failed to read config name: %v", err)
+		return "", fmt.Errorf("failed to read config name: %w", err)
 	}
 	configName = strings.TrimSpace(configName)
 	if configName == "" {

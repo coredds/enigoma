@@ -121,7 +121,7 @@ func TestRandomRotor(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_Forward(t *testing.T) {
+func TestRotor_Forward(t *testing.T) {
 	alph := createTestAlphabet()
 	// Mapping: A->E, B->A, C->B, D->D, E->C
 	rotor, err := NewRotor("test", alph, "EABDC", []rune{'B'})
@@ -151,7 +151,7 @@ func TestBasicRotor_Forward(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_Backward(t *testing.T) {
+func TestRotor_Backward(t *testing.T) {
 	alph := createTestAlphabet()
 	// Mapping: A->E, B->A, C->B, D->D, E->C
 	// Reverse: A<-B, B<-C, C<-E, D<-D, E<-A
@@ -182,7 +182,7 @@ func TestBasicRotor_Backward(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_ForwardBackwardRoundtrip(t *testing.T) {
+func TestRotor_ForwardBackwardRoundtrip(t *testing.T) {
 	alph := createTestAlphabet()
 	rotor, err := NewRotor("test", alph, "EABDC", []rune{'B'})
 	if err != nil {
@@ -198,7 +198,7 @@ func TestBasicRotor_ForwardBackwardRoundtrip(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_IsAtNotch(t *testing.T) {
+func TestRotor_IsAtNotch(t *testing.T) {
 	alph := createTestAlphabet()
 	rotor, err := NewRotor("test", alph, "EABDC", []rune{'B', 'D'})
 	if err != nil {
@@ -224,7 +224,7 @@ func TestBasicRotor_IsAtNotch(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_Step(t *testing.T) {
+func TestRotor_Step(t *testing.T) {
 	alph := createTestAlphabet()
 	rotor, err := NewRotor("test", alph, "EABDC", []rune{'B'})
 	if err != nil {
@@ -246,7 +246,7 @@ func TestBasicRotor_Step(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_SetPosition(t *testing.T) {
+func TestRotor_SetPosition(t *testing.T) {
 	alph := createTestAlphabet()
 	rotor, err := NewRotor("test", alph, "EABDC", []rune{'B'})
 	if err != nil {
@@ -272,7 +272,7 @@ func TestBasicRotor_SetPosition(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_SetRingSetting(t *testing.T) {
+func TestRotor_SetRingSetting(t *testing.T) {
 	alph := createTestAlphabet()
 	rotor, err := NewRotor("test", alph, "EABDC", []rune{'B'})
 	if err != nil {
@@ -298,7 +298,7 @@ func TestBasicRotor_SetRingSetting(t *testing.T) {
 	}
 }
 
-func TestBasicRotor_Clone(t *testing.T) {
+func TestRotor_Clone(t *testing.T) {
 	alph := createTestAlphabet()
 	original, err := NewRotor("test", alph, "EABDC", []rune{'B'})
 	if err != nil {

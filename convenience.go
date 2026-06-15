@@ -1,8 +1,8 @@
-// Package enigma provides convenience functions for zero-config usage.
+// package enigoma provides convenience functions for zero-config usage.
 //
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
-package enigma
+package enigoma
 
 import (
 	"fmt"
@@ -58,15 +58,8 @@ func NewFromText(text string, security SecurityLevel) (*Enigma, error) {
 	return machine, nil
 }
 
-// EncryptText is the simplest possible encryption function.
-// Auto-detects alphabet, uses medium security, and returns encrypted text with config.
-// Perfect for quick experiments and demos.
-func EncryptText(text string) (encrypted string, config string, err error) {
-	return QuickEncrypt(text, Medium)
-}
-
 // DecryptWithConfig decrypts text using a JSON configuration string.
-// Companion function to QuickEncrypt and EncryptText.
+// Companion function to QuickEncrypt.
 func DecryptWithConfig(encryptedText string, configJSON string) (decrypted string, err error) {
 	machine, err := NewFromJSON(configJSON)
 	if err != nil {
@@ -79,10 +72,4 @@ func DecryptWithConfig(encryptedText string, configJSON string) (decrypted strin
 	}
 
 	return decrypted, nil
-}
-
-// NewWithAutoDetection creates an Enigma machine with auto-detected alphabet and medium security.
-// This is a convenience function for the most common use case.
-func NewWithAutoDetection(text string) (*Enigma, error) {
-	return NewFromText(text, Medium)
 }

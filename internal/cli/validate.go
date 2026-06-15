@@ -9,7 +9,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/coredds/enigoma/pkg/enigma"
+	"github.com/coredds/enigoma"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +41,7 @@ func validateConfigFile(configPath string, cmd *cobra.Command) error {
 	}
 
 	// Attempt to create machine from config to validate
-	_, err = enigma.NewFromJSON(string(data))
+	_, err = enigoma.NewFromJSON(string(data))
 	if err != nil {
 		return fmt.Errorf("invalid configuration file %s: %v", configPath, err)
 	}

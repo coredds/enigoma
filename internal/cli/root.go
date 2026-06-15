@@ -20,7 +20,7 @@ configurable complexity, and modular design.
 
 Examples:
   enigoma encrypt --text "Hello World" --preset classic
-  enigoma decrypt --file encrypted.txt --config my-enigma.json
+  enigoma decrypt --file encrypted.txt --config my-enigoma.json
   enigoma keygen --security high --alphabet latin --output my-key.json
   enigoma preset --list`,
 	Version: enigoma.GetVersion(),
@@ -39,9 +39,6 @@ func init() {
 	rootCmd.AddCommand(presetCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(wizardCmd)
-	rootCmd.AddCommand(demoCmd)
-	rootCmd.AddCommand(examplesCmd)
-	rootCmd.AddCommand(testCmd)
 	rootCmd.AddCommand(versionCmd)
 
 	// Global flags

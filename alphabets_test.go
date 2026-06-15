@@ -121,26 +121,6 @@ func TestPortugueseVariousMessages(t *testing.T) {
 	}
 }
 
-func TestNewAlphabetFromPredefined(t *testing.T) {
-	// Test that the helper function works with Portuguese alphabet
-	alph, err := NewAlphabetFromPredefined(AlphabetPortuguese)
-	if err != nil {
-		t.Errorf("NewAlphabetFromPredefined(AlphabetPortuguese) error: %v", err)
-	}
-
-	if alph == nil {
-		t.Error("NewAlphabetFromPredefined(AlphabetPortuguese) returned nil")
-	}
-}
-
-func TestGetAlphabetSize(t *testing.T) {
-	// Test the helper function with Portuguese alphabet
-	size := GetAlphabetSize(AlphabetPortuguese)
-	if size != 88 {
-		t.Errorf("GetAlphabetSize(AlphabetPortuguese) = %d, want 88", size)
-	}
-}
-
 func TestAlphabetPortugueseNoDuplicates(t *testing.T) {
 	// Test that there are no duplicate characters in the alphabet
 	seen := make(map[rune]bool)

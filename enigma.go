@@ -1,8 +1,8 @@
-// Package enigma provides the main Enigma machine implementation.
+// package enigoma provides the main Enigma machine implementation.
 //
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
-package enigma
+package enigoma
 
 import (
 	"fmt"
@@ -16,8 +16,8 @@ import (
 // Enigma represents a configurable Enigma machine.
 type Enigma struct {
 	alphabet        *alphabet.Alphabet
-	rotors          []rotor.Rotor
-	reflector       reflector.Reflector
+	rotors          []*rotor.Rotor
+	reflector       *reflector.Reflector
 	plugboard       *plugboard.Plugboard
 	initialSettings EnigmaSettings // Store initial settings for reset
 }
@@ -222,7 +222,7 @@ func (e *Enigma) Clone() (*Enigma, error) {
 	}
 
 	// Clone rotors
-	clone.rotors = make([]rotor.Rotor, len(e.rotors))
+	clone.rotors = make([]*rotor.Rotor, len(e.rotors))
 	for i, r := range e.rotors {
 		clone.rotors[i] = r.Clone()
 	}

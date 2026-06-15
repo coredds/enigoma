@@ -15,7 +15,6 @@ import (
 
 	"github.com/coredds/enigoma"
 	"github.com/coredds/enigoma/internal/alphabet"
-	"github.com/coredds/enigoma/pkg/enigma"
 	"github.com/spf13/cobra"
 )
 
@@ -103,7 +102,7 @@ func runEncrypt(cmd *cobra.Command, args []string) error {
 	// Get input text
 	text, err := getInputText(cmd)
 	if err != nil {
-		return fmt.Errorf("failed to get input text: %v", err)
+		return fmt.Errorf("failed to get input text: %w", err)
 	}
 
 	if text == "" {
@@ -130,43 +129,43 @@ func runEncrypt(cmd *cobra.Command, args []string) error {
 	}
 
 	// Create Enigma machine with configuration-first workflow
-	var machine *enigma.Enigma
+	var machine *enigoma.Enigma
 
 	// 1) Use explicit config if provided
 	if configFile, _ := cmd.Flags().GetString("config"); configFile != "" {
 		machine, err = createMachineFromConfig(configFile)
 		if err != nil {
-			return fmt.Errorf("failed to create Enigma machine: %v", err)
+			return fmt.Errorf("failed to create Enigma machine: %w", err)
 		}
 	} else if autoConfigPath, _ := cmd.Flags().GetString("auto-config"); autoConfigPath != "" {
 		// 2) Auto-generate configuration from input text
 		machine, err = createMachineWithAutoConfig(cmd, text, autoConfigPath)
 		if err != nil {
-			return fmt.Errorf("failed to auto-configure Enigma machine: %v", err)
+			return fmt.Errorf("failed to auto-configure Enigma machine: %w", err)
 		}
 	} else if preset, _ := cmd.Flags().GetString("preset"); preset != "" {
 		// 3) Preset (optionally save config)
 		machine, err = createMachineFromPreset(preset)
 		if err != nil {
-			return fmt.Errorf("failed to create Enigma machine: %v", err)
+			return fmt.Errorf("failed to create Enigma machine: %w", err)
 		}
 		if savePath, _ := cmd.Flags().GetString("save-config"); savePath != "" {
 			if err := saveMachineConfig(machine, savePath); err != nil {
-				return fmt.Errorf("failed to save configuration: %v", err)
+				return fmt.Errorf("failed to save configuration: %w", err)
 			}
 		}
 	} else {
 		// 4) Manual flags
 		machine, err = createMachineFromSettings(cmd, text)
 		if err != nil {
-			return fmt.Errorf("failed to create Enigma machine: %v", err)
+			return fmt.Errorf("failed to create Enigma machine: %w", err)
 		}
 	}
 
 	// Reset machine if requested
 	if reset, _ := cmd.Flags().GetBool("reset"); reset {
 		if err := machine.Reset(); err != nil {
-			return fmt.Errorf("failed to reset machine: %v", err)
+			return fmt.Errorf("failed to reset machine: %w", err)
 		}
 	}
 
@@ -179,7 +178,7 @@ func runEncrypt(cmd *cobra.Command, args []string) error {
 	// Format output
 	formatted, err := formatOutput(encrypted, cmd)
 	if err != nil {
-		return fmt.Errorf("failed to format output: %v", err)
+		return fmt.Errorf("failed to format output: %w", err)
 	}
 
 	// Write output
@@ -213,7 +212,7 @@ func getInputText(cmd *cobra.Command) (string, error) {
 	return "", nil
 }
 
-func createMachineFromFlags(cmd *cobra.Command, inputText string) (*enigma.Enigma, error) {
+func createMachineFromFlags(cmd *cobra.Command, inputText string) (*enigoma.Enigma, error) {
 	// Check if config file is specified
 	if configFile, _ := cmd.Flags().GetString("config"); configFile != "" {
 		return createMachineFromConfig(configFile)
@@ -228,51 +227,51 @@ func createMachineFromFlags(cmd *cobra.Command, inputText string) (*enigma.Enigm
 	return createMachineFromSettings(cmd, inputText)
 }
 
-func createMachineFromConfig(configFile string) (*enigma.Enigma, error) {
+func createMachineFromConfig(configFile string) (*enigoma.Enigma, error) {
 	data, err := os.ReadFile(configFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %v", err)
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	return enigma.NewFromJSON(string(data))
+	return enigoma.NewFromJSON(string(data))
 }
 
-func createMachineFromPreset(preset string) (*enigma.Enigma, error) {
+func createMachineFromPreset(preset string) (*enigoma.Enigma, error) {
 	switch strings.ToLower(preset) {
 	case "classic":
-		return enigma.NewEnigmaClassic()
+		return enigoma.NewEnigmaClassic()
 	case "m3":
-		return enigma.NewEnigmaM3()
+		return enigoma.NewEnigmaM3()
 	case "m4":
-		return enigma.NewEnigmaM4()
+		return enigoma.NewEnigmaM4()
 	case "simple":
-		return enigma.NewEnigmaSimple(enigoma.AlphabetLatinUpper)
+		return enigoma.NewEnigmaSimple(enigoma.AlphabetLatinUpper)
 	case "low":
-		return enigma.New(
-			enigma.WithAlphabet(enigoma.AlphabetLatinUpper),
-			enigma.WithRandomSettings(enigma.Low),
+		return enigoma.New(
+			enigoma.WithAlphabet(enigoma.AlphabetLatinUpper),
+			enigoma.WithRandomSettings(enigoma.Low),
 		)
 	case "medium":
-		return enigma.New(
-			enigma.WithAlphabet(enigoma.AlphabetLatinUpper),
-			enigma.WithRandomSettings(enigma.Medium),
+		return enigoma.New(
+			enigoma.WithAlphabet(enigoma.AlphabetLatinUpper),
+			enigoma.WithRandomSettings(enigoma.Medium),
 		)
 	case "high":
-		return enigma.New(
-			enigma.WithAlphabet(enigoma.AlphabetLatinUpper),
-			enigma.WithRandomSettings(enigma.High),
+		return enigoma.New(
+			enigoma.WithAlphabet(enigoma.AlphabetLatinUpper),
+			enigoma.WithRandomSettings(enigoma.High),
 		)
 	case "extreme":
-		return enigma.New(
-			enigma.WithAlphabet(enigoma.AlphabetLatinUpper),
-			enigma.WithRandomSettings(enigma.Extreme),
+		return enigoma.New(
+			enigoma.WithAlphabet(enigoma.AlphabetLatinUpper),
+			enigoma.WithRandomSettings(enigoma.Extreme),
 		)
 	default:
 		return nil, fmt.Errorf("unknown preset: %s. Available: classic, m3, m4, simple, low, medium, high, extreme", preset)
 	}
 }
 
-func createMachineFromSettings(cmd *cobra.Command, inputText string) (*enigma.Enigma, error) {
+func createMachineFromSettings(cmd *cobra.Command, inputText string) (*enigoma.Enigma, error) {
 	// Get alphabet
 	alphabet, err := getAlphabetFromFlag(cmd, inputText)
 	if err != nil {
@@ -286,9 +285,9 @@ func createMachineFromSettings(cmd *cobra.Command, inputText string) (*enigma.En
 	}
 
 	// Create machine with basic settings
-	machine, err := enigma.New(
-		enigma.WithAlphabet(alphabet),
-		enigma.WithRandomSettings(securityLevel),
+	machine, err := enigoma.New(
+		enigoma.WithAlphabet(alphabet),
+		enigoma.WithRandomSettings(securityLevel),
 	)
 	if err != nil {
 		return nil, err
@@ -298,10 +297,10 @@ func createMachineFromSettings(cmd *cobra.Command, inputText string) (*enigma.En
 	if rotorPositions, _ := cmd.Flags().GetStringSlice("rotors"); len(rotorPositions) > 0 {
 		positions, err := parseRotorPositions(rotorPositions)
 		if err != nil {
-			return nil, fmt.Errorf("invalid rotor positions: %v", err)
+			return nil, fmt.Errorf("invalid rotor positions: %w", err)
 		}
 		if err := machine.SetRotorPositions(positions); err != nil {
-			return nil, fmt.Errorf("failed to set rotor positions: %v", err)
+			return nil, fmt.Errorf("failed to set rotor positions: %w", err)
 		}
 	}
 
@@ -348,20 +347,20 @@ func getAlphabetFromFlag(cmd *cobra.Command, inputText string) ([]rune, error) {
 	}
 }
 
-func getSecurityLevelFromFlag(cmd *cobra.Command) (enigma.SecurityLevel, error) {
+func getSecurityLevelFromFlag(cmd *cobra.Command) (enigoma.SecurityLevel, error) {
 	securityName, _ := cmd.Flags().GetString("security")
 
 	switch strings.ToLower(securityName) {
 	case "low":
-		return enigma.Low, nil
+		return enigoma.Low, nil
 	case "medium":
-		return enigma.Medium, nil
+		return enigoma.Medium, nil
 	case "high":
-		return enigma.High, nil
+		return enigoma.High, nil
 	case "extreme":
-		return enigma.Extreme, nil
+		return enigoma.Extreme, nil
 	default:
-		return enigma.Medium, fmt.Errorf("unknown security level: %s. Available: low, medium, high, extreme", securityName)
+		return enigoma.Medium, fmt.Errorf("unknown security level: %s. Available: low, medium, high, extreme", securityName)
 	}
 }
 
@@ -412,7 +411,7 @@ func writeOutput(text string, cmd *cobra.Command) error {
 // createMachineWithAutoConfig builds an Enigma machine by auto-detecting the alphabet
 // from the provided text, applies random settings per selected security level, and saves
 // the resulting configuration JSON to the provided path.
-func createMachineWithAutoConfig(cmd *cobra.Command, text string, savePath string) (*enigma.Enigma, error) {
+func createMachineWithAutoConfig(cmd *cobra.Command, text string, savePath string) (*enigoma.Enigma, error) {
 	// Auto-detect alphabet from input text
 	detectedAlphabet, err := alphabet.AutoDetectFromText(text)
 	if err != nil {
@@ -426,9 +425,9 @@ func createMachineWithAutoConfig(cmd *cobra.Command, text string, savePath strin
 	}
 
 	// Create machine
-	machine, err := enigma.New(
-		enigma.WithAlphabet(detectedAlphabet.Runes()),
-		enigma.WithRandomSettings(securityLevel),
+	machine, err := enigoma.New(
+		enigoma.WithAlphabet(detectedAlphabet.Runes()),
+		enigoma.WithRandomSettings(securityLevel),
 	)
 	if err != nil {
 		return nil, err
@@ -438,10 +437,10 @@ func createMachineWithAutoConfig(cmd *cobra.Command, text string, savePath strin
 	if rotorPositions, _ := cmd.Flags().GetStringSlice("rotors"); len(rotorPositions) > 0 {
 		positions, err := parseRotorPositions(rotorPositions)
 		if err != nil {
-			return nil, fmt.Errorf("invalid rotor positions: %v", err)
+			return nil, fmt.Errorf("invalid rotor positions: %w", err)
 		}
 		if err := machine.SetRotorPositions(positions); err != nil {
-			return nil, fmt.Errorf("failed to set rotor positions: %v", err)
+			return nil, fmt.Errorf("failed to set rotor positions: %w", err)
 		}
 	}
 
@@ -457,7 +456,7 @@ func createMachineWithAutoConfig(cmd *cobra.Command, text string, savePath strin
 	return machine, nil
 }
 
-func saveMachineConfig(machine *enigma.Enigma, path string) error {
+func saveMachineConfig(machine *enigoma.Enigma, path string) error {
 	jsonData, err := machine.SaveSettingsToJSON()
 	if err != nil {
 		return fmt.Errorf("serialize configuration: %w", err)
@@ -529,7 +528,7 @@ func enhanceEncryptionError(err error, text string, cmd *cobra.Command) error {
 		return fmt.Errorf("encryption failed: %v\n\nSuggestions:\n%s", err, suggestionText)
 	}
 
-	return fmt.Errorf("encryption failed: %v", err)
+	return fmt.Errorf("encryption failed: %w", err)
 }
 
 // hasLowercase checks if the text contains lowercase letters

@@ -1,4 +1,4 @@
-.PHONY: help test build install clean lint fmt vet coverage benchmark run-example run-demo all
+.PHONY: help test build install clean lint fmt vet coverage benchmark all
 
 # Default target
 help:
@@ -32,10 +32,6 @@ help:
 	@echo "  make clean         - Remove build artifacts"
 	@echo "  make clean-all     - Remove all generated files"
 	@echo ""
-	@echo "Examples:"
-	@echo "  make run-example   - Run example application"
-	@echo "  make run-demo      - Run CLI demo"
-
 # Test targets
 test:
 	@echo "Running tests..."
@@ -57,7 +53,7 @@ coverage:
 
 benchmark:
 	@echo "Running benchmarks..."
-	@go test -bench=. -benchmem ./pkg/enigma
+	@go test -bench=. -benchmem .
 
 # Code quality targets
 lint:
@@ -104,15 +100,6 @@ clean-all: clean
 	@rm -rf dist/
 	@echo "Deep clean complete!"
 
-# Example targets
-run-example:
-	@echo "Running example application..."
-	@go run ./cmd/example
-
-run-demo:
-	@echo "Running CLI demo..."
-	@go run ./cmd/enigoma demo
-
 # Go module management
 tidy:
 	@echo "Tidying go modules..."
@@ -153,7 +140,7 @@ docker-run:
 docker-test:
 	@echo "Testing Docker build..."
 	@docker build -t enigoma:test .
-	@docker run --rm enigoma:test test
+	@docker run --rm enigoma:test --version
 
 docker-compose-up:
 	@docker-compose up

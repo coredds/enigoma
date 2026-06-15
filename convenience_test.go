@@ -1,8 +1,8 @@
-// Package enigma provides convenience function tests.
+// package enigoma provides convenience function tests.
 //
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
-package enigma
+package enigoma
 
 import (
 	"strings"
@@ -114,37 +114,6 @@ func TestQuickEncrypt_UnicodeRoundTrip(t *testing.T) {
 	}
 }
 
-func TestEncryptText_Basic(t *testing.T) {
-	text := "HELLO WORLD"
-	encrypted, config, err := EncryptText(text)
-	if err != nil {
-		t.Fatalf("EncryptText() error: %v", err)
-	}
-	if encrypted == "" {
-		t.Error("EncryptText() returned empty encrypted text")
-	}
-	if config == "" {
-		t.Error("EncryptText() returned empty config")
-	}
-}
-
-func TestEncryptText_RoundTrip(t *testing.T) {
-	text := "HELLO WORLD"
-	encrypted, config, err := EncryptText(text)
-	if err != nil {
-		t.Fatalf("EncryptText() error: %v", err)
-	}
-
-	decrypted, err := DecryptWithConfig(encrypted, config)
-	if err != nil {
-		t.Fatalf("DecryptWithConfig() error: %v", err)
-	}
-
-	if decrypted != text {
-		t.Errorf("EncryptText round-trip failed: got %q, want %q", decrypted, text)
-	}
-}
-
 func TestDecryptWithConfig_InvalidJSON(t *testing.T) {
 	_, err := DecryptWithConfig("encrypted", "not-valid-json")
 	if err == nil {
@@ -193,52 +162,6 @@ func TestNewFromText_AllSecurityLevels(t *testing.T) {
 		if machine == nil {
 			t.Fatalf("NewFromText(level=%d) returned nil machine", level)
 		}
-	}
-}
-
-func TestNewWithAutoDetection_Basic(t *testing.T) {
-	machine, err := NewWithAutoDetection("HELLO WORLD")
-	if err != nil {
-		t.Fatalf("NewWithAutoDetection() error: %v", err)
-	}
-	if machine == nil {
-		t.Fatal("NewWithAutoDetection() returned nil machine")
-	}
-}
-
-func TestNewWithAutoDetection_EmptyText(t *testing.T) {
-	_, err := NewWithAutoDetection("")
-	if err == nil {
-		t.Error("NewWithAutoDetection('') expected error")
-	}
-}
-
-func TestNewWithAutoDetection_EncryptDecrypt(t *testing.T) {
-	text := "HELLO WORLD"
-	machine, err := NewWithAutoDetection(text)
-	if err != nil {
-		t.Fatalf("NewWithAutoDetection() error: %v", err)
-	}
-
-	// Save config before encryption
-	config, err := machine.SaveSettingsToJSON()
-	if err != nil {
-		t.Fatalf("SaveSettingsToJSON() error: %v", err)
-	}
-
-	encrypted, err := machine.Encrypt(text)
-	if err != nil {
-		t.Fatalf("Encrypt() error: %v", err)
-	}
-
-	// Decrypt using saved config
-	decrypted, err := DecryptWithConfig(encrypted, config)
-	if err != nil {
-		t.Fatalf("DecryptWithConfig() error: %v", err)
-	}
-
-	if decrypted != text {
-		t.Errorf("NewWithAutoDetection round-trip failed: got %q, want %q", decrypted, text)
 	}
 }
 

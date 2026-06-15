@@ -81,7 +81,7 @@ func runDecrypt(cmd *cobra.Command, args []string) error {
 	// Get input text
 	text, err := getInputTextForDecrypt(cmd)
 	if err != nil {
-		return fmt.Errorf("failed to get input text: %v", err)
+		return fmt.Errorf("failed to get input text: %w", err)
 	}
 
 	if text == "" {
@@ -105,7 +105,7 @@ func runDecrypt(cmd *cobra.Command, args []string) error {
 	// Reset machine if requested
 	if reset, _ := cmd.Flags().GetBool("reset"); reset {
 		if err := machine.Reset(); err != nil {
-			return fmt.Errorf("failed to reset machine: %v", err)
+			return fmt.Errorf("failed to reset machine: %w", err)
 		}
 	}
 
@@ -206,6 +206,5 @@ func enhanceDecryptionError(err error, text string, cmd *cobra.Command) error {
 		return fmt.Errorf("decryption failed: %v\n\nSuggestions:\n%s", err, suggestionText)
 	}
 
-	return fmt.Errorf("decryption failed: %v", err)
+	return fmt.Errorf("decryption failed: %w", err)
 }
-

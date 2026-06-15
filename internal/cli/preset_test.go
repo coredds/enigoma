@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/coredds/enigoma/pkg/enigma"
+	"github.com/coredds/enigoma"
 )
 
 // TestGetAvailablePresets tests that all presets are properly defined.
@@ -213,7 +213,7 @@ func TestPresetExport(t *testing.T) {
 			}
 
 			// Verify the JSON can be imported back
-			importedMachine, err := enigma.NewFromJSON(jsonData)
+			importedMachine, err := enigoma.NewFromJSON(jsonData)
 			if err != nil {
 				t.Errorf("Failed to import JSON for preset %s: %v", preset.Name, err)
 				return
