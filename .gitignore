@@ -73,3 +73,5 @@ cmd/enigoma/enigoma.exe
 # Release artifacts (built locally for manual GitHub release upload)
 releases/
 release-notes.md 
+# Superpowers plugin docs (specs/plans)
+docs/superpowers/
