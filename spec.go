@@ -12,7 +12,7 @@ import (
 // SchemaVersion is the configuration schema version produced and accepted by this package.
 const SchemaVersion = 2
 
-// errSchemaV1 is returned for configuration files written by enigoma 0.5 and earlier.
+// errSchemaV1 is returned for configuration files written by enigoma 0.6 and earlier.
 var errSchemaV1 = errors.New("config schema v1 (enigoma ≤ 0.6) is not supported; regenerate the key with enigoma ≥ 0.7")
 
 // RotorSpec describes a rotor. Letters (notches, ring, position) are characters
@@ -43,7 +43,7 @@ type Settings struct {
 	Plugboard     string        `json:"plugboard"` // space-separated pairs, e.g. "AB CD"
 }
 
-// ParseSettings decodes a JSON configuration. Configurations from enigoma 0.5
+// ParseSettings decodes a JSON configuration. Configurations from enigoma 0.6
 // and earlier (schema v1) are rejected.
 func ParseSettings(data []byte) (Settings, error) {
 	var probe struct {

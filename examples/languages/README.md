@@ -23,8 +23,8 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 ### 🇬🇷 `greek-simple.json` - Greek Alphabet
 - **Character Set**: Greek alphabet (upper and lowercase)
-- **Size**: 72 characters  
-- **Includes**: Α-Ω, α-ω, basic punctuation
+- **Size**: 48 characters
+- **Includes**: Α-Ω, α-ω (no spaces, punctuation or accents)
 - **Use Case**: Greek text encryption
 
 ```bash
@@ -34,7 +34,7 @@ enigoma encrypt --text "ΚαλημεραΚοσμε" --config examples/languages/
 
 **Supported Characters**:
 ```
-ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψω .,!?;:-'"()
+ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψω
 ```
 
 ### 🌍 `mixed-alphabet-extreme.json` - Multi-Character Set
@@ -132,19 +132,19 @@ enigoma config --show examples/languages/greek-simple.json
 
 ### Character Not In Alphabet
 ```
-Error: character 'ñ' not found in alphabet
+Error: character 'ñ' at offset 4 is not in the alphabet
 ```
 **Solution**: Add missing characters to the alphabet or use a configuration that includes them.
 
 ### Alphabet Size Mismatch  
 ```
-Error: mapping length (50) must match alphabet size (48)
+Error: rotor 1 (I): wiring must be a permutation of the alphabet
 ```
-**Solution**: Ensure rotor and reflector mappings match alphabet size exactly.
+**Solution**: Each rotor wiring must use every alphabet character exactly once.
 
 ### Reflector Requirements
 ```
-Error: reflector mapping must have even length
+Error: alphabet size 49 must be even (the reflector pairs every character)
 ```
 **Solution**: Ensure alphabet has even number of characters for reflector compatibility.
 

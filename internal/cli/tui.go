@@ -20,7 +20,8 @@ func newTuiCmd() *cobra.Command {
 rotors, lights a lamp and shows the signal's path through plugboard, rotors
 and reflector and back.
 
-Keys: Backspace undo · Tab group tape by 5 · Ctrl+R reset · Esc quit
+Keys: Backspace undo · Tab group tape by 5 · Ctrl+R reset · Enter newline · Esc quit
+Newline and space are shown as ⏎ and ␣.
 
 Examples:
   enigoma tui

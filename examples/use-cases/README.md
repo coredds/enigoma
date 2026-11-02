@@ -5,7 +5,8 @@ This directory contains example configurations tailored for specific real-world 
 ## Available Examples
 
 ### 📄 `document-protection.json` - File and Document Encryption
-- **Security Level**: Low-Medium
+- **Security Level**: Low-Medium (3 rotors, 2 plugboard pairs)
+- **Alphabet**: printable ASCII plus newline (96 characters), so ordinary text files work
 - **Best For**: Personal documents, files, notes
 - **Features**: Balanced security and performance for everyday use
 
@@ -18,7 +19,8 @@ enigoma decrypt --file encrypted-doc.txt --config examples/use-cases/document-pr
 ```
 
 ### 🔐 `secure-communication.json` - Secure Messaging
-- **Security Level**: High
+- **Security Level**: High (8 rotors, 15 plugboard pairs)
+- **Alphabet**: printable ASCII plus newline (96 characters)
 - **Best For**: Confidential communications, secure messaging
 - **Features**: Strong security for sensitive communications
 
@@ -33,7 +35,7 @@ enigoma encrypt --file confidential-report.pdf --config examples/use-cases/secur
 ### 🏛️ `historical-simulation.json` - Educational and Historical
 - **Security Level**: Historical accuracy
 - **Best For**: Learning about Enigma, historical projects, education
-- **Features**: Authentic WWII-era Enigma M3 configuration
+- **Features**: Enigma M3 (rotors I-II-III, reflector B) with positions QEV, rings BUL and plugboard AV BS CG; A-Z only
 
 ```bash
 # Historical encryption simulation

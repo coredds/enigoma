@@ -58,6 +58,8 @@ are not compatible.**
   `extreme`. `--verbose` writes to stderr.
 - Configuration files from 0.6 and earlier (schema v1) are rejected with an
   explanatory error.
+- The TUI dependencies (Bubble Tea, Lip Gloss v1) keep the module at Go 1.24.
+- CI: govulncheck runs on the current stable Go (govulncheck 1.9 requires Go 1.26).
 
 ### Migration: library
 

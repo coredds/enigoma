@@ -30,7 +30,7 @@ one unless it is saved (`--save-config FILE` or `--auto-config FILE`), and
 enigoma encrypt --text "Olá, mundo!" --auto-config pt-key.json
 enigoma encrypt --file report.txt --config key.json --output report.enc
 echo "HELLO" | enigoma encrypt --preset m3 --positions QEV
-enigoma encrypt --text "TOP SECRET" --preset high --save-config key.json
+enigoma encrypt --text "TOPSECRET" --preset high --save-config key.json
 ```
 
 | Flag | Default | Meaning |

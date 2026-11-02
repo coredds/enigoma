@@ -31,7 +31,7 @@ enigoma encrypt --file document.txt --config examples/security-levels/simple-med
 ### 🔒🔒 `high-security.json` - Strong Protection
 - **Security Level**: High
 - **Rotors**: 8
-- **Plugboard Pairs**: 15
+- **Plugboard Pairs**: 13 (`--security high` asks for 15; 26 letters allow at most 13)
 - **Alphabet**: Latin uppercase (A-Z)
 - **Use Case**: Sensitive documents, secure communication
 
@@ -43,7 +43,7 @@ enigoma encrypt --text "CONFIDENTIALDATA" --config examples/security-levels/high
 ### 🔒🔒🔒 `extreme-key.json` - Maximum Complexity
 - **Security Level**: Extreme
 - **Rotors**: 12
-- **Plugboard Pairs**: 20+
+- **Plugboard Pairs**: 13 (`--security extreme` asks for 20; 26 letters allow at most 13)
 - **Alphabet**: Latin uppercase (A-Z)
 - **Use Case**: Research, maximum obfuscation needs
 
@@ -58,8 +58,10 @@ enigoma encrypt --text "TOPSECRET" --config examples/security-levels/extreme-key
 |-------|--------|-----------|---------------|-------------|----------|
 | Low | 3 | 2 | ~10^15 | Fastest | Learning, historical |
 | Medium | 5 | 8 | ~10^25 | Fast | General use |
-| High | 8 | 15 | ~10^40 | Moderate | Sensitive data |
-| Extreme | 12 | 20+ | ~10^60 | Slower | Maximum security |
+| High | 8 | 13* | ~10^40 | Moderate | Sensitive data |
+| Extreme | 12 | 13* | ~10^60 | Slower | Maximum security |
+
+\* `high` and `extreme` request 15 and 20 plug pairs; larger alphabets get them all.
 
 ## Generating Your Own
 
@@ -82,7 +84,7 @@ Always validate your configurations:
 enigoma config --validate examples/security-levels/high-security.json
 
 # Test with sample text
-enigoma config --test examples/security-levels/high-security.json --text "TEST MESSAGE"
+enigoma config --test examples/security-levels/high-security.json --text "TESTMESSAGE"
 
 # Show detailed configuration info
 enigoma config --show examples/security-levels/extreme-key.json
@@ -90,11 +92,10 @@ enigoma config --show examples/security-levels/extreme-key.json
 
 ## Historical Context
 
-The **Classic** configuration closely matches the Wehrmacht M3 Enigma used during WWII:
-- 3 rotors (I, II, III historically)
-- Minimal plugboard connections
-- 26-character Latin alphabet
-- Deterministic rotor stepping
+`classic-low-security.json` has the shape of a wartime Enigma (3 rotors, 26
+letters, few plugboard pairs) but randomly generated wiring. For the real
+machine use `--preset m3` / `--preset m4` or
+[`examples/historical/historical-enigma.json`](../historical/historical-enigma.json).
 
 Higher security levels represent modern enhancements that would not have been possible with 1940s technology.
 

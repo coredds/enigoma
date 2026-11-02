@@ -17,7 +17,7 @@ The M3 preset in enigoma uses rotors I, II, and III with reflector B, which was 
 
 ```bash
 # Use the M3 preset
-enigoma encrypt --text "TOP SECRET" --preset m3 --save-config m3-config.json
+enigoma encrypt --text "TOPSECRET" --preset m3
 ```
 
 ### M4 Naval Enigma (`m4`)
@@ -33,7 +33,7 @@ The M4 preset in enigoma uses the Beta thin rotor, rotors I, II, and III, with t
 
 ```bash
 # Use the M4 preset
-enigoma encrypt --text "KRIEGSMARINE" --preset m4 --save-config m4-config.json
+enigoma encrypt --text "KRIEGSMARINE" --preset m4
 ```
 
 ## Historical Accuracy
@@ -42,7 +42,7 @@ These presets aim to provide historically accurate simulations of the Enigma mac
 
 ## Example Configurations
 
-- `historical-enigma.json`: A sample configuration for an M3 Enigma machine
+- `historical-enigma.json`: the M3 preset exported with `enigoma preset --export m3`
 
 ## Historical Rotors
 

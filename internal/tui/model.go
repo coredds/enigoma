@@ -170,7 +170,7 @@ func (md model) View() string {
 
 	status := md.status
 	if status == "" {
-		status = dimStyle.Render("Backspace undo · Tab group by 5 · Ctrl+R reset · Esc quit")
+		status = dimStyle.Render("Backspace undo · Tab group by 5 · Ctrl+R reset · Enter newline · Esc quit")
 	}
 	b.WriteString(truncateLines(status, w))
 	return b.String()

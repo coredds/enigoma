@@ -16,7 +16,8 @@ and an interactive terminal visualizer.
   from your text, including mixed scripts and emoji.
 - **Observable**: `Machine.Press` returns a trace of every hop of the signal;
   `enigoma tui` draws it live as you type.
-- **Configuration-first CLI**: the CLI never produces ciphertext you cannot decrypt.
+- **Configuration-first CLI**: the CLI never produces ciphertext you cannot decrypt,
+  and `--auto-config` keeps your text exactly, line endings included.
 
 > enigoma is for education and simulation. Enigma was broken in the 1940s; do not
 > use it to protect real data. Use AES-GCM or ChaCha20-Poly1305.
@@ -185,8 +186,10 @@ enigoma tui --config my-key.json
 
 Type to press keys. The TUI shows the rotor windows stepping (including the
 double-step), the lit lamp, and the signal's path through plugboard, rotors and
-reflector and back. Backspace undoes a keypress, Ctrl+R resets, Tab groups the
-tape in fives, Esc quits.
+reflector and back, both as a chain of hops and, for alphabets of up to 26
+letters on wide terminals, as columns of contacts. Backspace undoes a keypress,
+Ctrl+R resets, Tab groups the tape in fives, Enter types a newline (when the
+alphabet has one), Esc quits. Newline and space are shown as ⏎ and ␣.
 
 ## Historical accuracy
 
