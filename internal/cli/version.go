@@ -11,15 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print the version number of enigoma",
-	Long: `Display the current version of enigoma.
-
-Examples:
-  enigoma version
-  enigoma --version`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("enigoma version %s\n", enigoma.GetVersion())
-	},
+func newVersionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "version",
+		Short: "Print the version number of enigoma",
+		Run: func(cmd *cobra.Command, _ []string) {
+			fmt.Fprintf(cmd.OutOrStdout(), "enigoma version %s\n", enigoma.GetVersion())
+		},
+	}
 }

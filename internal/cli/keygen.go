@@ -1,189 +1,143 @@
-// Package cli provides the keygen command for the enigoma CLI.
-//
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
+
 package cli
 
 import (
+	"crypto/rand"
 	"fmt"
-	mrand "math/rand"
-	"os"
+	"math/big"
+	mrand "math/rand/v2"
+	"strings"
 
 	"github.com/coredds/enigoma"
 	"github.com/spf13/cobra"
 )
 
-var keygenCmd = &cobra.Command{
-	Use:   "keygen",
-	Short: "Generate random Enigma machine configurations",
-	Long: `Generate random Enigma machine configurations with specified parameters.
-
-The generated configuration can be saved to a file and used later with the
---config flag in encrypt/decrypt commands.
+func newKeygenCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "keygen",
+		Short: "Generate a machine configuration file",
+		Long: `Generate a machine configuration for use with --config.
 
 Examples:
-  enigoma keygen --security high --alphabet latin --output my-key.json
-  enigoma keygen --preset classic --output classic-key.json
-  enigoma keygen --security extreme --alphabet portuguese --save-to keys/extreme-pt.json`,
-	RunE: runKeygen,
+  enigoma keygen --security high --output my-key.json
+  enigoma keygen --alphabet greek --rotors 6 --plugboard-pairs 10
+  enigoma keygen --preset m3 --output m3-key.json   # M3 with random positions`,
+		RunE: runKeygen,
+	}
+	cmd.Flags().StringP("preset", "p", "", "Base preset: "+presetNames)
+	cmd.Flags().StringP("alphabet", "a", "latin", "Alphabet: latin, latin-lower, greek, cyrillic, portuguese, ascii, alphanumeric, digits")
+	cmd.Flags().StringP("security", "s", "medium", "Machine size: low, medium, high, extreme")
+	cmd.Flags().IntP("rotors", "r", 0, "Number of rotors (overrides --security)")
+	cmd.Flags().Int("plugboard-pairs", 0, "Number of plugboard pairs (overrides --security)")
+	cmd.Flags().Bool("random-positions", true, "Randomize the starting rotor positions")
+	cmd.Flags().Int64("seed", 0, "Derive starting positions from this seed (deterministic)")
+	cmd.Flags().StringP("output", "o", "", "Output file (default: stdout)")
+	cmd.Flags().String("save-to", "", "Alias for --output")
+	cmd.Flags().BoolP("describe", "d", false, "Describe the generated configuration")
+	return cmd
 }
 
-func init() {
-	// Machine configuration
-	keygenCmd.Flags().StringP("preset", "p", "", "Base preset to modify (classic, simple, low, medium, high, extreme)")
-	keygenCmd.Flags().StringP("alphabet", "a", "latin", "Alphabet to use (latin, greek, cyrillic, portuguese, ascii, alphanumeric)")
-	keygenCmd.Flags().StringP("security", "s", "medium", "Security level (low, medium, high, extreme)")
-
-	// Output options
-	keygenCmd.Flags().StringP("output", "o", "", "Output file for the configuration (default: stdout)")
-	keygenCmd.Flags().StringP("save-to", "", "", "Save configuration to file (alias for --output)")
-	keygenCmd.Flags().StringP("format", "f", "json", "Output format (json, yaml)")
-
-	// Advanced options
-	keygenCmd.Flags().IntP("rotors", "r", 0, "Number of rotors (overrides security level)")
-	keygenCmd.Flags().IntP("plugboard-pairs", "", 0, "Number of plugboard pairs (overrides security level)")
-	keygenCmd.Flags().BoolP("random-positions", "", true, "Generate random rotor positions")
-	keygenCmd.Flags().Int64("seed", 0, "Deterministic seed for rotor positions (optional)")
-
-	// Information options
-	keygenCmd.Flags().BoolP("describe", "d", false, "Show description of generated configuration")
-	keygenCmd.Flags().BoolP("stats", "", false, "Show statistics about the configuration")
-}
-
-func runKeygen(cmd *cobra.Command, args []string) error {
-	setupVerbose(cmd)
-
-	// Create machine based on parameters
-	machine, err := createMachineFromFlags(cmd, "")
-	if err != nil {
-		return fmt.Errorf("failed to create Enigma machine: %w", err)
-	}
-
-	// Apply rotor positions if requested
-	if randomPos, _ := cmd.Flags().GetBool("random-positions"); randomPos {
-		if cmd.Flags().Changed("seed") {
-			seed, _ := cmd.Flags().GetInt64("seed")
-			if err := setSeededRotorPositions(machine, seed); err != nil {
-				return fmt.Errorf("failed to set seeded rotor positions: %w", err)
-			}
-		} else {
-			if err := enigoma.WithRandomRotorPositions()(machine); err != nil {
-				return fmt.Errorf("failed to set random rotor positions: %w", err)
-			}
-		}
-	}
-
-	// Machine is ready for configuration export
-
-	// Show description if requested
-	if describe, _ := cmd.Flags().GetBool("describe"); describe {
-		showConfigurationDescription(machine, cmd)
-	}
-
-	// Show stats if requested
-	if stats, _ := cmd.Flags().GetBool("stats"); stats {
-		showConfigurationStats(machine, cmd)
-	}
-
-	// Convert to JSON
-	jsonData, err := machine.SaveSettingsToJSON()
-	if err != nil {
-		return fmt.Errorf("failed to serialize settings: %w", err)
-	}
-
-	// Output the configuration
-	outputFile, _ := cmd.Flags().GetString("output")
-	if outputFile == "" {
-		outputFile, _ = cmd.Flags().GetString("save-to")
-	}
-
-	if outputFile == "" {
-		fmt.Fprint(cmd.OutOrStdout(), jsonData)
+func runKeygen(cmd *cobra.Command, _ []string) error {
+	var m *enigoma.Machine
+	var err error
+	if preset := flagString(cmd, "preset"); preset != "" {
+		m, _, err = presetMachine(preset)
 	} else {
-		err := writeStringToFile(jsonData, outputFile)
-		if err != nil {
-			return fmt.Errorf("failed to write configuration to file: %w", err)
-		}
-		fmt.Fprintf(cmd.OutOrStdout(), "Configuration saved to: %s\n", outputFile)
+		m, err = keygenRandom(cmd)
+	}
+	if err != nil {
+		return err
 	}
 
+	if cmd.Flags().Changed("seed") {
+		seed, _ := cmd.Flags().GetInt64("seed")
+		rng := mrand.New(mrand.NewPCG(uint64(seed), 0)) // #nosec G404 -- deterministic by request
+		if err := m.SetPositions(randomPositions(m, func(n int) int { return rng.IntN(n) })); err != nil {
+			return err
+		}
+	} else if flagBool(cmd, "random-positions") {
+		if err := m.SetPositions(randomPositions(m, cryptoIntN)); err != nil {
+			return err
+		}
+	}
+
+	if flagBool(cmd, "describe") {
+		describeMachine(cmd, m)
+	}
+	path := flagString(cmd, "output")
+	if path == "" {
+		path = flagString(cmd, "save-to")
+	}
+	if path == "" {
+		data, err := settingsJSON(m)
+		if err != nil {
+			return err
+		}
+		_, err = cmd.OutOrStdout().Write(data)
+		return err
+	}
+	if err := saveConfig(m, path); err != nil {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "Configuration saved to %s\n", path)
 	return nil
 }
 
-func showConfigurationDescription(machine *enigoma.Enigma, cmd *cobra.Command) {
-	fmt.Fprintf(cmd.OutOrStdout(), "Configuration Description:\n")
-	fmt.Fprintf(cmd.OutOrStdout(), "  Alphabet Size: %d characters\n", machine.GetAlphabetSize())
-	fmt.Fprintf(cmd.OutOrStdout(), "  Rotors: %d\n", machine.GetRotorCount())
-	fmt.Fprintf(cmd.OutOrStdout(), "  Plugboard Pairs: %d\n", machine.GetPlugboardPairCount())
-	fmt.Fprintf(cmd.OutOrStdout(), "  Current Rotor Positions: %v\n", machine.GetCurrentRotorPositions())
-	fmt.Fprintf(cmd.OutOrStdout(), "\n")
+func keygenRandom(cmd *cobra.Command) (*enigoma.Machine, error) {
+	chars, err := alphabetFromName(flagString(cmd, "alphabet"), "")
+	if err != nil {
+		return nil, err
+	}
+	counts, err := securityCounts(flagString(cmd, "security"))
+	if err != nil {
+		return nil, err
+	}
+	if n, _ := cmd.Flags().GetInt("rotors"); n > 0 {
+		counts[0] = n
+	}
+	if n, _ := cmd.Flags().GetInt("plugboard-pairs"); n > 0 {
+		counts[1] = n
+	}
+	return enigoma.New(enigoma.WithAlphabet(chars), enigoma.WithRandomComponents(counts[0], counts[1]))
 }
 
-func showConfigurationStats(machine *enigoma.Enigma, cmd *cobra.Command) {
-	alphabetSize := machine.GetAlphabetSize()
-	rotorCount := machine.GetRotorCount()
-	plugboardPairs := machine.GetPlugboardPairCount()
-
-	// Calculate approximate keyspace (simplified calculation)
-	rotorCombinations := calculateFactorial(rotorCount)
-	rotorPositions := calculatePower(alphabetSize, rotorCount)
-	plugboardCombinations := calculatePlugboardCombinations(alphabetSize, plugboardPairs)
-
-	fmt.Fprintf(cmd.OutOrStdout(), "Configuration Statistics:\n")
-	fmt.Fprintf(cmd.OutOrStdout(), "  Rotor Combinations: ~%g\n", float64(rotorCombinations))
-	fmt.Fprintf(cmd.OutOrStdout(), "  Rotor Position Combinations: %d\n", rotorPositions)
-	fmt.Fprintf(cmd.OutOrStdout(), "  Plugboard Combinations: ~%g\n", float64(plugboardCombinations))
-	fmt.Fprintf(cmd.OutOrStdout(), "  Approximate Total Keyspace: ~%g\n",
-		float64(rotorCombinations)*float64(rotorPositions)*float64(plugboardCombinations))
-	fmt.Fprintf(cmd.OutOrStdout(), "\n")
+func randomPositions(m *enigoma.Machine, intN func(int) int) string {
+	alph := []rune(m.Alphabet())
+	pos := make([]rune, len([]rune(m.Positions())))
+	for i := range pos {
+		pos[i] = alph[intN(len(alph))]
+	}
+	return string(pos)
 }
 
-func calculateFactorial(n int) int64 {
-	if n <= 1 {
-		return 1
+func cryptoIntN(n int) int {
+	v, err := rand.Int(rand.Reader, big.NewInt(int64(n)))
+	if err != nil {
+		panic(fmt.Sprintf("crypto/rand failed: %v", err))
 	}
-	result := int64(1)
-	for i := 2; i <= n; i++ {
-		result *= int64(i)
-	}
-	return result
+	return int(v.Int64())
 }
 
-func calculatePower(base, exp int) int {
-	if exp == 0 {
-		return 1
+// describeMachine prints a human-readable summary of a machine.
+func describeMachine(cmd *cobra.Command, m *enigoma.Machine) {
+	s := m.Settings()
+	w := cmd.OutOrStdout()
+	names := make([]string, len(s.Rotors))
+	rings := make([]string, len(s.Rotors))
+	for i, r := range s.Rotors {
+		names[i] = r.Name
+		rings[i] = r.Ring
 	}
-	result := 1
-	for i := 0; i < exp; i++ {
-		result *= base
+	fmt.Fprintf(w, "Alphabet:  %d characters\n", len([]rune(s.Alphabet)))
+	fmt.Fprintf(w, "Rotors:    %s\n", strings.Join(names, " "))
+	fmt.Fprintf(w, "Positions: %s\n", m.Positions())
+	fmt.Fprintf(w, "Rings:     %s\n", strings.Join(rings, ""))
+	fmt.Fprintf(w, "Reflector: %s\n", s.Reflector.Name)
+	if s.Plugboard == "" {
+		fmt.Fprintln(w, "Plugboard: (none)")
+	} else {
+		fmt.Fprintf(w, "Plugboard: %s\n", s.Plugboard)
 	}
-	return result
-}
-
-func calculatePlugboardCombinations(alphabetSize, pairs int) int64 {
-	if pairs == 0 {
-		return 1
-	}
-	// Simplified calculation: C(n,2k) for k pairs from n characters
-	// This is a rough approximation
-	available := alphabetSize
-	combinations := int64(1)
-	for i := 0; i < pairs; i++ {
-		combinations *= int64(available * (available - 1) / 2)
-		available -= 2
-	}
-	return combinations
-}
-
-func writeStringToFile(content, filename string) error {
-	return os.WriteFile(filename, []byte(content), 0600)
-}
-
-func setSeededRotorPositions(machine *enigoma.Enigma, seed int64) error {
-	rng := mrand.New(mrand.NewSource(seed)) // #nosec G404
-	positions := make([]int, machine.GetRotorCount())
-	for i := range positions {
-		positions[i] = rng.Intn(machine.GetAlphabetSize())
-	}
-	return machine.SetRotorPositions(positions)
 }

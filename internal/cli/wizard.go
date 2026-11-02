@@ -13,28 +13,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var wizardCmd = &cobra.Command{
-	Use:   "wizard",
-	Short: "Interactive wizard for beginners",
-	Long: `Interactive wizard to guide you through encrypting or decrypting text.
-
-This wizard will ask you simple questions and generate the appropriate
-enigoma command for you. Perfect for beginners!
-
-The wizard will:
-• Help you choose between encryption and decryption
-• Guide you through providing input text
-• Suggest the best configuration approach
-• Generate and execute the appropriate command
-• Save configuration files for later use
+func newWizardCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "wizard",
+		Short: "Interactive wizard for beginners",
+		Long: `Interactive wizard that asks a few questions, then runs the matching
+encrypt or decrypt command. Encryption always saves a configuration file so
+the text can be decrypted later.
 
 Example:
   enigoma wizard`,
-	RunE: runWizard,
-}
-
-func init() {
-	// Add wizard to root command in root.go
+		RunE: runWizard,
+	}
 }
 
 func runWizard(cmd *cobra.Command, args []string) error {
@@ -158,9 +148,9 @@ func runEncryptWizard(reader *bufio.Reader) error {
 	// Execute command
 	fmt.Printf("\n🚀 Executing command: enigoma %s\n\n", strings.Join(cmdArgs, " "))
 
-	// Create and execute the encrypt command
-	encryptCmd.SetArgs(cmdArgs[1:]) // Remove 'encrypt' from args
-	err = encryptCmd.Execute()
+	encrypt := newRootCmd()
+	encrypt.SetArgs(cmdArgs)
+	err = encrypt.Execute()
 	if err != nil {
 		return fmt.Errorf("encryption failed: %w", err)
 	}
@@ -246,9 +236,9 @@ func runDecryptWizard(reader *bufio.Reader) error {
 	// Execute command
 	fmt.Printf("\n🚀 Executing command: enigoma %s\n\n", strings.Join(cmdArgs, " "))
 
-	// Create and execute the decrypt command
-	decryptCmd.SetArgs(cmdArgs[1:]) // Remove 'decrypt' from args
-	err = decryptCmd.Execute()
+	decrypt := newRootCmd()
+	decrypt.SetArgs(cmdArgs)
+	err = decrypt.Execute()
 	if err != nil {
 		return fmt.Errorf("decryption failed: %w", err)
 	}
@@ -258,35 +248,30 @@ func runDecryptWizard(reader *bufio.Reader) error {
 }
 
 func askPreset(reader *bufio.Reader) string {
-	fmt.Println("\n🎨 Choose a historical preset:")
-	fmt.Println("1) classic - Traditional 3-rotor Enigma (low security)")
-	fmt.Println("2) m3 - Historically accurate Enigma M3")
-	fmt.Println("3) m4 - Historically accurate Naval Enigma M4")
-	fmt.Println("4) high - High security (8 rotors, 15 plugboard pairs)")
-	fmt.Println("5) extreme - Maximum security (12 rotors, 20 plugboard pairs)")
-	fmt.Print("\nEnter your choice (1-5): ")
+	fmt.Println("\n🎨 Choose a preset:")
+	fmt.Println("1) m3 - Historical Enigma M3 (rotors I-II-III, reflector B)")
+	fmt.Println("2) m4 - Historical naval Enigma M4")
+	fmt.Println("3) high - Random machine, 8 rotors, 15 plugboard pairs")
+	fmt.Println("4) extreme - Random machine, 12 rotors, 20 plugboard pairs")
+	fmt.Print("\nEnter your choice (1-4): ")
 
 	choice, err := reader.ReadString('\n')
 	if err != nil {
-		fmt.Println("Error reading input, defaulting to classic")
-		return "classic"
-	}
-
-	choice = strings.TrimSpace(choice)
-	switch choice {
-	case "1":
-		return "classic"
-	case "2":
+		fmt.Println("Error reading input, defaulting to m3")
 		return "m3"
-	case "3":
+	}
+	switch strings.TrimSpace(choice) {
+	case "1":
+		return "m3"
+	case "2":
 		return "m4"
-	case "4":
+	case "3":
 		return "high"
-	case "5":
+	case "4":
 		return "extreme"
 	default:
-		fmt.Println("Invalid choice, defaulting to classic")
-		return "classic"
+		fmt.Println("Invalid choice, defaulting to m3")
+		return "m3"
 	}
 }
 
@@ -412,7 +397,7 @@ func getWizardSecurityLevel(reader *bufio.Reader) (string, error) {
 func getWizardApproach(reader *bufio.Reader) (string, error) {
 	fmt.Println("\n⚙️  Which approach would you prefer?")
 	fmt.Println("1) 🎯 Auto-config (recommended) - automatically detect the best settings")
-	fmt.Println("2) 🎨 Historical preset - use classic Enigma machine settings")
+	fmt.Println("2) 🎨 Preset - historical M3/M4 or a large random machine")
 	fmt.Println("3) 🔧 Custom settings - choose alphabet and security level manually")
 	fmt.Print("\nEnter your choice (1, 2, or 3): ")
 

@@ -11,45 +11,48 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "enigoma",
-	Short: "A highly customizable, Unicode-capable Enigma machine implementation",
-	Long: `enigoma is a Go library and CLI tool that simulates the famous Enigma machine 
-used during World War II, with modern enhancements including Unicode support,
-configurable complexity, and modular design.
+// newRootCmd builds a fresh command tree. Tests use it to avoid shared flag state.
+func newRootCmd() *cobra.Command {
+	root := &cobra.Command{
+		Use:   "enigoma",
+		Short: "A historically accurate, Unicode-capable Enigma machine",
+		Long: `enigoma is a Go library and CLI that simulates the Enigma machine used in
+World War II, with historically accurate stepping, extensible alphabets and an
+interactive terminal visualizer.
 
 Examples:
-  enigoma encrypt --text "Hello World" --preset classic
-  enigoma decrypt --file encrypted.txt --config my-enigoma.json
-  enigoma keygen --security high --alphabet latin --output my-key.json
+  enigoma encrypt --text "Hello World!" --auto-config my-key.json
+  enigoma decrypt --text "CIPHERTEXT" --config my-key.json
+  enigoma encrypt --text "HELLO" --preset m3 --positions ADU
+  enigoma keygen --security high --output my-key.json
   enigoma preset --list`,
-	Version: enigoma.GetVersion(),
+		Version:       enigoma.GetVersion(),
+		SilenceUsage:  true,
+		SilenceErrors: true,
+	}
+	root.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output (to stderr)")
+	root.PersistentFlags().StringP("config", "c", "", "Configuration file path")
+
+	root.AddCommand(
+		newEncryptCmd(),
+		newDecryptCmd(),
+		newKeygenCmd(),
+		newPresetCmd(),
+		newConfigCmd(),
+		newWizardCmd(),
+		newVersionCmd(),
+	)
+	return root
 }
 
-// Execute runs the root command and handles errors.
+// Execute runs the CLI.
 func Execute() error {
-	return rootCmd.Execute()
+	return newRootCmd().Execute()
 }
 
-func init() {
-	// Add subcommands
-	rootCmd.AddCommand(encryptCmd)
-	rootCmd.AddCommand(decryptCmd)
-	rootCmd.AddCommand(keygenCmd)
-	rootCmd.AddCommand(presetCmd)
-	rootCmd.AddCommand(configCmd)
-	rootCmd.AddCommand(wizardCmd)
-	rootCmd.AddCommand(versionCmd)
-
-	// Global flags
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
-	rootCmd.PersistentFlags().StringP("config", "c", "", "Configuration file path")
-}
-
-// setupVerbose configures verbose logging if enabled.
-func setupVerbose(cmd *cobra.Command) {
-	verbose, _ := cmd.Flags().GetBool("verbose")
-	if verbose {
-		fmt.Println("Verbose mode enabled")
+// verbosef prints to stderr when --verbose is set, keeping stdout clean for output.
+func verbosef(cmd *cobra.Command, format string, args ...any) {
+	if v, _ := cmd.Flags().GetBool("verbose"); v {
+		fmt.Fprintf(cmd.ErrOrStderr(), format, args...)
 	}
 }
