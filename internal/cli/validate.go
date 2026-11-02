@@ -17,7 +17,7 @@ func suggestConfigFixes(err error) string {
 		tips = append(tips, "check the file path")
 	case strings.Contains(msg, "schema v1"):
 		tips = append(tips,
-			"old keys cannot be used: the stepping fix in 0.6 changes the cipher",
+			"old keys cannot be used: the stepping fix in 0.7 changes the cipher",
 			"generate a new key: enigoma keygen --output new-key.json",
 			"or encrypt with: enigoma encrypt --text \"...\" --auto-config new-key.json")
 	case strings.Contains(msg, "parse settings"):

@@ -13,7 +13,7 @@ import (
 const SchemaVersion = 2
 
 // errSchemaV1 is returned for configuration files written by enigoma 0.5 and earlier.
-var errSchemaV1 = errors.New("config schema v1 (enigoma ≤ 0.5) is not supported; regenerate the key with enigoma ≥ 0.6")
+var errSchemaV1 = errors.New("config schema v1 (enigoma ≤ 0.6) is not supported; regenerate the key with enigoma ≥ 0.7")
 
 // RotorSpec describes a rotor. Letters (notches, ring, position) are characters
 // of the machine's alphabet; an empty Ring or Position means the first letter.

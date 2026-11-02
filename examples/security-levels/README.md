@@ -13,7 +13,7 @@ This directory contains example configurations demonstrating different security 
 
 ```bash
 # Example usage
-enigoma encrypt --text "HELLO WORLD" --config examples/security-levels/classic-low-security.json
+enigoma encrypt --text "HELLOWORLD" --config examples/security-levels/classic-low-security.json
 ```
 
 ### 🔒 `simple-medium-security.json` - Balanced Security
@@ -37,7 +37,7 @@ enigoma encrypt --file document.txt --config examples/security-levels/simple-med
 
 ```bash
 # Example usage
-enigoma encrypt --text "CONFIDENTIAL DATA" --config examples/security-levels/high-security.json
+enigoma encrypt --text "CONFIDENTIALDATA" --config examples/security-levels/high-security.json
 ```
 
 ### 🔒🔒🔒 `extreme-key.json` - Maximum Complexity
@@ -49,7 +49,7 @@ enigoma encrypt --text "CONFIDENTIAL DATA" --config examples/security-levels/hig
 
 ```bash
 # Example usage
-enigoma encrypt --text "TOP SECRET" --config examples/security-levels/extreme-key.json
+enigoma encrypt --text "TOPSECRET" --config examples/security-levels/extreme-key.json
 ```
 
 ## Security Level Comparison
@@ -85,7 +85,7 @@ enigoma config --validate examples/security-levels/high-security.json
 enigoma config --test examples/security-levels/high-security.json --text "TEST MESSAGE"
 
 # Show detailed configuration info
-enigoma config --show examples/security-levels/extreme-key.json --detailed
+enigoma config --show examples/security-levels/extreme-key.json
 ```
 
 ## Historical Context

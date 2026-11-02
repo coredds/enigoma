@@ -1,183 +1,95 @@
 {
+  "schema_version": 2,
   "alphabet": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-  "rotor_specs": [
+  "rotors": [
     {
-      "id": "R1",
-      "forward_mapping": "wCS9V5jXoRv8YpNsmkM3bZB7tDglJHLExrzQdaW2qTcKGynA1F04fiOhuUeP6I",
-      "notches": [
-        109
-      ],
-      "position": 3,
-      "ring_setting": 31
+      "name": "R1",
+      "wiring": "PN1svjB6aV9inJIxlogy3pOk0LK5GcDteEFmMU4C87ZbWYST2uAHwdfhQXrRqz",
+      "notches": "G1",
+      "ring": "Q",
+      "position": "7"
     },
     {
-      "id": "R2",
-      "forward_mapping": "vPCQjq7ixBpUF1l52of498VLM0DEGcytWawgkNS6hOmzJebI3XTARrYHnZdsuK",
-      "notches": [
-        83
-      ],
-      "position": 46,
-      "ring_setting": 9
+      "name": "R2",
+      "wiring": "I1rB2GoSvJu7jyAk4eNE5HZndlif3Uh6PzbRXmCaqWOw9YsDV8KtLcTMQp0xFg",
+      "notches": "rXf",
+      "ring": "V",
+      "position": "H"
     },
     {
-      "id": "R3",
-      "forward_mapping": "Lc52ImnZke7WHYuBNowGgJ4bqdiTy6j8saPXFhD0pMAzCrKtvlOUQ9V3R1ESfx",
-      "notches": [
-        88,
-        68,
-        54
-      ],
-      "position": 29,
-      "ring_setting": 5
+      "name": "R3",
+      "wiring": "rHAapKvoYOiJQkVW2P60wtRgbuXBq1sd34EUfz798lhN5jyZDIGeSmTCcnxFLM",
+      "notches": "HX",
+      "ring": "2",
+      "position": "W"
     },
     {
-      "id": "R4",
-      "forward_mapping": "oI5OeNiGcPFyr2dwgmt0zVsMkpSYZaA7j3XC9qThB6Kv1HWxQJElfunU48RLbD",
-      "notches": [
-        86
-      ],
-      "position": 53,
-      "ring_setting": 15
+      "name": "R4",
+      "wiring": "xr7avmPALXfIiD4TNZMgSo2U5H18OnVb9CkszKy6WeFEq0lGwd3YpcBtRQjJuh",
+      "notches": "xS",
+      "ring": "Q",
+      "position": "C"
     },
     {
-      "id": "R5",
-      "forward_mapping": "GyHoIuhfSsX8nL4B0Ud5KgEew9aYjQCzDPiTlx2bkMrcmOZN3Jq6vAtRF1WV7p",
-      "notches": [
-        107
-      ],
-      "position": 7,
-      "ring_setting": 33
+      "name": "R5",
+      "wiring": "DvKpbBulI7ykmrRQ01a5C2ULitM6N3wYTV8gHJqnXGzPZefdSOWjEch9soxFA4",
+      "notches": "4",
+      "ring": "s",
+      "position": "v"
     },
     {
-      "id": "R6",
-      "forward_mapping": "u8cUPBnSAVmjpQM7Tow1NkIhv3OWGzFfy0q2rELbClRXHs9gZatidK65eD4YJx",
-      "notches": [
-        117
-      ],
-      "position": 27,
-      "ring_setting": 48
+      "name": "R6",
+      "wiring": "ibqt3e1lpmoWjUSDHQy4dgc720MhzNaGxKY5PVCsLBFAT8wrOXfZnIkvJ6R9uE",
+      "notches": "K8s",
+      "ring": "K",
+      "position": "h"
     },
     {
-      "id": "R7",
-      "forward_mapping": "URyOGMaVk1IYJrFu0hv4Ab9pB7zTdsSZlwCeKWNDPQiExo86q53mfgLcnj2HtX",
-      "notches": [
-        86
-      ],
-      "position": 37,
-      "ring_setting": 61
+      "name": "R7",
+      "wiring": "GcCloYXQKMzOw0FLVkpi49qWBshu2EjaZgymTfNJ5RHD3tIUdP1xn6vA78bSre",
+      "notches": "6nz",
+      "ring": "n",
+      "position": "i"
     },
     {
-      "id": "R8",
-      "forward_mapping": "geJlKF34So6mycEaB8kWUrxs2XfNpPhtIHRzq95AOLjYd0QuVTMn7w1iDbZCvG",
-      "notches": [
-        99,
-        70,
-        67
-      ],
-      "position": 41,
-      "ring_setting": 14
+      "name": "R8",
+      "wiring": "Sn32yOq6bGdjfHkIl9iPULtWMFhcBERgJaZpwDemoN40xz7CKvuArTQY581XsV",
+      "notches": "jrm",
+      "ring": "2",
+      "position": "Y"
     },
     {
-      "id": "R9",
-      "forward_mapping": "wX5TydrvGn7BFU3NRsAZY1VO2foIaibqQDtHP9zSK6x0pJh4LEkMc8mWlegCuj",
-      "notches": [
-        50,
-        104,
-        110
-      ],
-      "position": 22,
-      "ring_setting": 40
+      "name": "R9",
+      "wiring": "158kfdelcYR96tjiEICPxnsUXQmh7GzSZBbVqpJa4MHON2y0TWwouKv3rADFLg",
+      "notches": "ZUu",
+      "ring": "P",
+      "position": "B"
     },
     {
-      "id": "R10",
-      "forward_mapping": "AaUZemdkNH5XP9ryp7wVciRtzlQnTq2hob3JuDs0GSFgO8MKE1IY4WfCBxj6vL",
-      "notches": [
-        108,
-        70,
-        114
-      ],
-      "position": 45,
-      "ring_setting": 41
+      "name": "R10",
+      "wiring": "C8Sy1GtWQdFzj0vYRNTk6LwEosX4aZHxmerq7ul2KJ3BUnADgpifVMI95hOPcb",
+      "notches": "vX",
+      "ring": "R",
+      "position": "z"
     },
     {
-      "id": "R11",
-      "forward_mapping": "CpgzFaGeTXQHyvtP8EONmwAl3cU4qiS9jfBRM0xuLZ6KWdbkr2DYI7JonsV51h",
-      "notches": [
-        111,
-        80,
-        68
-      ],
-      "position": 57,
-      "ring_setting": 26
+      "name": "R11",
+      "wiring": "TAd5pkCOb9meWgZ06JuFfPy8jvhoN3KcnDRXwL1VHIEYaqM27tQzsi4GlxBrSU",
+      "notches": "4d",
+      "ring": "D",
+      "position": "i"
     },
     {
-      "id": "R12",
-      "forward_mapping": "j2edhODwzkKYtvuioIrgpxly7N5TcV6ACJqUSs8E130Qn9LmHaMZGFBfXPR4bW",
-      "notches": [
-        74
-      ],
-      "position": 8,
-      "ring_setting": 42
+      "name": "R12",
+      "wiring": "t8ECAQMnZwqSTY4vGK7gbOyIXlcx02dJP3RaUBeFp1HsLWuzVkmo6rfiDNj59h",
+      "notches": "25",
+      "ring": "a",
+      "position": "g"
     }
   ],
-  "reflector_spec": {
-    "id": "UKW",
-    "mapping": "HKyRIOmqpClL9VzxU04t1BnX5Sk3PdGDsNZYjvoTugfrwaQA6Mc87hWJebiF2E"
+  "reflector": {
+    "name": "UKW",
+    "wiring": "vQbnTHxuNDclM9erZ5zhoWC8pj1gU4SYLtVGw2AyEqRJsPmBk3KOfFiX70a6dI"
   },
-  "plugboard_pairs": {
-    "0": "O",
-    "2": "q",
-    "3": "C",
-    "4": "V",
-    "5": "z",
-    "8": "h",
-    "C": "3",
-    "E": "b",
-    "F": "p",
-    "G": "m",
-    "H": "T",
-    "I": "J",
-    "J": "I",
-    "K": "j",
-    "L": "i",
-    "N": "X",
-    "O": "0",
-    "Q": "t",
-    "T": "H",
-    "U": "n",
-    "V": "4",
-    "X": "N",
-    "Y": "e",
-    "b": "E",
-    "e": "Y",
-    "f": "x",
-    "g": "v",
-    "h": "8",
-    "i": "L",
-    "j": "K",
-    "m": "G",
-    "n": "U",
-    "p": "F",
-    "q": "2",
-    "s": "u",
-    "t": "Q",
-    "u": "s",
-    "v": "g",
-    "x": "f",
-    "z": "5"
-  },
-  "current_rotor_positions": [
-    3,
-    46,
-    29,
-    53,
-    7,
-    27,
-    37,
-    41,
-    22,
-    45,
-    57,
-    8
-  ]
+  "plugboard": "0D 1p 2G 4n 6E 8d Fv Mx Nb Os Pu QY Sc Uo Wq Xt fk gw jy lr"
 }

@@ -29,7 +29,7 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 ```bash
 # Example usage
-enigoma encrypt --text "Γεια σας κόσμε!" --config examples/languages/greek-simple.json
+enigoma encrypt --text "ΚαλημεραΚοσμε" --config examples/languages/greek-simple.json
 ```
 
 **Supported Characters**:
@@ -45,7 +45,7 @@ enigoma encrypt --text "Γεια σας κόσμε!" --config examples/languages
 
 ```bash
 # Example usage  
-enigoma encrypt --text "Password123!" --config examples/languages/mixed-alphabet-extreme.json
+enigoma encrypt --text "Password123" --config examples/languages/mixed-alphabet-extreme.json
 ```
 
 ## Creating Language-Specific Configurations
@@ -54,9 +54,9 @@ enigoma encrypt --text "Password123!" --config examples/languages/mixed-alphabet
 
 ```go
 // Programmatic creation
-machine, err := enigma.New(
-    enigma.WithAlphabet(enigoma.AlphabetPortuguese),
-    enigma.WithRandomSettings(enigma.Medium),
+machine, err := enigoma.New(
+    enigoma.WithAlphabet(enigoma.AlphabetPortuguese),
+    enigoma.WithRandomComponents(5, 8), // 5 rotors, 8 plug pairs
 )
 
 // CLI generation
@@ -87,7 +87,7 @@ enigoma keygen --security medium --output custom-lang.json
 | English | `AlphabetLatinUpper` | 26 | Historical simulation |
 | Portuguese | `AlphabetPortuguese` | 88 | Full accent support |
 | Greek | `AlphabetGreek` | 48 | Academic texts |
-| ASCII | `AlphabetASCIIPrintable` | 95 | Programming, mixed content |
+| ASCII | `AlphabetASCIIPrintable` | 96 | Programming, mixed content |
 | Numbers | `AlphabetDigits` | 10 | Numeric data only |
 
 ## Example Text Samples
@@ -125,7 +125,7 @@ enigoma encrypt --text "Olá mundo!" --config examples/languages/portuguese-basi
 enigoma decrypt --config examples/languages/portuguese-basic.json
 
 # Show character mappings
-enigoma config --show examples/languages/greek-simple.json --detailed
+enigoma config --show examples/languages/greek-simple.json
 ```
 
 ## Common Issues and Solutions

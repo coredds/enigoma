@@ -37,10 +37,10 @@ enigoma encrypt --file confidential-report.pdf --config examples/use-cases/secur
 
 ```bash
 # Historical encryption simulation
-enigoma encrypt --text "WEATHER REPORT CLOUDY" --config examples/use-cases/historical-simulation.json
+enigoma encrypt --text "WEATHERREPORTCLOUDY" --config examples/use-cases/historical-simulation.json
 
 # Educational demonstration
-enigoma config --show examples/use-cases/historical-simulation.json --detailed
+enigoma config --show examples/use-cases/historical-simulation.json
 ```
 
 ## Detailed Use Case Scenarios
@@ -98,7 +98,7 @@ enigoma encrypt --text "ENIGMA" --config examples/use-cases/historical-simulatio
 enigoma config --test examples/use-cases/historical-simulation.json --text "AAAAA"
 
 # Compare with modern security
-enigoma preset --describe classic
+enigoma preset --describe m3
 enigoma preset --describe extreme
 ```
 
@@ -133,7 +133,7 @@ enigoma keygen --security medium --output "weekly-key-$(date +%Y-W%U).json"
 # Generate test configurations for research
 for level in low medium high extreme; do
     enigoma keygen --security $level --output "research-${level}.json"
-    enigoma config --validate "research-${level}.json" --stats
+    enigoma config --validate "research-${level}.json"
 done
 ```
 

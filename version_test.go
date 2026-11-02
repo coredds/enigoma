@@ -45,3 +45,9 @@ func TestVersionConstant(t *testing.T) {
 		}
 	}
 }
+
+func TestVersion_Release(t *testing.T) {
+	if Version != "0.7.0" {
+		t.Errorf("Version = %s, want 0.7.0", Version)
+	}
+}

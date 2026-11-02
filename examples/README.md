@@ -22,7 +22,7 @@ Advanced configuration examples demonstrating custom component settings and comp
 
 ```bash
 # Encrypt with a specific example
-enigoma encrypt --text "Your message" --config examples/security-levels/high-security.json
+enigoma encrypt --text "YOURMESSAGE" --config examples/security-levels/high-security.json
 
 # Decrypt using the same configuration
 enigoma decrypt --text "ENCRYPTED_TEXT" --config examples/security-levels/high-security.json
@@ -47,14 +47,18 @@ func main() {
         log.Fatal(err)
     }
     
-    // Create machine from configuration
-    machine, err := enigoma.NewFromJSON(string(data))
+    // Parse the configuration and build the machine
+    settings, err := enigoma.ParseSettings(data)
+    if err != nil {
+        log.Fatal(err)
+    }
+    machine, err := enigoma.NewFromSettings(settings)
     if err != nil {
         log.Fatal(err)
     }
     
     // Use the machine
-    encrypted, _ := machine.Encrypt("Hello World!")
+    encrypted, _ := machine.Encrypt("HELLOWORLD")
     fmt.Printf("Encrypted: %s\n", encrypted)
 }
 ```
@@ -65,27 +69,24 @@ All example configurations follow this JSON structure:
 
 ```json
 {
-  "alphabet": "string of characters used by the machine",
-  "rotor_specs": [
+  "schema_version": 2,
+  "alphabet": "characters the machine uses (unique, even count)",
+  "rotors": [
     {
-      "id": "unique rotor identifier",
-      "forward_mapping": "character mapping string",
-      "notches": [positions where rotor advances next rotor],
-      "position": "initial position",
-      "ring_setting": "ring offset setting"
+      "name": "rotor name",
+      "wiring": "permutation of the alphabet",
+      "notches": "letters at which the rotor turns over its left neighbour",
+      "ring": "ring setting letter",
+      "position": "starting position letter",
+      "fixed": false
     }
   ],
-  "reflector_spec": {
-    "id": "reflector identifier", 
-    "mapping": "reflector character mapping"
-  },
-  "plugboard_pairs": {
-    "A": "Z",
-    "Z": "A"
-  },
-  "current_rotor_positions": [array of current rotor positions]
+  "reflector": {"name": "reflector name", "wiring": "reciprocal mapping, no letter to itself"},
+  "plugboard": "AB CD"
 }
 ```
+
+See [`schemas/config.v2.schema.json`](../schemas/config.v2.schema.json) for the full schema.
 
 ## Customizing Examples
 
@@ -99,7 +100,7 @@ You can use these examples as starting points for your own configurations:
 
 ```bash
 # Validate your custom configuration
-enigoma config --validate my-custom-config.json --detailed
+enigoma config --validate my-custom-config.json
 
 # Test with sample text
 enigoma config --test my-custom-config.json --text "Test message"
@@ -107,7 +108,7 @@ enigoma config --test my-custom-config.json --text "Test message"
 
 ## Security Recommendations
 
-- **For learning/education**: Use `classic` or `simple` configurations
+- **For learning/education**: Use the `m3`/`m4` presets or `classic-low-security.json`
 - **For file protection**: Use `medium` or `high` security examples  
 - **For sensitive data**: Use `extreme` security with custom modifications
 - **For production systems**: ⚠️ Use modern cryptography (AES-GCM, ChaCha20-Poly1305)

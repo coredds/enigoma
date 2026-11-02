@@ -1,49 +1,32 @@
 {
+  "schema_version": 2,
   "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "rotor_specs": [
+  "rotors": [
     {
-      "id": "R1",
-      "forward_mapping": "VSPTURAXQWEOBZMLFNIGJKYCDH",
-      "notches": [
-        80
-      ],
-      "position": 2,
-      "ring_setting": 16
+      "name": "R1",
+      "wiring": "MOQPGKDIZETRYJFHNWLBUCXVAS",
+      "notches": "SN",
+      "ring": "J",
+      "position": "S"
     },
     {
-      "id": "R2",
-      "forward_mapping": "ODZNTVAYSHFCMJLQKXWPIERGUB",
-      "notches": [
-        67
-      ],
-      "position": 24,
-      "ring_setting": 16
+      "name": "R2",
+      "wiring": "PIXNBGKMQFJRYWEZVDOTHACSLU",
+      "notches": "M",
+      "ring": "U",
+      "position": "E"
     },
     {
-      "id": "R3",
-      "forward_mapping": "ZCDUJRBLOPTVHQYIXGFWKESMNA",
-      "notches": [
-        86,
-        65,
-        85
-      ],
-      "position": 11,
-      "ring_setting": 5
+      "name": "R3",
+      "wiring": "OQSZPXLRWHYKFTENMDBUACJGIV",
+      "notches": "AW",
+      "ring": "P",
+      "position": "P"
     }
   ],
-  "reflector_spec": {
-    "id": "UKW",
-    "mapping": "CNAORXVJPHSWYBDIUEKZQGLFMT"
+  "reflector": {
+    "name": "UKW",
+    "wiring": "TMJKPUISGCDZBRYEWNHAFXQVOL"
   },
-  "plugboard_pairs": {
-    "E": "R",
-    "R": "E",
-    "U": "V",
-    "V": "U"
-  },
-  "current_rotor_positions": [
-    2,
-    24,
-    11
-  ]
+  "plugboard": "EQ OU"
 }

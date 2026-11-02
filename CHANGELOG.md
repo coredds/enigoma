@@ -5,6 +5,99 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - Unreleased
+
+This release fixes rotor stepping and replaces the public API and the
+configuration format. **Ciphertext and configuration files from 0.6 and earlier
+are not compatible.**
+
+### Fixed
+- **Rotor stepping**: turnover was decided after the right rotor had already
+  moved, so the middle and left rotors stepped one letter early and the
+  double-step was wrong (ADU went to BEV instead of ADV → AEW → BFX). Output was
+  only correct until the first turnover. Machines now match historical Enigma
+  I/M3/M4 behaviour, verified against the 1941 Operation Barbarossa message.
+  Old ciphertexts longer than the first turnover will not decrypt.
+- **M4 thin rotor**: Beta/Gamma never step (they could before).
+- **ASCII alphabet**: `AlphabetASCIIPrintable` had 95 characters (odd), so no
+  machine could be built with it (`--alphabet ascii` always failed). It now
+  includes newline (96 characters).
+- **Unrecoverable CLI output**: `encrypt` with a random preset or random machine
+  printed ciphertext without saving the machine. It now refuses unless
+  `--save-config` or `--auto-config` is given; `decrypt` refuses random sources.
+- `--reset` (a no-op) removed; documented example commands that could not run
+  now work.
+
+### Added
+- `Machine.Press(r)` returns a `Trace` of one keypress: rotor windows before and
+  after stepping and every signal hop (plugboard, rotors, reflector, back).
+- `enigoma tui`: interactive terminal visualizer of the machine.
+- Public spec types usable outside the module: `RotorSpec`, `ReflectorSpec`,
+  `Settings` (the old options used `internal/` types and could not be called).
+- Historical catalogue: `HistoricalRotor("I".."VIII", "Beta", "Gamma")`,
+  `HistoricalReflector("A", "B", "C", "B-Thin", "C-Thin")`.
+- Letter positions and rings: `WithPositions("ADU")`, `WithRings("BUL")`,
+  `Machine.Positions()`, `Machine.SetPositions("ADU")`.
+- `*CharError` with the offending rune and its rune offset.
+- Configuration schema v2 (`schemas/config.v2.schema.json`), string-based and
+  readable.
+
+### Changed
+- `Enigma` is now `Machine`; alphabets are `string` constants.
+- CLI: `--positions`, `--rings` and `--plugboard "AB CD"` replace `--rotors 1,2,3`
+  and `--plugboard A:Z,B:Y`; presets are `m3`, `m4`, `low`, `medium`, `high`,
+  `extreme`. `--verbose` writes to stderr.
+- Configuration files from 0.6 and earlier (schema v1) are rejected with an
+  explanatory error.
+
+### Migration: library
+
+| 0.6 | 0.7 |
+|---|---|
+| `*enigoma.Enigma` | `*enigoma.Machine` |
+| `NewEnigmaM3()` / `NewEnigmaM4()` | `NewM3(opts...)` / `NewM4(opts...)` |
+| `NewEnigmaClassic()` | `NewM3()` for the historical machine, or `New(WithRandomComponents(3, 2))` |
+| `NewEnigmaSimple(alphabet)` | `New(WithAlphabet(a), WithRandomComponents(5, 8))` |
+| `WithAlphabet([]rune)` | `WithAlphabet(string)` |
+| `WithRandomSettings(Low/Medium/High/Extreme)` | `WithRandomComponents(3,2)` / `(5,8)` / `(8,15)` / `(12,20)` |
+| `SecurityLevel`, `Low`, `Medium`, `High`, `Extreme` | removed; pass rotor and plug-pair counts |
+| `WithRotorConfiguration([]rotor.RotorSpec)` | `WithRotors(specs ...RotorSpec)` |
+| `WithReflectorConfiguration(reflector.ReflectorSpec)` | `WithReflector(ReflectorSpec)` |
+| `WithPlugboardConfiguration(map[rune]rune)` | `WithPlugboard("AB CD")` |
+| `WithCustomComponents(...)` | `WithRotors`, `WithReflector`, `WithPlugboard` |
+| `WithRotorPositions([]int)` | `WithPositions("ADU")` |
+| `WithRandomRotorPositions()` | `WithRandomComponents` randomizes positions; or `SetPositions` |
+| `RotorI`..`RotorVIII`, `RotorBeta`, `RotorGamma`, `Notch*` | `HistoricalRotor(name)` |
+| `ReflectorA`, `ReflectorB`, `ReflectorC`, `ReflectorBThin`, `ReflectorCThin` | `HistoricalReflector(name)` |
+| `GetSettings()` | `Settings()` |
+| `SaveSettingsToJSON()` | `json.Marshal(m.Settings())` |
+| `LoadSettings`, `LoadSettingsFromJSON` | `NewFromSettings(s)` on a new machine |
+| `NewFromJSON(string)` | `ParseSettings([]byte)` + `NewFromSettings` |
+| `EnigmaSettings` | `Settings` |
+| `GetCurrentRotorPositions() []int` | `Positions() string` |
+| `SetRotorPositions([]int) error` | `SetPositions(string) error` |
+| `Reset() error` | `Reset()` |
+| `Clone() (*Enigma, error)` | `Clone() *Machine` |
+| `GetRotorCount()`, `GetPlugboardPairCount()` | `len(m.Settings().Rotors)`, `m.Settings().Plugboard` |
+| `GetAlphabetSize()` | `len([]rune(m.Alphabet()))` |
+| `QuickEncrypt(text, level) (string, string, error)` | `QuickEncrypt(text, rotors, plugPairs) (string, []byte, error)` |
+| `DecryptWithConfig(text, string)` | `DecryptWithConfig(text, []byte)` |
+| `NewFromText(text, level)` | `NewFromText(text, opts...)` |
+
+### Migration: CLI
+
+| 0.6 | 0.7 |
+|---|---|
+| `--preset classic` | `--preset m3` (historical) or `--preset low --save-config key.json` |
+| `--preset simple` | `--preset medium --save-config key.json` |
+| `--rotors 1,5,12` | `--positions BFM` |
+| `--plugboard A:Z,B:Y` | `--plugboard "AZ BY"` |
+| `--reset` | removed (machines always start from their configured positions) |
+| `--preserve-case` | removed (had no effect) |
+| `decrypt --alphabet/--security` | removed: decrypt needs `--config` or `--preset m3\|m4` |
+| `config --detailed`, `keygen --stats`, `preset --verbose` | removed; `config --show` and `keygen --describe` print the full summary |
+| v1 key files | regenerate with `enigoma keygen` or `encrypt --auto-config` |
+
 ## [0.6.0] - 2026-06-15
 
 ### Changed

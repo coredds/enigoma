@@ -1,6 +1,7 @@
 package enigoma_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -53,4 +54,14 @@ func ExampleQuickEncrypt() {
 	plaintext, _ := enigoma.DecryptWithConfig(ciphertext, config)
 	fmt.Println(plaintext)
 	// Output: Meet at dawn.
+}
+
+func ExampleMachine_Settings() {
+	m, _ := enigoma.NewM3(enigoma.WithPositions("QEV"))
+	data, _ := json.Marshal(m.Settings())
+
+	s, _ := enigoma.ParseSettings(data)
+	restored, _ := enigoma.NewFromSettings(s)
+	fmt.Println(restored.Positions())
+	// Output: QEV
 }

@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const v1Message = "config schema v1 (enigoma ≤ 0.5) is not supported; regenerate the key with enigoma ≥ 0.6"
+const v1Message = "config schema v1 (enigoma ≤ 0.6) is not supported; regenerate the key with enigoma ≥ 0.7"
 
 const validV2JSON = `{
   "schema_version": 2,

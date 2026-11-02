@@ -65,7 +65,7 @@ debug_*
 test_output.txt
 
 # enigoma CLI binaries (avoid committing compiled binaries)
-enigoma
+/enigoma
 enigoma.exe
 cmd/enigoma/enigoma
 cmd/enigoma/enigoma.exe
