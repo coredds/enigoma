@@ -55,7 +55,9 @@ func TestModel_Undo(t *testing.T) {
 	md := send(newTestModel(t)(enigoma.NewM3(enigoma.WithPositions("ADU"))), keys("HEL")...)
 	md = send(md, key(tea.KeyBackspace))
 	ref, _ := enigoma.NewM3(enigoma.WithPositions("ADU"))
-	ref.Encrypt("HE")
+	if _, err := ref.Encrypt("HE"); err != nil {
+		t.Fatal(err)
+	}
 	if md.m.Positions() != ref.Positions() {
 		t.Errorf("positions after undo = %s, want %s", md.m.Positions(), ref.Positions())
 	}

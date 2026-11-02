@@ -22,7 +22,7 @@ func readInput(cmd *cobra.Command) (string, error) {
 		return text, nil
 	}
 	if path := flagString(cmd, "file"); path != "" {
-		data, err := os.ReadFile(path)
+		data, err := os.ReadFile(path) // #nosec G304 -- reading the file the user named is the purpose of --file
 		if err != nil {
 			return "", fmt.Errorf("read %s: %w", path, err)
 		}

@@ -53,7 +53,7 @@ func runKeygen(cmd *cobra.Command, _ []string) error {
 
 	if cmd.Flags().Changed("seed") {
 		seed, _ := cmd.Flags().GetInt64("seed")
-		rng := mrand.New(mrand.NewPCG(uint64(seed), 0)) // #nosec G404 -- deterministic by request
+		rng := mrand.New(mrand.NewPCG(uint64(seed), 0)) // #nosec G404 G115 -- deterministic by request; reinterpreting the seed bits is intended
 		if err := m.SetPositions(randomPositions(m, func(n int) int { return rng.IntN(n) })); err != nil {
 			return err
 		}

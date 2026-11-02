@@ -109,7 +109,7 @@ func settingsOptions(s enigoma.Settings) []enigoma.Option {
 // loadSettings reads and parses a configuration file. Errors from
 // ParseSettings (including the schema v1 message) are returned unchanged.
 func loadSettings(path string) (enigoma.Settings, error) {
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(path) // #nosec G304 -- reading the config file the user named is the purpose of --config
 	if err != nil {
 		return enigoma.Settings{}, fmt.Errorf("read config: %w", err)
 	}
