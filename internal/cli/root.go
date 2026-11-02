@@ -39,6 +39,7 @@ Examples:
 		newKeygenCmd(),
 		newPresetCmd(),
 		newConfigCmd(),
+		newTuiCmd(),
 		newWizardCmd(),
 		newVersionCmd(),
 	)

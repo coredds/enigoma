@@ -230,3 +230,17 @@ func TestFilterAlphanumericOnly(t *testing.T) {
 		t.Errorf("got %q", got)
 	}
 }
+
+func TestTuiCmd_RefusesRandom(t *testing.T) {
+	_, err := run(t, "tui", "--preset", "low")
+	want := "tui needs a deterministic machine: use --config FILE or --preset m3|m4"
+	if err == nil || err.Error() != want {
+		t.Errorf("got %v", err)
+	}
+}
+
+func TestTuiCmd_BadPositions(t *testing.T) {
+	if _, err := run(t, "tui", "--positions", "AB"); err == nil {
+		t.Error("--positions AB on the default M3 should fail before starting the UI")
+	}
+}
