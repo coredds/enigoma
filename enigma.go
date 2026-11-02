@@ -132,36 +132,36 @@ func (e *Enigma) processCharacter(inputIdx int) int {
 	return current
 }
 
-// stepRotors implements the Enigma rotor stepping mechanism including double-stepping.
+// stepRotors implements historical Enigma stepping, including the double-step.
+// All notch checks use the positions before any rotor moves. Rotor i steps when
+// rotor i+1 is at a notch, and the pushing rotor steps with it (pawl behaviour),
+// which produces the middle rotor's double-step. Fixed rotors never step and
+// block propagation to their left.
 func (e *Enigma) stepRotors() {
-	if len(e.rotors) == 0 {
+	n := len(e.rotors)
+	right := n - 1
+	for right >= 0 && e.rotors[right].IsFixed() {
+		right--
+	}
+	if right < 0 {
 		return
 	}
-
-	// Check for double-stepping (middle rotor steps twice)
-	// This happens when the middle rotor is at its notch position
-	doubleStep := false
-	if len(e.rotors) >= 2 {
-		middleRotor := e.rotors[len(e.rotors)-2]
-		doubleStep = middleRotor.IsAtNotch()
-	}
-
-	// Always step the rightmost (fastest) rotor
-	e.rotors[len(e.rotors)-1].Step()
-
-	// Step other rotors based on notch positions
-	for i := len(e.rotors) - 2; i >= 0; i-- {
-		nextRotor := e.rotors[i+1]
-
-		// Step if the next rotor is at a notch
-		if nextRotor.IsAtNotch() {
-			e.rotors[i].Step()
-		} else if i == len(e.rotors)-2 && doubleStep {
-			// Double-stepping: middle rotor steps again
-			e.rotors[i].Step()
-		} else {
-			// No more stepping needed
+	step := make([]bool, n)
+	step[right] = true
+	for i := right - 1; i >= 0; i-- {
+		if e.rotors[i].IsFixed() {
 			break
+		}
+		if e.rotors[i+1].IsAtNotch() {
+			step[i] = true
+			if i+1 != right {
+				step[i+1] = true
+			}
+		}
+	}
+	for i, s := range step {
+		if s {
+			e.rotors[i].Step()
 		}
 	}
 }

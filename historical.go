@@ -108,6 +108,7 @@ func NewEnigmaM4() (*Enigma, error) {
 			ID:             "Beta",
 			ForwardMapping: RotorBeta,
 			Notches:        []rune{}, // The thin rotor doesn't step
+			Fixed:          true,
 			Position:       0,
 			RingSetting:    0,
 		},

@@ -443,3 +443,35 @@ func TestToSpec(t *testing.T) {
 		t.Errorf("Spec notches = %v, want [B]", spec.Notches)
 	}
 }
+
+func TestRotor_Fixed(t *testing.T) {
+	alph, _ := alphabet.New([]rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
+	r, err := NewRotor("Beta", alph, "LEYJVCNIXWPBQMDRTAKZGFUHOS", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.IsFixed() {
+		t.Fatal("new rotor should not be fixed")
+	}
+	r.SetFixed(true)
+	if !r.IsFixed() {
+		t.Fatal("SetFixed(true) not applied")
+	}
+	if !r.Clone().IsFixed() {
+		t.Error("Clone dropped fixed flag")
+	}
+	spec, err := ToSpec(r, alph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !spec.Fixed {
+		t.Error("ToSpec dropped fixed flag")
+	}
+	r2, err := CreateFromSpec(spec, alph)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !r2.IsFixed() {
+		t.Error("CreateFromSpec dropped fixed flag")
+	}
+}
