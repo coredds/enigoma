@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/coredds/enigoma"
-	"github.com/coredds/enigoma/internal/alphabet"
 	"github.com/spf13/cobra"
 )
 
@@ -70,9 +69,6 @@ func runEncrypt(cmd *cobra.Command, _ []string) error {
 	original := text
 	text = preprocessInput(cmd, text)
 	autoConfig := flagString(cmd, "auto-config")
-	if autoConfig != "" {
-		text = alphabet.PreprocessTextForAutoDetection(text)
-	}
 
 	if flagBool(cmd, "dry-run") {
 		return showDryRun(cmd, original, text)
@@ -89,17 +85,20 @@ func runEncrypt(cmd *cobra.Command, _ []string) error {
 	if random && savePath == "" {
 		return errors.New(errUnsavedRandom)
 	}
+	text = trimInputNewline(cmd, m, text)
+
+	// Encrypt on a clone so m keeps its starting positions for saving, and write
+	// the key file only after encryption succeeded: a failed run must never
+	// replace an existing key.
+	ciphertext, err := m.Clone().Encrypt(text)
+	if err != nil {
+		return explainCharError(cmd, err, text)
+	}
 	if savePath != "" {
-		// Save before encrypting: the settings must hold the starting positions.
 		if err := saveConfig(m, savePath); err != nil {
 			return err
 		}
 		verbosef(cmd, "Configuration saved to %s\n", savePath)
-	}
-
-	ciphertext, err := m.Encrypt(text)
-	if err != nil {
-		return explainCharError(cmd, err, text)
 	}
 	out, err := encodeOutput(cmd, ciphertext)
 	if err != nil {

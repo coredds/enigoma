@@ -6,6 +6,7 @@ package tui
 import (
 	"strings"
 	"testing"
+	"time"
 	"unicode/utf8"
 
 	"github.com/charmbracelet/x/ansi"
@@ -158,5 +159,41 @@ func TestRenderHeader_Truncates(t *testing.T) {
 		if n := utf8.RuneCountInString(l); n > 40 {
 			t.Errorf("header line has %d runes (> 40)", n)
 		}
+	}
+}
+
+func newlineTrace(t *testing.T) (enigoma.Trace, []rune) {
+	t.Helper()
+	ascii := []rune(enigoma.AlphabetASCIIPrintable)
+	x := strings.IndexRune(enigoma.AlphabetASCIIPrintable, 'x')
+	nl := strings.IndexRune(enigoma.AlphabetASCIIPrintable, '\n')
+	return enigoma.Trace{Input: 'x', Output: '\n', Before: "A", After: "B", Hops: []enigoma.Hop{
+		{Stage: enigoma.StagePlugboardIn, Component: "plugboard", In: x, Out: nl},
+		{Stage: enigoma.StagePlugboardOut, Component: "plugboard", In: nl, Out: nl},
+	}}, ascii
+}
+
+func TestRender_NewlineAndSpaceAreVisible(t *testing.T) {
+	tr, ascii := newlineTrace(t)
+	path := ansi.Strip(renderPath(tr, ascii, 200))
+	if strings.Contains(path, "\n") || !strings.Contains(path, "⏎") {
+		t.Errorf("path should show newline as ⏎ on one line: %q", path)
+	}
+	tapes := lines(renderTapes([]rune("a\nb c"), []rune("xyz"), false, 80))
+	if len(tapes) != 2 || !strings.Contains(tapes[0], "a⏎b␣c") {
+		t.Errorf("tapes = %q", tapes)
+	}
+	lamps := ansi.Strip(renderLampboard(ascii, '\n', ' ', 80))
+	if !strings.Contains(lamps, "[⏎]") || !strings.Contains(lamps, "(␣)") {
+		t.Errorf("lampboard should show [⏎] and (␣):\n%s", lamps)
+	}
+}
+
+func TestRenderTapes_LongTapeIsFast(t *testing.T) {
+	long := []rune(strings.Repeat("ABCDEFGHIJ", 20000))
+	start := time.Now()
+	renderTapes(long, long, true, 80)
+	if d := time.Since(start); d > 2*time.Second {
+		t.Errorf("rendering a 200k-rune tape took %v", d)
 	}
 }

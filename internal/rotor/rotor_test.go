@@ -475,3 +475,16 @@ func TestRotor_Fixed(t *testing.T) {
 		t.Error("CreateFromSpec dropped fixed flag")
 	}
 }
+
+func TestRandomRotor_TinyAlphabetTerminates(t *testing.T) {
+	alph, _ := alphabet.New([]rune("AB"))
+	for i := 0; i < 200; i++ {
+		r, err := RandomRotor("R", alph)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if n := len(r.notches); n < 1 || n > 2 {
+			t.Fatalf("%d notches on a 2-letter alphabet", n)
+		}
+	}
+}

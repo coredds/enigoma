@@ -27,6 +27,15 @@ are not compatible.**
   `--save-config` or `--auto-config` is given; `decrypt` refuses random sources.
 - `--reset` (a no-op) removed; documented example commands that could not run
   now work.
+- **Auto-detected alphabets are lossless**: `--auto-config`, `NewFromText` and
+  `QuickEncrypt` used to trim the text and turn CRLF into LF before encrypting
+  (and failed on `\r`); the alphabet now covers the text exactly.
+- **Trailing newline on stdin/files**: `echo HELLO | enigoma encrypt --preset m3`
+  failed on the newline; one trailing line ending is now dropped when the
+  alphabet cannot encode it.
+- **A failed `encrypt` no longer overwrites `--save-config`/`--auto-config`
+  files**: the key is written only after encryption succeeds.
+- **Random rotors on 2-letter alphabets** could hang generating notches.
 
 ### Added
 - `Machine.Press(r)` returns a `Trace` of one keypress: rotor windows before and

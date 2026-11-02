@@ -41,6 +41,22 @@ func readInput(cmd *cobra.Command) (string, error) {
 	return string(data), nil
 }
 
+// trimInputNewline drops one trailing line ending ("\n" or "\r\n") from
+// --file or stdin input when the machine's alphabet cannot encode it, so that
+// `echo HELLO | enigoma encrypt --preset m3` works. --text input is untouched.
+func trimInputNewline(cmd *cobra.Command, m *enigoma.Machine, text string) string {
+	if flagString(cmd, "text") != "" || strings.ContainsRune(m.Alphabet(), '\n') {
+		return text
+	}
+	if t, ok := strings.CutSuffix(text, "\n"); ok {
+		if !strings.ContainsRune(m.Alphabet(), '\r') {
+			t = strings.TrimSuffix(t, "\r")
+		}
+		return t
+	}
+	return text
+}
+
 // decodeInput converts --format hex/base64 input to text.
 func decodeInput(cmd *cobra.Command, text string) (string, error) {
 	switch format := strings.ToLower(flagString(cmd, "format")); format {

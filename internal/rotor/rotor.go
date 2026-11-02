@@ -107,7 +107,8 @@ func RandomRotor(id string, alph *alphabet.Alphabet) (*Rotor, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate random notch count: %w", err)
 	}
-	numNotches := int(numNotchesBig.Int64()) + 1
+	// Notches must be distinct, so tiny alphabets cannot have more than size.
+	numNotches := min(int(numNotchesBig.Int64())+1, size)
 
 	notches := make([]rune, numNotches)
 	notchPositions := make(map[int]bool)

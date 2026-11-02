@@ -244,3 +244,54 @@ func TestTuiCmd_BadPositions(t *testing.T) {
 		t.Error("--positions AB on the default M3 should fail before starting the UI")
 	}
 }
+
+func TestEncrypt_StdinTrailingNewline(t *testing.T) {
+	out, err := runWithStdin(t, "HELLO\n", "encrypt", "--preset", "m3")
+	if err != nil || out != "ILBDA" {
+		t.Errorf("echo HELLO | encrypt --preset m3: %q, %v", out, err)
+	}
+	out, err = runWithStdin(t, "HELLO\r\n", "encrypt", "--preset", "m3")
+	if err != nil || out != "ILBDA" {
+		t.Errorf("CRLF stdin: %q, %v", out, err)
+	}
+	path := writeFile(t, "in.txt", "AAAAA\n")
+	out, err = run(t, "encrypt", "--file", path, "--preset", "m3")
+	if err != nil || out != "BDZGO" {
+		t.Errorf("--file with trailing newline: %q, %v", out, err)
+	}
+}
+
+func TestEncrypt_FailureKeepsExistingKey(t *testing.T) {
+	key := filepath.Join(t.TempDir(), "k.json")
+	if _, err := run(t, "encrypt", "--preset", "m3", "--text", "HELLO", "--save-config", key); err != nil {
+		t.Fatal(err)
+	}
+	before, _ := os.ReadFile(key)
+	if _, err := run(t, "encrypt", "--alphabet", "latin", "--text", "hello", "--save-config", key); err == nil {
+		t.Fatal("expected a CharError for lowercase text on the latin alphabet")
+	}
+	after, _ := os.ReadFile(key)
+	if string(before) != string(after) {
+		t.Error("a failed encrypt overwrote the existing key file")
+	}
+}
+
+func TestEncrypt_AutoConfigLossless(t *testing.T) {
+	key := filepath.Join(t.TempDir(), "k.json")
+	in := "line one\r\nline two\n"
+	ct, err := runWithStdin(t, in, "encrypt", "--auto-config", key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pt, err := run(t, "decrypt", "--text", ct, "--config", key)
+	if err != nil || pt != in {
+		t.Errorf("auto-config round trip = %q, %v; want %q", pt, err, in)
+	}
+}
+
+func TestDecrypt_StdinTrailingNewline(t *testing.T) {
+	out, err := runWithStdin(t, "BDZGO\n", "decrypt", "--preset", "m3")
+	if err != nil || out != "AAAAA" {
+		t.Errorf("echo BDZGO | decrypt --preset m3: %q, %v", out, err)
+	}
+}

@@ -46,6 +46,10 @@ enigoma encrypt --text "TOP SECRET" --preset high --save-config key.json
 | `--dry-run` | | Describe what would happen |
 | `--verbose`, `-v` | | Details on stderr |
 
+With `--file` or stdin, one trailing line ending is dropped when the alphabet
+cannot encode it, so `echo HELLO | enigoma encrypt --preset m3` works.
+`--auto-config` keeps the text exactly (line endings included).
+
 Characters outside the machine's alphabet are an error. The message suggests
 preprocessing flags or `--auto-config`.
 
@@ -74,6 +78,7 @@ Defaults to M3 at AAA.
 | Key | Action |
 |---|---|
 | any alphabet character | press the key (upper-cased when the alphabet has no lowercase letters) |
+| Enter | press newline, if the alphabet has it (newline and space are shown as ⏎ and ␣) |
 | Backspace | undo the last keypress |
 | Ctrl+R | reset rotors and tapes |
 | Tab | group the tapes in fives |

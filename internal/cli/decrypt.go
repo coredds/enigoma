@@ -52,6 +52,7 @@ func runDecrypt(cmd *cobra.Command, _ []string) error {
 	if random {
 		return errors.New(errRandomDecrypt)
 	}
+	text = trimInputNewline(cmd, m, text)
 	plaintext, err := m.Decrypt(text)
 	if err != nil {
 		return explainCharError(cmd, err, text)

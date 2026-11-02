@@ -10,13 +10,13 @@ import (
 	"github.com/coredds/enigoma/internal/alphabet"
 )
 
-// NewFromText builds a machine whose alphabet is auto-detected from text, with
+// NewFromText builds a machine whose alphabet holds exactly the characters of text, with
 // random components (5 rotors, 8 plug pairs) unless opts override them.
 func NewFromText(text string, opts ...Option) (*Machine, error) {
 	if text == "" {
 		return nil, fmt.Errorf("cannot detect an alphabet from empty text")
 	}
-	detected, err := alphabet.AutoDetectFromText(text)
+	detected, err := alphabet.DetectCovering(text)
 	if err != nil {
 		return nil, fmt.Errorf("detect alphabet: %w", err)
 	}

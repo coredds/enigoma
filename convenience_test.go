@@ -45,3 +45,16 @@ func TestDecryptWithConfig_V1(t *testing.T) {
 		t.Errorf("got %v, want v1 message", err)
 	}
 }
+
+func TestQuickEncrypt_LineEndingsLossless(t *testing.T) {
+	for _, in := range []string{"a\r\nb", "hello\n", "  padded  ", "x"} {
+		ct, cfg, err := QuickEncrypt(in, 3, 2)
+		if err != nil {
+			t.Errorf("%q: %v", in, err)
+			continue
+		}
+		if got, err := DecryptWithConfig(ct, cfg); err != nil || got != in {
+			t.Errorf("%q: round trip = %q, %v", in, got, err)
+		}
+	}
+}

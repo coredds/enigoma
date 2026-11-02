@@ -143,7 +143,7 @@ func alphabetFromName(name, inputText string) (string, error) {
 		if inputText == "" {
 			return "", fmt.Errorf("alphabet auto-detection needs input text; use --alphabet NAME or provide --text/--file/stdin")
 		}
-		detected, err := alphabet.AutoDetectFromText(inputText)
+		detected, err := alphabet.DetectCovering(inputText)
 		if err != nil {
 			return "", fmt.Errorf("detect alphabet: %w", err)
 		}

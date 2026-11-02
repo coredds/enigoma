@@ -52,12 +52,12 @@ func renderRotors(reflector string, rotors []rotorView, width int) string {
 	rings.WriteString(pad("ring", label))
 	for _, r := range rotors {
 		names.WriteString(center(r.Name, cell))
-		w := "[" + string(r.Window) + "]"
+		w := "[" + display(r.Window) + "]"
 		if r.Stepped {
 			w = steppedStyle.Render(w)
 		}
 		windows.WriteString(center(w, cell))
-		rings.WriteString(center(dimStyle.Render(string(r.Ring)), cell))
+		rings.WriteString(center(dimStyle.Render(display(r.Ring)), cell))
 	}
 	return truncateLines(names.String()+"\n"+windows.String()+"\n"+rings.String(), width)
 }
@@ -65,13 +65,13 @@ func renderRotors(reflector string, rotors []rotorView, width int) string {
 // renderPath renders the hop chain of a keypress, e.g.
 // "A ─plug→ A ─III→ B ─II→ ...", wrapping between hops to fit width.
 func renderPath(t enigoma.Trace, alphabet []rune, width int) string {
-	tokens := []string{string(t.Input)}
+	tokens := []string{display(t.Input)}
 	for _, h := range t.Hops {
 		label := h.Component
 		if h.Stage == enigoma.StagePlugboardIn || h.Stage == enigoma.StagePlugboardOut {
 			label = "plug"
 		}
-		tokens = append(tokens, "─"+label+"→ "+string(alphabet[h.Out]))
+		tokens = append(tokens, "─"+label+"→ "+display(alphabet[h.Out]))
 	}
 	var lines []string
 	line := ""
@@ -129,7 +129,7 @@ func renderColumns(t enigoma.Trace, alphabet []rune, reflector string, rotors []
 		b.WriteString(pad(name, cw))
 	}
 	for i, r := range alphabet {
-		b.WriteString("\n" + string(r) + " ")
+		b.WriteString("\n" + display(r) + " ")
 		for c := range names {
 			mark := dimStyle.Render("·")
 			switch marks[c][i] {
@@ -155,11 +155,11 @@ func renderLampboard(alphabet []rune, lit, pressed rune, width int) string {
 	lamp := func(r rune) string {
 		switch r {
 		case lit:
-			return litStyle.Render("[" + string(r) + "]")
+			return litStyle.Render("[" + display(r) + "]")
 		case pressed:
-			return pressedStyle.Render("(" + string(r) + ")")
+			return pressedStyle.Render("(" + display(r) + ")")
 		}
-		return " " + string(r) + " "
+		return " " + display(r) + " "
 	}
 	var rows []string
 	if string(alphabet) == enigoma.AlphabetLatinUpper {
@@ -188,21 +188,49 @@ func renderLampboard(alphabet []rune, lit, pressed rune, width int) string {
 // character counted from the start of the tape.
 func renderTapes(in, out []rune, grouped bool, width int) string {
 	tape := func(prefix string, runes []rune) string {
-		var b strings.Builder
-		for i, r := range runes {
-			if grouped && i > 0 && i%5 == 0 {
-				b.WriteByte(' ')
-			}
-			b.WriteRune(r)
-		}
-		body := []rune(b.String())
 		avail := max(0, width-ansi.StringWidth(prefix))
-		for ansi.StringWidth(string(body)) > avail {
-			body = body[1:]
+		// Walk backwards from the end, so long tapes cost only what is shown.
+		var shown []string
+		used := 0
+		for i := len(runes) - 1; i >= 0; i-- {
+			cell := display(runes[i])
+			if grouped && i > 0 && i%5 == 0 {
+				cell = " " + cell
+			}
+			w := ansi.StringWidth(cell)
+			if used+w > avail {
+				break
+			}
+			used += w
+			shown = append(shown, cell)
 		}
-		return prefix + string(body)
+		var b strings.Builder
+		b.WriteString(prefix)
+		for i := len(shown) - 1; i >= 0; i-- {
+			b.WriteString(shown[i])
+		}
+		return b.String()
 	}
 	return tape("In:  ", in) + "\n" + tape("Out: ", out)
+}
+
+// display returns a visible symbol for characters a terminal would not show
+// (or would break lines on).
+func display(r rune) string {
+	switch r {
+	case '\n':
+		return "⏎"
+	case ' ':
+		return "␣"
+	case '\t':
+		return "⇥"
+	case '\r':
+		return "␍"
+	}
+	if r < 0x20 || r == 0x7f {
+		return "·"
+	}
+	return string(r)
 }
 
 func pad(s string, width int) string {

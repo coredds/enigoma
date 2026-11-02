@@ -161,3 +161,22 @@ func TestModel_TinyWidth(t *testing.T) {
 		t.Errorf("hop chain missing:\n%s", ansi.Strip(view))
 	}
 }
+
+func TestModel_EnterPressesNewline(t *testing.T) {
+	md := send(newTestModel(t)(enigoma.New(
+		enigoma.WithAlphabet(enigoma.AlphabetASCIIPrintable), enigoma.WithRandomComponents(3, 2))), key(tea.KeyEnter))
+	if string(md.in) != "\n" {
+		t.Errorf("Enter pressed %q, want newline", string(md.in))
+	}
+	md = send(newTestModel(t)(enigoma.NewM3()), key(tea.KeyEnter))
+	if !strings.Contains(md.status, "not in the alphabet") || len(md.in) != 0 {
+		t.Errorf("Enter on M3: status %q, in %q", md.status, string(md.in))
+	}
+}
+
+func TestModel_UnhandledKeyShowsStatus(t *testing.T) {
+	md := send(newTestModel(t)(enigoma.NewM3()), key(tea.KeyF1))
+	if md.status == "" {
+		t.Error("an unhandled key should set a status message")
+	}
+}

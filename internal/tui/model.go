@@ -93,6 +93,10 @@ func (md model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, r := range msg.Runes {
 				md.press(r)
 			}
+		case tea.KeyEnter:
+			md.press('\n')
+		default:
+			md.status = fmt.Sprintf("%s does nothing here", msg.String())
 		}
 	}
 	return md, nil
