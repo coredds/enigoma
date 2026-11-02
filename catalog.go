@@ -44,3 +44,26 @@ func HistoricalReflector(name string) (ReflectorSpec, error) {
 	}
 	return r, nil
 }
+
+// NewM3 builds an Enigma M3: rotors I-II-III, reflector B, positions and rings
+// "AAA", no plugboard pairs. Options are applied afterwards and override these
+// defaults, e.g. NewM3(WithPositions("ADU"), WithPlugboard("AB CD")).
+func NewM3(opts ...Option) (*Machine, error) {
+	base := []Option{
+		WithAlphabet(AlphabetLatinUpper),
+		WithRotors(historicalRotors["I"], historicalRotors["II"], historicalRotors["III"]),
+		WithReflector(historicalReflectors["B"]),
+	}
+	return New(append(base, opts...)...)
+}
+
+// NewM4 builds a naval Enigma M4: fixed thin rotor Beta, rotors I-II-III and
+// the thin reflector B-Thin. Options override these defaults.
+func NewM4(opts ...Option) (*Machine, error) {
+	base := []Option{
+		WithAlphabet(AlphabetLatinUpper),
+		WithRotors(historicalRotors["Beta"], historicalRotors["I"], historicalRotors["II"], historicalRotors["III"]),
+		WithReflector(historicalReflectors["B-Thin"]),
+	}
+	return New(append(base, opts...)...)
+}

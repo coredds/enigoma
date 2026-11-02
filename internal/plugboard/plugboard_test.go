@@ -471,10 +471,7 @@ func TestPlugboard_Clone(t *testing.T) {
 		t.Fatalf("AddPair failed: %v", err)
 	}
 
-	clone, err := pb.Clone()
-	if err != nil {
-		t.Fatalf("Clone() error: %v", err)
-	}
+	clone := pb.Clone()
 
 	// Test that clone has same pair count
 	if clone.PairCount() != pb.PairCount() {

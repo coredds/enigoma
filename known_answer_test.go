@@ -3,20 +3,39 @@ package enigoma
 import (
 	"strings"
 	"testing"
-
-	"github.com/coredds/enigoma/internal/reflector"
-	"github.com/coredds/enigoma/internal/rotor"
 )
 
-func positionsAsLetters(m *Enigma) string {
-	var b strings.Builder
-	for _, p := range m.GetCurrentRotorPositions() {
-		b.WriteRune(rune('A' + p))
+func mustRotor(t *testing.T, name string) RotorSpec {
+	t.Helper()
+	r, err := HistoricalRotor(name)
+	if err != nil {
+		t.Fatal(err)
 	}
-	return b.String()
+	return r
 }
 
-func mustEncrypt(t *testing.T, m *Enigma, s string) string {
+func mustReflector(t *testing.T, name string) ReflectorSpec {
+	t.Helper()
+	r, err := HistoricalReflector(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r
+}
+
+// mustMachine is curried so it can wrap a constructor call: mustMachine(t)(NewM3()).
+func mustMachine(t *testing.T) func(*Machine, error) *Machine {
+	t.Helper()
+	return func(m *Machine, err error) *Machine {
+		t.Helper()
+		if err != nil {
+			t.Fatal(err)
+		}
+		return m
+	}
+}
+
+func mustEncrypt(t *testing.T, m *Machine, s string) string {
 	t.Helper()
 	out, err := m.Encrypt(s)
 	if err != nil {
@@ -26,40 +45,31 @@ func mustEncrypt(t *testing.T, m *Enigma, s string) string {
 }
 
 func TestKAT_DoubleStep(t *testing.T) {
-	m, err := NewEnigmaM3()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := m.SetRotorPositions([]int{0, 3, 20}); err != nil { // ADU
-		t.Fatal(err)
-	}
+	m := mustMachine(t)(NewM3(WithPositions("ADU")))
 	for _, want := range []string{"ADV", "AEW", "BFX", "BFY"} {
 		mustEncrypt(t, m, "A")
-		if got := positionsAsLetters(m); got != want {
+		if got := m.Positions(); got != want {
 			t.Fatalf("positions = %s, want %s", got, want)
 		}
 	}
 }
 
 func TestKAT_M3_AAAAA(t *testing.T) {
-	m, _ := NewEnigmaM3()
+	m := mustMachine(t)(NewM3())
 	if got := mustEncrypt(t, m, "AAAAA"); got != "BDZGO" {
 		t.Errorf("got %s, want BDZGO", got)
 	}
 }
 
 func TestKAT_M3_RingsBBB(t *testing.T) {
-	m, _ := NewEnigmaM3()
-	for _, r := range m.rotors {
-		r.SetRingSetting(1)
-	}
+	m := mustMachine(t)(NewM3(WithRings("BBB")))
 	if got := mustEncrypt(t, m, "AAAAA"); got != "EWTYX" {
 		t.Errorf("got %s, want EWTYX", got)
 	}
 }
 
 func TestKAT_M3_Long(t *testing.T) {
-	m, _ := NewEnigmaM3()
+	m := mustMachine(t)(NewM3())
 	want := "BDZGOWCXLTKSBTMCDLPBMUQOFXYHCXTGYJFLINHNXSHIUNTHEORXPQPKOVHC"
 	if got := mustEncrypt(t, m, strings.Repeat("A", 60)); got != want {
 		t.Errorf("got  %s\nwant %s", got, want)
@@ -69,21 +79,13 @@ func TestKAT_M3_Long(t *testing.T) {
 func TestKAT_Barbarossa(t *testing.T) {
 	ct := "EDPUDNRGYSZRCXNUYTPOMRMBOFKTBZREZKMLXLVEFGUEYSIOZVEQMIKUBPMMYLKLTTDEISMDICAGYKUACTCDOMOHWXMUUIAUBSTSLRNBZSZWNRFXWFYSSXJZVIJHIDISHPRKLKAYUPADTXQSPINQMATLPIFSVKDASCTACDPBOPVHJK"
 	pt := "AUFKLXABTEILUNGXVONXKURTINOWAXKURTINOWAXNORDWESTLXSEBEZXSEBEZXUAFFLIEGERSTRASZERIQTUNGXDUBROWKIXDUBROWKIXOPOTSCHKAXOPOTSCHKAXUMXEINSAQTDREINULLXUHRANGETRETENXANGRIFFXINFXRGTX"
-
-	idx := func(r rune) int { return int(r - 'A') }
-	m, err := New(
-		WithAlphabet(AlphabetLatinUpper),
-		WithRotorConfiguration([]rotor.RotorSpec{
-			{ID: "II", ForwardMapping: RotorII, Notches: NotchII, RingSetting: idx('B'), Position: idx('B')},
-			{ID: "IV", ForwardMapping: RotorIV, Notches: NotchIV, RingSetting: idx('U'), Position: idx('L')},
-			{ID: "V", ForwardMapping: RotorV, Notches: NotchV, RingSetting: idx('L'), Position: idx('A')},
-		}),
-		WithReflectorConfiguration(reflector.ReflectorSpec{ID: "B", Mapping: ReflectorB}),
-		WithPlugboardConfiguration(reciprocal("AV BS CG DL FU HZ IN KM OW RX")),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
+	m := mustMachine(t)(New(
+		WithRotors(mustRotor(t, "II"), mustRotor(t, "IV"), mustRotor(t, "V")),
+		WithReflector(mustReflector(t, "B")),
+		WithRings("BUL"),
+		WithPositions("BLA"),
+		WithPlugboard("AV BS CG DL FU HZ IN KM OW RX"),
+	))
 	got, err := m.Decrypt(ct)
 	if err != nil {
 		t.Fatal(err)
@@ -94,8 +96,8 @@ func TestKAT_Barbarossa(t *testing.T) {
 }
 
 func TestKAT_M4_EqualsM3(t *testing.T) {
-	m3, _ := NewEnigmaM3()
-	m4, _ := NewEnigmaM4()
+	m3 := mustMachine(t)(NewM3())
+	m4 := mustMachine(t)(NewM4())
 	in := strings.Repeat("HELLOWORLD", 20)
 	if a, b := mustEncrypt(t, m4, in), mustEncrypt(t, m3, in); a != b {
 		t.Errorf("M4 != M3\nM4 %s\nM3 %s", a, b)
@@ -103,21 +105,10 @@ func TestKAT_M4_EqualsM3(t *testing.T) {
 }
 
 func TestKAT_M4_ThinRotorFixed(t *testing.T) {
-	m, _ := NewEnigmaM4()
+	m := mustMachine(t)(NewM4())
 	// Rotor I first reaches its notch (Q) after ~16*650 presses; go well past it.
-	for i := 0; i < 20000; i++ {
-		mustEncrypt(t, m, "A")
+	mustEncrypt(t, m, strings.Repeat("A", 20000))
+	if p := []rune(m.Positions())[0]; p != 'A' {
+		t.Errorf("thin rotor moved to %c", p)
 	}
-	if p := m.GetCurrentRotorPositions()[0]; p != 0 {
-		t.Errorf("thin rotor moved to %d", p)
-	}
-}
-
-func reciprocal(pairs string) map[rune]rune {
-	m := map[rune]rune{}
-	for _, p := range strings.Fields(pairs) {
-		r := []rune(p)
-		m[r[0]], m[r[1]] = r[1], r[0]
-	}
-	return m
 }
