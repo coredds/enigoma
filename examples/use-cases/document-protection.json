@@ -1,50 +1,32 @@
 {
-  "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "rotor_specs": [
+  "schema_version": 2,
+  "alphabet": "\n !\"#$%\u0026'()*+,-./0123456789:;\u003c=\u003e?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+  "rotors": [
     {
-      "id": "R1",
-      "forward_mapping": "RQJDEASYZHXNLOWGTKIFVCMPUB",
-      "notches": [
-        65
-      ],
-      "position": 9,
-      "ring_setting": 0
+      "name": "R1",
+      "wiring": "{C*K4cz;G,EPfwk%sI#Y31~n[pA!?$'=TR|\"ZQ\u003eo6h JuSUMa-xm\nHrF9D`N/\\+:O8jBy7@b(lv]qtWVXg\u003c0e.^i_d\u0026}5L)2",
+      "notches": "B",
+      "ring": "z",
+      "position": "t"
     },
     {
-      "id": "R2",
-      "forward_mapping": "MUELDPFRBOZHNQCYIKXSGVWTAJ",
-      "notches": [
-        82,
-        73,
-        76
-      ],
-      "position": 2,
-      "ring_setting": 25
+      "name": "R2",
+      "wiring": "LC\\BT#OcX~H{ZdEk+h64)nYb5[xGtI.'3?\u003er%ym/9F^ j\u003c8,W@eiUlVMQwsN!vPA\u0026|Dp]g}\"z1a-$RS7oK;_f=\n2u:*J(0q`",
+      "notches": "/H?",
+      "ring": "2",
+      "position": "I"
     },
     {
-      "id": "R3",
-      "forward_mapping": "CFTWMYQNUSHJXRGKODAIBLVPZE",
-      "notches": [
-        73,
-        77
-      ],
-      "position": 25,
-      "ring_setting": 23
+      "name": "R3",
+      "wiring": "vF[hINYuc}i.17Q\u003c!l#\u0026|VO)]ZBnjA_-DC/xUmo'Ps4bpreR*aTS\u003e$\n;%^t6=\"E{5+Kwg~JW3f@H928qz` XL0?d\\,G(y:kM",
+      "notches": "\\1",
+      "ring": "[",
+      "position": "\u003e"
     }
   ],
-  "reflector_spec": {
-    "id": "UKW",
-    "mapping": "HELNBPVAKTICXDZFUSRJQGYMWO"
+  "reflector": {
+    "name": "UKW",
+    "wiring": "\u003exDBRLK6.Emvt@c'Z~_`yQw\u0026nAk]}sV\nO,8\"{!(lJIHG%$aU?u4#r\\N=|qo/dT:b12M^-[gpezji9F)7YfXS\u003c+P*5 3hCW;0"
   },
-  "plugboard_pairs": {
-    "D": "L",
-    "L": "D",
-    "O": "Z",
-    "Z": "O"
-  },
-  "current_rotor_positions": [
-    9,
-    2,
-    25
-  ]
+  "plugboard": "1~ OP"
 }

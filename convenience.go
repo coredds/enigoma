@@ -1,75 +1,58 @@
-// package enigoma provides convenience functions for zero-config usage.
-//
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
+
 package enigoma
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/coredds/enigoma/internal/alphabet"
 )
 
-// QuickEncrypt encrypts text with auto-detected alphabet and specified security level.
-// Returns the encrypted text, the machine configuration as JSON, and any error.
-// This is perfect for one-off encryption where you want maximum convenience.
-func QuickEncrypt(text string, security SecurityLevel) (encrypted string, config string, err error) {
-	machine, err := NewFromText(text, security)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to create machine: %w", err)
-	}
-
-	// Save configuration BEFORE encryption to preserve initial state
-	config, err = machine.SaveSettingsToJSON()
-	if err != nil {
-		return "", "", fmt.Errorf("failed to save configuration: %w", err)
-	}
-
-	encrypted, err = machine.Encrypt(text)
-	if err != nil {
-		return "", "", fmt.Errorf("encryption failed: %w", err)
-	}
-
-	return encrypted, config, nil
-}
-
-// NewFromText creates an Enigma machine by auto-detecting the alphabet from the input text.
-// This is the easiest way to create a machine - just provide your text and desired security level.
-func NewFromText(text string, security SecurityLevel) (*Enigma, error) {
+// NewFromText builds a machine whose alphabet holds exactly the characters of text, with
+// random components (5 rotors, 8 plug pairs) unless opts override them.
+func NewFromText(text string, opts ...Option) (*Machine, error) {
 	if text == "" {
-		return nil, fmt.Errorf("text cannot be empty for auto-detection. Provide sample text or use enigma.NewEnigmaClassic() for default setup")
+		return nil, fmt.Errorf("cannot detect an alphabet from empty text")
 	}
-
-	// Auto-detect alphabet from text
-	detectedAlphabet, err := alphabet.AutoDetectFromText(text)
+	detected, err := alphabet.DetectCovering(text)
 	if err != nil {
-		return nil, fmt.Errorf("failed to auto-detect alphabet from text %q: %w. Try using enigma.NewEnigmaSimple(enigoma.AlphabetLatinUpper) for manual setup", text, err)
+		return nil, fmt.Errorf("detect alphabet: %w", err)
 	}
-
-	// Create machine with detected alphabet and specified security
-	machine, err := New(
-		WithAlphabet(detectedAlphabet.Runes()),
-		WithRandomSettings(security),
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create machine: %w", err)
-	}
-
-	return machine, nil
+	base := []Option{WithAlphabet(string(detected.Runes())), WithRandomComponents(5, 8)}
+	return New(append(base, opts...)...)
 }
 
-// DecryptWithConfig decrypts text using a JSON configuration string.
-// Companion function to QuickEncrypt.
-func DecryptWithConfig(encryptedText string, configJSON string) (decrypted string, err error) {
-	machine, err := NewFromJSON(configJSON)
+// QuickEncrypt encrypts text on a fresh random machine whose alphabet is
+// detected from the text. It returns the ciphertext and the machine's settings
+// as JSON (captured before encrypting), which DecryptWithConfig needs.
+func QuickEncrypt(text string, rotors, plugPairs int) (string, []byte, error) {
+	m, err := NewFromText(text, WithRandomComponents(rotors, plugPairs))
 	if err != nil {
-		return "", fmt.Errorf("failed to load configuration: %w. Make sure you're using the same config that was used for encryption", err)
+		return "", nil, err
 	}
-
-	decrypted, err = machine.Decrypt(encryptedText)
+	settings, err := json.MarshalIndent(m.Settings(), "", "  ")
 	if err != nil {
-		return "", fmt.Errorf("decryption failed: %w. Make sure you're using the correct configuration and encrypted text", err)
+		return "", nil, fmt.Errorf("encode settings: %w", err)
 	}
+	ciphertext, err := m.Encrypt(text)
+	if err != nil {
+		return "", nil, err
+	}
+	return ciphertext, settings, nil
+}
 
-	return decrypted, nil
+// DecryptWithConfig decrypts ciphertext using settings JSON from QuickEncrypt
+// or Machine.Settings.
+func DecryptWithConfig(ciphertext string, settingsJSON []byte) (string, error) {
+	s, err := ParseSettings(settingsJSON)
+	if err != nil {
+		return "", err
+	}
+	m, err := NewFromSettings(s)
+	if err != nil {
+		return "", err
+	}
+	return m.Decrypt(ciphertext)
 }

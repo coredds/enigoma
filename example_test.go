@@ -1,92 +1,67 @@
 package enigoma_test
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
-	enigoma "github.com/coredds/enigoma"
+	"github.com/coredds/enigoma"
 )
 
-func ExampleNewEnigmaClassic() {
-	machine, err := enigoma.NewEnigmaClassic()
+func ExampleNewM3() {
+	m, err := enigoma.NewM3()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	encrypted, err := machine.Encrypt("HELLOWORLD")
-	if err != nil {
-		panic(err)
-	}
-
-	if err := machine.Reset(); err != nil {
-		panic(err)
-	}
-	decrypted, _ := machine.Decrypt(encrypted)
-	fmt.Println(decrypted)
-	// Output:
-	// HELLOWORLD
+	out, _ := m.Encrypt("AAAAA")
+	fmt.Println(out)
+	// Output: BDZGO
 }
 
-func ExampleNewEnigmaM3() {
-	machine, err := enigoma.NewEnigmaM3()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Rotor count:", machine.GetRotorCount())
-	// Output:
-	// Rotor count: 3
+func ExampleMachine_Press() {
+	m, _ := enigoma.NewM3()
+	t, _ := m.Press('A')
+	fmt.Printf("%c -> %c, rotors %s -> %s, %d hops\n", t.Input, t.Output, t.Before, t.After, len(t.Hops))
+	// Output: A -> B, rotors AAA -> AAB, 9 hops
 }
 
-func ExampleNewEnigmaM4() {
-	machine, err := enigoma.NewEnigmaM4()
+func ExampleNew() {
+	II, _ := enigoma.HistoricalRotor("II")
+	IV, _ := enigoma.HistoricalRotor("IV")
+	V, _ := enigoma.HistoricalRotor("V")
+	B, _ := enigoma.HistoricalReflector("B")
+
+	m, err := enigoma.New(
+		enigoma.WithRotors(II, IV, V),
+		enigoma.WithReflector(B),
+		enigoma.WithRings("BUL"),
+		enigoma.WithPositions("BLA"),
+		enigoma.WithPlugboard("AV BS CG DL FU HZ IN KM OW RX"),
+	)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	fmt.Println("Rotor count:", machine.GetRotorCount())
-	// Output:
-	// Rotor count: 4
+	out, _ := m.Decrypt("EDPUDNRGYSZRCXNUYTPOMRMBOF")
+	fmt.Println(out)
+	// Output: AUFKLXABTEILUNGXVONXKURTIN
 }
 
 func ExampleQuickEncrypt() {
-	encrypted, config, err := enigoma.QuickEncrypt("HELLOWORLD", enigoma.Low)
+	ciphertext, config, err := enigoma.QuickEncrypt("Meet at dawn.", 5, 8)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	decrypted, err := enigoma.DecryptWithConfig(encrypted, config)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(decrypted)
-	// Output:
-	// HELLOWORLD
+	plaintext, _ := enigoma.DecryptWithConfig(ciphertext, config)
+	fmt.Println(plaintext)
+	// Output: Meet at dawn.
 }
 
-func ExampleNewEnigmaSimple() {
-	machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetLatinUpper)
-	if err != nil {
-		panic(err)
-	}
+func ExampleMachine_Settings() {
+	m, _ := enigoma.NewM3(enigoma.WithPositions("QEV"))
+	data, _ := json.Marshal(m.Settings())
 
-	message := "HELLOWORLD"
-	encrypted, _ := machine.Encrypt(message)
-	if err := machine.Reset(); err != nil {
-		panic(err)
-	}
-	decrypted, _ := machine.Decrypt(encrypted)
-	fmt.Println(decrypted)
-	// Output:
-	// HELLOWORLD
-}
-
-func ExampleNewFromJSON() {
-	machine, _ := enigoma.NewEnigmaClassic()
-	jsonConfig, _ := machine.SaveSettingsToJSON()
-
-	restored, _ := enigoma.NewFromJSON(jsonConfig)
-	message := "TEST"
-	encrypted, _ := machine.Encrypt(message)
-	decrypted, _ := restored.Decrypt(encrypted)
-	fmt.Println(decrypted)
-	// Output:
-	// TEST
+	s, _ := enigoma.ParseSettings(data)
+	restored, _ := enigoma.NewFromSettings(s)
+	fmt.Println(restored.Positions())
+	// Output: QEV
 }

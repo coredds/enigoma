@@ -1,275 +1,67 @@
 package enigoma
 
 import (
+	"strings"
 	"testing"
-
-	"github.com/coredds/enigoma/internal/alphabet"
 )
 
-func TestWithAlphabet(t *testing.T) {
-	runes := []rune{'A', 'B', 'C', 'D'}
-
-	enigma := &Enigma{}
-	opt := WithAlphabet(runes)
-
-	err := opt(enigma)
-	if err != nil {
-		t.Errorf("WithAlphabet() error: %v", err)
+func TestWithPlugboard_Parsing(t *testing.T) {
+	m := mustMachine(t)(NewM3(WithPlugboard("  AB   CD ")))
+	if got := m.Settings().Plugboard; got != "AB CD" {
+		t.Errorf("whitespace-tolerant parse: got %q", got)
 	}
-
-	if enigma.alphabet == nil {
-		t.Errorf("WithAlphabet() did not set alphabet")
-	}
-
-	if enigma.alphabet.Size() != len(runes) {
-		t.Errorf("WithAlphabet() alphabet size = %d, want %d", enigma.alphabet.Size(), len(runes))
-	}
-}
-
-func TestWithAlphabet_Invalid(t *testing.T) {
-	// Test with duplicate runes
-	runes := []rune{'A', 'B', 'A', 'C'}
-
-	enigma := &Enigma{}
-	opt := WithAlphabet(runes)
-
-	err := opt(enigma)
-	if err == nil {
-		t.Errorf("WithAlphabet() with duplicates should fail")
-	}
-}
-
-func TestWithRandomSettings(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F'})
-
-	tests := []struct {
-		name  string
-		level SecurityLevel
-	}{
-		{"Low", Low},
-		{"Medium", Medium},
-		{"High", High},
-		{"Extreme", Extreme},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			enigma := &Enigma{alphabet: alph}
-			opt := WithRandomSettings(tt.level)
-
-			err := opt(enigma)
-			if err != nil {
-				t.Errorf("WithRandomSettings(%v) error: %v", tt.level, err)
-			}
-
-			if len(enigma.rotors) == 0 {
-				t.Errorf("WithRandomSettings(%v) did not create rotors", tt.level)
-			}
-
-			if enigma.reflector == nil {
-				t.Errorf("WithRandomSettings(%v) did not create reflector", tt.level)
-			}
-
-			if enigma.plugboard == nil {
-				t.Errorf("WithRandomSettings(%v) did not create plugboard", tt.level)
-			}
-		})
-	}
-}
-
-func TestWithRandomSettings_NoAlphabet(t *testing.T) {
-	enigma := &Enigma{}
-	opt := WithRandomSettings(Low)
-
-	err := opt(enigma)
-	if err == nil {
-		t.Errorf("WithRandomSettings() without alphabet should fail")
-	}
-}
-
-func TestWithRotorPositions(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D'})
-
-	// Create enigma with rotors first
-	enigma := &Enigma{alphabet: alph}
-	if err := WithRandomSettings(Low)(enigma); err != nil { // This creates rotors
-		t.Fatalf("WithRandomSettings failed: %v", err)
-	}
-
-	positions := []int{1, 2, 0}
-	opt := WithRotorPositions(positions)
-
-	err := opt(enigma)
-	if err != nil {
-		t.Errorf("WithRotorPositions() error: %v", err)
-	}
-
-	currentPositions := enigma.GetCurrentRotorPositions()
-	for i, pos := range positions {
-		if i < len(currentPositions) && currentPositions[i] != pos {
-			t.Errorf("Position %d = %d, want %d", i, currentPositions[i], pos)
+	for _, bad := range []string{"ab", "A", "ABC", "AB BC"} {
+		_, err := NewM3(WithPlugboard(bad))
+		token := bad
+		if bad == "AB BC" {
+			token = "BC"
+		}
+		if err == nil || !strings.Contains(err.Error(), token) {
+			t.Errorf("WithPlugboard(%q): got %v, want error naming %q", bad, err, token)
 		}
 	}
 }
 
-func TestWithRotorPositions_WrongCount(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D'})
-
-	// Create enigma with 3 rotors
-	enigma := &Enigma{alphabet: alph}
-	if err := WithRandomSettings(Low)(enigma); err != nil {
-		t.Fatalf("WithRandomSettings failed: %v", err)
+func TestWithRandomComponents(t *testing.T) {
+	m := mustMachine(t)(New(WithRandomComponents(5, 8)))
+	s := m.Settings()
+	if len(s.Rotors) != 5 || len(strings.Fields(s.Plugboard)) != 8 {
+		t.Errorf("rotors=%d pairs=%d, want 5 and 8", len(s.Rotors), len(strings.Fields(s.Plugboard)))
 	}
 
-	// Try to set positions for wrong number of rotors
-	positions := []int{1, 2} // Only 2 positions for 3 rotors
-	opt := WithRotorPositions(positions)
+	m = mustMachine(t)(New(WithRandomComponents(3, 100)))
+	if n := len(strings.Fields(m.Settings().Plugboard)); n != 13 {
+		t.Errorf("pairs capped at %d, want 13", n)
+	}
 
-	err := opt(enigma)
-	if err == nil {
-		t.Errorf("WithRotorPositions() with wrong count should fail")
+	m = mustMachine(t)(New(WithRandomComponents(3, 2), WithReflector(mustReflector(t, "B"))))
+	if m.Settings().Reflector.Name != "B" {
+		t.Errorf("later WithReflector discarded: %+v", m.Settings().Reflector)
+	}
+
+	m = mustMachine(t)(New(WithRotors(mustRotor(t, "I")), WithRandomComponents(5, 2)))
+	if n := len(m.Settings().Rotors); n != 5 {
+		t.Errorf("earlier WithRotors should be replaced by random components, got %d rotors", n)
 	}
 }
 
-func TestWithRandomRotorPositions(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D'})
-
-	enigma := &Enigma{alphabet: alph}
-	if err := WithRandomSettings(Low)(enigma); err != nil { // Create rotors first
-		t.Fatalf("WithRandomSettings failed: %v", err)
+func TestNewM3_Overrides(t *testing.T) {
+	m := mustMachine(t)(NewM3(WithRotors(mustRotor(t, "IV"), mustRotor(t, "V"), mustRotor(t, "I"))))
+	var names []string
+	for _, r := range m.Settings().Rotors {
+		names = append(names, r.Name)
 	}
-
-	// Get initial positions
-	initialPositions := enigma.GetCurrentRotorPositions()
-
-	opt := WithRandomRotorPositions()
-	err := opt(enigma)
-	if err != nil {
-		t.Errorf("WithRandomRotorPositions() error: %v", err)
+	if got := strings.Join(names, ","); got != "IV,V,I" {
+		t.Errorf("rotors = %s", got)
 	}
+}
 
-	// Positions should be set (may or may not be different from initial)
-	newPositions := enigma.GetCurrentRotorPositions()
-	if len(newPositions) != len(initialPositions) {
-		t.Errorf("Position count changed: %d -> %d", len(initialPositions), len(newPositions))
-	}
-
-	// All positions should be valid (within alphabet range)
-	for i, pos := range newPositions {
-		if pos < 0 || pos >= alph.Size() {
-			t.Errorf("Position %d out of range: %d", i, pos)
+func TestWithRandomComponents_PlugboardSkipsWhitespace(t *testing.T) {
+	// Space and tab cannot be written in the "AB CD" format, so only A-B can pair.
+	for i := 0; i < 20; i++ {
+		m := mustMachine(t)(New(WithAlphabet(" \tAB"), WithRandomComponents(1, 2)))
+		if got := m.Settings().Plugboard; got != "AB" {
+			t.Fatalf("plugboard = %q, want %q", got, "AB")
 		}
-	}
-}
-
-func TestWithPlugboardConfiguration(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D'})
-
-	enigma := &Enigma{alphabet: alph}
-
-	pairs := map[rune]rune{
-		'A': 'B',
-		'B': 'A',
-		'C': 'D',
-		'D': 'C',
-	}
-
-	opt := WithPlugboardConfiguration(pairs)
-	err := opt(enigma)
-	if err != nil {
-		t.Errorf("WithPlugboardConfiguration() error: %v", err)
-	}
-
-	if enigma.plugboard == nil {
-		t.Errorf("WithPlugboardConfiguration() did not create plugboard")
-	}
-
-	if enigma.plugboard.PairCount() != 2 {
-		t.Errorf("Plugboard pair count = %d, want 2", enigma.plugboard.PairCount())
-	}
-}
-
-func TestWithPlugboardConfiguration_NonReciprocal(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D'})
-
-	enigma := &Enigma{alphabet: alph}
-
-	// Non-reciprocal pairs
-	pairs := map[rune]rune{
-		'A': 'B',
-		'B': 'C', // Should be B->A
-	}
-
-	opt := WithPlugboardConfiguration(pairs)
-	err := opt(enigma)
-	if err == nil {
-		t.Errorf("WithPlugboardConfiguration() with non-reciprocal pairs should fail")
-	}
-}
-
-func TestGetSecurityConfig(t *testing.T) {
-	tests := []struct {
-		level             SecurityLevel
-		expectedRotors    int
-		expectedPlugboard int
-	}{
-		{Low, 3, 2},
-		{Medium, 5, 8},
-		{High, 8, 15},
-		{Extreme, 12, 20},
-	}
-
-	for _, tt := range tests {
-		config := getSecurityConfig(tt.level)
-		if config.rotorCount != tt.expectedRotors {
-			t.Errorf("Security level %v rotor count = %d, want %d",
-				tt.level, config.rotorCount, tt.expectedRotors)
-		}
-		if config.plugboardPairs != tt.expectedPlugboard {
-			t.Errorf("Security level %v plugboard pairs = %d, want %d",
-				tt.level, config.plugboardPairs, tt.expectedPlugboard)
-		}
-	}
-}
-
-func TestSecurityLevels_Integration(t *testing.T) {
-	alph, _ := alphabet.New([]rune{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'})
-
-	levels := []SecurityLevel{Low, Medium, High}
-
-	for _, level := range levels {
-		t.Run(level.String(), func(t *testing.T) {
-			enigma, err := New(
-				WithAlphabet(alph.Runes()),
-				WithRandomSettings(level),
-			)
-			if err != nil {
-				t.Errorf("Failed to create Enigma with security level %v: %v", level, err)
-				return
-			}
-
-			// Test basic functionality
-			plaintext := "ABCD"
-			encrypted, err := enigma.Encrypt(plaintext)
-			if err != nil {
-				t.Errorf("Encrypt() error with level %v: %v", level, err)
-				return
-			}
-
-			if err := enigma.Reset(); err != nil {
-				t.Errorf("Reset() error with level %v: %v", level, err)
-				return
-			}
-			decrypted, err := enigma.Decrypt(encrypted)
-			if err != nil {
-				t.Errorf("Decrypt() error with level %v: %v", level, err)
-				return
-			}
-
-			if decrypted != plaintext {
-				t.Errorf("Round-trip failed for level %v: %s -> %s -> %s",
-					level, plaintext, encrypted, decrypted)
-			}
-		})
 	}
 }

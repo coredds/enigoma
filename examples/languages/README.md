@@ -23,18 +23,18 @@ ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
 ### 🇬🇷 `greek-simple.json` - Greek Alphabet
 - **Character Set**: Greek alphabet (upper and lowercase)
-- **Size**: 72 characters  
-- **Includes**: Α-Ω, α-ω, basic punctuation
+- **Size**: 48 characters
+- **Includes**: Α-Ω, α-ω (no spaces, punctuation or accents)
 - **Use Case**: Greek text encryption
 
 ```bash
 # Example usage
-enigoma encrypt --text "Γεια σας κόσμε!" --config examples/languages/greek-simple.json
+enigoma encrypt --text "ΚαλημεραΚοσμε" --config examples/languages/greek-simple.json
 ```
 
 **Supported Characters**:
 ```
-ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψω .,!?;:-'"()
+ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψω
 ```
 
 ### 🌍 `mixed-alphabet-extreme.json` - Multi-Character Set
@@ -45,7 +45,7 @@ enigoma encrypt --text "Γεια σας κόσμε!" --config examples/languages
 
 ```bash
 # Example usage  
-enigoma encrypt --text "Password123!" --config examples/languages/mixed-alphabet-extreme.json
+enigoma encrypt --text "Password123" --config examples/languages/mixed-alphabet-extreme.json
 ```
 
 ## Creating Language-Specific Configurations
@@ -54,9 +54,9 @@ enigoma encrypt --text "Password123!" --config examples/languages/mixed-alphabet
 
 ```go
 // Programmatic creation
-machine, err := enigma.New(
-    enigma.WithAlphabet(enigoma.AlphabetPortuguese),
-    enigma.WithRandomSettings(enigma.Medium),
+machine, err := enigoma.New(
+    enigoma.WithAlphabet(enigoma.AlphabetPortuguese),
+    enigoma.WithRandomComponents(5, 8), // 5 rotors, 8 plug pairs
 )
 
 // CLI generation
@@ -87,7 +87,7 @@ enigoma keygen --security medium --output custom-lang.json
 | English | `AlphabetLatinUpper` | 26 | Historical simulation |
 | Portuguese | `AlphabetPortuguese` | 88 | Full accent support |
 | Greek | `AlphabetGreek` | 48 | Academic texts |
-| ASCII | `AlphabetASCIIPrintable` | 95 | Programming, mixed content |
+| ASCII | `AlphabetASCIIPrintable` | 96 | Programming, mixed content |
 | Numbers | `AlphabetDigits` | 10 | Numeric data only |
 
 ## Example Text Samples
@@ -125,26 +125,26 @@ enigoma encrypt --text "Olá mundo!" --config examples/languages/portuguese-basi
 enigoma decrypt --config examples/languages/portuguese-basic.json
 
 # Show character mappings
-enigoma config --show examples/languages/greek-simple.json --detailed
+enigoma config --show examples/languages/greek-simple.json
 ```
 
 ## Common Issues and Solutions
 
 ### Character Not In Alphabet
 ```
-Error: character 'ñ' not found in alphabet
+Error: character 'ñ' at offset 4 is not in the alphabet
 ```
 **Solution**: Add missing characters to the alphabet or use a configuration that includes them.
 
 ### Alphabet Size Mismatch  
 ```
-Error: mapping length (50) must match alphabet size (48)
+Error: rotor 1 (I): wiring must be a permutation of the alphabet
 ```
-**Solution**: Ensure rotor and reflector mappings match alphabet size exactly.
+**Solution**: Each rotor wiring must use every alphabet character exactly once.
 
 ### Reflector Requirements
 ```
-Error: reflector mapping must have even length
+Error: alphabet size 49 must be even (the reflector pairs every character)
 ```
 **Solution**: Ensure alphabet has even number of characters for reflector compatibility.
 

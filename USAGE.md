@@ -1,228 +1,156 @@
-# enigoma Usage Guide
+# enigoma CLI reference
 
-## Auto-Detection
+## Choosing a machine
 
-The easiest way to use enigoma: just encrypt any text in any language.
+`encrypt`, `decrypt` and `tui` pick the machine from the first source given:
+
+| Source | Flags | Deterministic? |
+|---|---|---|
+| Saved configuration | `--config FILE` (`-c`) | yes |
+| Historical preset | `--preset m3` or `--preset m4` | yes |
+| Random preset | `--preset low\|medium\|high\|extreme` | no |
+| Random machine | `--alphabet NAME --security LEVEL` (encrypt only) | no |
+| Auto-config | `--auto-config FILE` (encrypt only) | no, saved to FILE |
+
+These override any source:
+
+| Flag | Example | Meaning |
+|---|---|---|
+| `--positions` | `ADU` | Starting rotor positions, one letter per rotor, left to right |
+| `--rings` | `BUL` | Ring settings, one letter per rotor |
+| `--plugboard` | `"AB CD EF"` | Plugboard pairs |
+
+A random machine cannot be recreated. `encrypt` therefore refuses to run with
+one unless it is saved (`--save-config FILE` or `--auto-config FILE`), and
+`decrypt` refuses random sources altogether.
+
+## encrypt
 
 ```bash
-# Works automatically with any language!
-enigoma encrypt --text "Olá mundo! Como você está?"
-enigoma encrypt --text "Mixed: Hello! Привет! 日本語!"
-enigoma encrypt --text "Symbols: αβγ δεζ 🙂 test!"
+enigoma encrypt --text "Olá, mundo!" --auto-config pt-key.json
+enigoma encrypt --file report.txt --config key.json --output report.enc
+echo "HELLO" | enigoma encrypt --preset m3 --positions QEV
+enigoma encrypt --text "TOPSECRET" --preset high --save-config key.json
 ```
 
-Note: The default alphabet is auto-detected (equivalent to --alphabet=auto). No need to specify alphabets; enigoma automatically detects the optimal character set from your text.
+| Flag | Default | Meaning |
+|---|---|---|
+| `--text`, `-t` / `--file`, `-f` | stdin | Input |
+| `--output`, `-o` | stdout | Output file (written with mode 0600) |
+| `--alphabet`, `-a` | `auto` | `auto`, `latin`, `latin-lower`, `greek`, `cyrillic`, `portuguese`, `ascii`, `alphanumeric`, `digits` |
+| `--security`, `-s` | `medium` | Random machine size: `low` (3 rotors, 2 plug pairs), `medium` (5, 8), `high` (8, 15), `extreme` (12, 20) |
+| `--auto-config` | | Detect the alphabet from the input, generate a machine, save it |
+| `--save-config` | | Save the machine (before encrypting) |
+| `--format` | `text` | Output encoding: `text`, `hex`, `base64` |
+| `--remove-spaces`, `--uppercase`, `--letters-only`, `--alphanumeric-only` | | Preprocess the input |
+| `--dry-run` | | Describe what would happen |
+| `--verbose`, `-v` | | Details on stderr |
 
-## Brazilian Portuguese Support
+With `--file` or stdin, one trailing line ending is dropped when the alphabet
+cannot encode it, so `echo HELLO | enigoma encrypt --preset m3` works.
+`--auto-config` keeps the text exactly (line endings included).
 
-enigoma includes **built-in support for Brazilian Portuguese** with both auto-detection and the `AlphabetPortuguese` predefined alphabet.
+Characters outside the machine's alphabet are an error. The message suggests
+preprocessing flags or `--auto-config`.
 
-### Quick Start with Portuguese
+## decrypt
 
-```go
-package main
+```bash
+enigoma decrypt --text "CIPHERTEXT" --config key.json
+enigoma decrypt --file report.enc --config key.json --format base64
+enigoma decrypt --text "BDZGO" --preset m3
+```
 
-import (
-    "fmt"
-    "log"
+Same input, output, preprocessing and override flags as `encrypt`; `--format`
+describes the input encoding.
 
-    "github.com/coredds/enigoma"
-)
+## tui
 
-func main() {
-    // Create Enigma machine with Portuguese alphabet
-    machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetPortuguese)
-    if err != nil {
-        log.Fatal(err)
-    }
+```bash
+enigoma tui
+enigoma tui --preset m4 --positions AADU
+enigoma tui --config key.json
+```
 
-    // Your message with full Portuguese accents
-    message := "Hoje eu fui almoçar na casa da vovó."
-    
-    // Encrypt
-    encrypted, err := machine.Encrypt(message)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("Encrypted: %s\n", encrypted)
+Accepts `--config`, `--preset m3|m4`, `--positions`, `--rings`, `--plugboard`.
+Defaults to M3 at AAA.
 
-    // Decrypt
-    machine.Reset()
-    decrypted, err := machine.Decrypt(encrypted)
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("Decrypted: %s\n", decrypted)
-    
-    // Perfect round-trip with all accents preserved!
+| Key | Action |
+|---|---|
+| any alphabet character | press the key (upper-cased when the alphabet has no lowercase letters) |
+| Enter | press newline, if the alphabet has it (newline and space are shown as ⏎ and ␣) |
+| Backspace | undo the last keypress |
+| Ctrl+R | reset rotors and tapes |
+| Tab | group the tapes in fives |
+| Esc, Ctrl+C | quit |
+
+## keygen
+
+```bash
+enigoma keygen --security high --output key.json
+enigoma keygen --alphabet greek --rotors 6 --plugboard-pairs 10
+enigoma keygen --preset m3 --seed 42 --describe
+```
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `--preset`, `-p` | | Start from a preset |
+| `--alphabet`, `-a` | `latin` | Alphabet for random machines |
+| `--security`, `-s` | `medium` | Machine size |
+| `--rotors`, `-r` / `--plugboard-pairs` | | Override the counts from `--security` |
+| `--random-positions` | `true` | Randomize the starting positions |
+| `--seed` | | Derive the starting positions from a seed (deterministic) |
+| `--output`, `-o` / `--save-to` | stdout | Output file |
+| `--describe`, `-d` | | Print a summary |
+
+## preset
+
+```bash
+enigoma preset --list
+enigoma preset --describe all
+enigoma preset --export m4 --output m4.json
+```
+
+## config
+
+```bash
+enigoma config --validate key.json
+enigoma config --show key.json
+enigoma config --test key.json --text "HELLO"
+enigoma config --convert key.json --output normalized.json
+```
+
+## Configuration files
+
+Configuration files are JSON, schema version 2
+([`schemas/config.v2.schema.json`](schemas/config.v2.schema.json)):
+
+```json
+{
+  "schema_version": 2,
+  "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+  "rotors": [
+    {"name": "I", "wiring": "EKMFLGDQVZNTOWYHXUSPAIBRCJ", "notches": "Q", "ring": "A", "position": "A"},
+    {"name": "II", "wiring": "AJDKSIRUXBLHWTMCQGZNPYFVOE", "notches": "E", "ring": "A", "position": "A"},
+    {"name": "III", "wiring": "BDFHJLCPRTXVZNYEIWGAKMUSQO", "notches": "V", "ring": "A", "position": "A"}
+  ],
+  "reflector": {"name": "B", "wiring": "YRUHQSLDPXNGOKMIEBFZCWVJAT"},
+  "plugboard": "AB CD"
 }
 ```
 
-### Portuguese Alphabet Features
+Files from enigoma 0.6 and earlier (schema v1) are rejected: the 0.7 stepping
+fix changes the cipher, so old keys would silently decrypt to garbage.
 
-- **88 characters total** (even number for reflector compatibility)
-- **Full accent support**: à, á, â, ã, ç, é, ê, í, ó, ô, õ, ú (uppercase and lowercase)
-- **Complete Latin alphabet**: A-Z, a-z
-- **Common punctuation**: space, period, comma, exclamation, question mark, etc.
+## Alphabets and languages
 
-### Supported Characters
-
-The `AlphabetPortuguese` includes:
-
-```
-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-ÀÁÂÃÇÉÊÍÓÔÕÚàáâãçéêíóôõú .,!?;:-'"()
-```
-
-### Test Your Portuguese Text
-
-```go
-// All these phrases work perfectly:
-phrases := []string{
-    "Olá, como você está?",
-    "Bom dia! Está tudo bem?", 
-    "Vamos à praia amanhã.",
-    "Não posso ir à reunião.",
-    "São Paulo é uma cidade incrível!",
-    "Brasília é a capital do Brasil.",
-    "Açúcar, café e pão de açúcar.",
-}
-```
-
-## Other Languages
-
-### Greek Example
-```go
-machine, err := enigoma.NewEnigmaSimple(enigoma.AlphabetGreek)
-message := "Αβγδε ζητα" // Greek text
-```
-
-### Custom Language Support
-```go
-// Create alphabet for any language
-customAlphabet := []rune{
-    'A', 'B', 'C', /* your characters */
-    'ñ', 'ü', 'ß', /* special characters */
-    ' ', '.', '!',  /* punctuation */
-}
-
-machine, err := enigoma.New(enigoma.WithAlphabet(customAlphabet))
-```
-
-## Advanced Portuguese Usage
-
-### Security Levels with Portuguese
-```go
-machine, err := enigoma.New(
-    enigoma.WithAlphabet(enigoma.AlphabetPortuguese),
-    enigoma.WithRandomSettings(enigoma.High), // High security
-)
-```
-
-### Save/Load Portuguese Settings
-```go
-// Save Portuguese machine configuration
-jsonData, err := machine.SaveSettingsToJSON()
-
-// Later: restore exact same configuration
-newMachine, err := enigoma.NewFromJSON(jsonData)
-```
-
-## Example Configurations
-
-The [`examples/`](./examples/) directory contains ready-to-use configuration files:
-
-### Portuguese Examples
-```bash
-# Use the Portuguese configuration example
-enigoma encrypt --text "Bom dia, Brasil!" --auto-config pt-key.json
-enigoma decrypt --text "ENCRYPTED" --config pt-key.json
-
-# Generate your own Portuguese configuration
-enigoma keygen --alphabet portuguese --security medium --output my-portuguese.json
-```
-
-### Other Language Examples
-```bash
-# Greek text encryption
-enigoma encrypt --text "Γεια σας!" --config examples/languages/greek-simple.json
-
-# Mixed character sets
-enigoma encrypt --text "Password123!" --config examples/languages/mixed-alphabet-extreme.json
-```
-
-### Security Examples
-```bash
-# Document protection
-enigoma encrypt --file document.txt --config examples/use-cases/document-protection.json
-
-# High security communication
-enigoma encrypt --text "TOP SECRET" --config examples/security-levels/extreme-key.json
-
-# Historical simulation
-enigoma encrypt --text "ENIGMA MACHINE" --config examples/use-cases/historical-simulation.json
-```
-
-Browse all examples: [`examples/README.md`](./examples/README.md)
-
----
-
-Brazilian Portuguese is now a first-class citizen in enigoma.
-
-## CLI: Stdin and Encoding Examples
+Auto-detection (`--auto-config`, or `--alphabet auto`) builds an alphabet from
+the characters in your text, so any language or mix of scripts works:
 
 ```bash
-# Stdin encryption (auto-detected alphabet by default)
-echo "Hello via stdin" | enigoma encrypt --auto-config my-key.json
-
-# Base64 output and decrypt
-enigoma encrypt --text "Hello" --auto-config my-key.json --format base64
-enigoma decrypt --text "SGVsbG8=" --config my-key.json --format base64
-
-# Hex output and decrypt
-enigoma encrypt --text "Hello" --auto-config my-key.json --format hex
-enigoma decrypt --text "48656c6c6f" --config my-key.json --format hex
+enigoma encrypt --text "Mixed: Hello! Привет! 日本語! 🙂" --auto-config mixed.json
 ```
 
-## Presets and decryptability
-
-Presets (e.g., `classic`, `high`, `extreme`) generate a random configuration on each run. If you encrypt with a preset and want to decrypt later, save the configuration and reuse it:
-
-```bash
-# Save configuration during encryption
-enigoma encrypt --text "TOP SECRET" --preset high --save-config my-key.json
-
-# Later, decrypt with the same saved configuration
-enigoma decrypt --text "ENCRYPTED_OUTPUT" --config my-key.json
-```
-
-## Configuration schema
-
-Saved configuration files include a `schema_version` field. This allows the project to evolve the configuration format safely over time.
-
-### Configuration Validation
-
-enigoma provides a configuration validation feature to ensure your configuration files are valid:
-
-```bash
-# Validate a configuration file
-enigoma config --validate my-key.json
-```
-
-This will check that:
-1. The JSON is well-formed
-2. The configuration follows the schema
-3. All required fields are present
-4. Field types are correct
-
-If validation succeeds, you'll see:
-```
-Configuration is VALID
-   Schema Version: 1
-   Alphabet Size: 26 characters
-   Rotors: 5
-   Plugboard Pairs: 8
-   Current Rotor Positions: [16 20 24 14 9]
-```
-
-If validation fails, you'll see detailed error messages to help you fix the issues.
+Predefined alphabets give a fixed character set that every message under one
+key can use, for example `--alphabet portuguese` (letters, accents, space and
+punctuation: `Hoje eu fui almoçar na casa da vovó.` works as is).

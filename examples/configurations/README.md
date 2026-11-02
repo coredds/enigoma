@@ -43,34 +43,31 @@ For completely custom setups, you can manually create configuration files follow
 
 ```json
 {
-  "alphabet": "your custom character set",
-  "rotor_specs": [
+  "schema_version": 2,
+  "alphabet": "characters the machine uses (unique, even count)",
+  "rotors": [
     {
-      "id": "CustomRotor1",
-      "forward_mapping": "custom mapping string matching alphabet length",
-      "notches": [array of notch positions],
-      "position": 0,
-      "ring_setting": 0
+      "name": "rotor name",
+      "wiring": "permutation of the alphabet",
+      "notches": "letters at which the rotor turns over its left neighbour",
+      "ring": "ring setting letter",
+      "position": "starting position letter",
+      "fixed": false
     }
   ],
-  "reflector_spec": {
-    "id": "CustomReflector",
-    "mapping": "reflector mapping (must be reciprocal)"
-  },
-  "plugboard_pairs": {
-    "A": "Z",
-    "Z": "A"
-  },
-  "current_rotor_positions": [0, 0, 0]
+  "reflector": {"name": "reflector name", "wiring": "reciprocal mapping, no letter to itself"},
+  "plugboard": "AB CD"
 }
 ```
+
+See [`schemas/config.v2.schema.json`](../schemas/config.v2.schema.json) for the full schema.
 
 ## Validation
 
 Always validate custom configurations:
 
 ```bash
-enigoma config --validate your-custom-config.json --detailed
+enigoma config --validate your-custom-config.json
 ```
 
 ---

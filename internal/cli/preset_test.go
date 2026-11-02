@@ -1,234 +1,164 @@
-// Package cli provides unit tests for preset functionality.
-//
 // Copyright (c) 2025-2026 David Duarte
 // Licensed under the MIT License
+
 package cli
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/coredds/enigoma"
 )
 
-// TestGetAvailablePresets tests that all presets are properly defined.
-func TestGetAvailablePresets(t *testing.T) {
-	presets := getAvailablePresets()
-
-	if len(presets) == 0 {
-		t.Error("No presets available")
-	}
-
-	expectedPresets := []string{"classic", "simple", "high", "extreme"}
-	presetMap := make(map[string]bool)
-
-	for _, preset := range presets {
-		presetMap[preset.Name] = true
-
-		// Validate preset structure
-		if preset.Name == "" {
-			t.Error("Preset has empty name")
-		}
-		if preset.Description == "" {
-			t.Errorf("Preset %s has empty description", preset.Name)
-		}
-		if preset.RotorCount <= 0 {
-			t.Errorf("Preset %s has invalid rotor count: %d", preset.Name, preset.RotorCount)
-		}
-		if preset.PlugboardPairs < 0 {
-			t.Errorf("Preset %s has negative plugboard pairs: %d", preset.Name, preset.PlugboardPairs)
-		}
-		if preset.AlphabetSize <= 0 {
-			t.Errorf("Preset %s has invalid alphabet size: %d", preset.Name, preset.AlphabetSize)
-		}
-	}
-
-	// Check that all expected presets exist
-	for _, expected := range expectedPresets {
-		if !presetMap[expected] {
-			t.Errorf("Expected preset %s not found", expected)
-		}
+func TestPresetMachine(t *testing.T) {
+	for _, p := range getAvailablePresets() {
+		t.Run(p.Name, func(t *testing.T) {
+			m, random, err := presetMachine(p.Name)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if random != p.Random {
+				t.Errorf("random = %v, want %v", random, p.Random)
+			}
+			s := m.Settings()
+			if len(s.Rotors) != p.RotorCount {
+				t.Errorf("rotors = %d, want %d", len(s.Rotors), p.RotorCount)
+			}
+			dec := m.Clone()
+			ct, err := m.Encrypt("HELLO")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if pt, _ := dec.Decrypt(ct); pt != "HELLO" {
+				t.Errorf("round trip = %q", pt)
+			}
+		})
 	}
 }
 
-// TestFindPreset tests the preset lookup functionality.
 func TestFindPreset(t *testing.T) {
-	tests := []struct {
-		name     string
-		preset   string
-		expected bool
-	}{
-		{"find classic", "classic", true},
-		{"find simple", "simple", true},
-		{"find high", "high", true},
-		{"find extreme", "extreme", true},
-		{"find classic case insensitive", "CLASSIC", true},
-		{"find nonexistent", "nonexistent", false},
-		{"find empty", "", false},
+	if findPreset("M3") == nil || findPreset("extreme") == nil {
+		t.Error("expected m3 and extreme presets (case-insensitive)")
 	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			preset := findPreset(tt.preset)
-			found := preset != nil
-
-			if found != tt.expected {
-				t.Errorf("findPreset(%q) found=%v, expected=%v", tt.preset, found, tt.expected)
-			}
-
-			if found && preset.Name != tt.preset && !strings.EqualFold(preset.Name, tt.preset) {
-				// Account for case insensitive matching
-				if !strings.EqualFold(preset.Name, tt.preset) {
-					t.Errorf("findPreset(%q) returned wrong preset: %s", tt.preset, preset.Name)
-				}
-			}
-		})
+	if findPreset("classic") != nil || findPreset("simple") != nil {
+		t.Error("classic and simple presets were removed")
 	}
 }
 
-// TestCreateMachineFromPreset tests that all presets can create valid machines.
-func TestCreateMachineFromPreset(t *testing.T) {
-	presets := getAvailablePresets()
-
-	for _, preset := range presets {
-		t.Run("create_"+preset.Name, func(t *testing.T) {
-			machine, err := createMachineFromPreset(preset.Name)
-			if err != nil {
-				t.Errorf("Failed to create machine from preset %s: %v", preset.Name, err)
-				return
-			}
-
-			// Verify machine properties match preset specifications
-			if machine.GetAlphabetSize() != preset.AlphabetSize {
-				t.Errorf("Preset %s: alphabet size mismatch. Expected %d, got %d",
-					preset.Name, preset.AlphabetSize, machine.GetAlphabetSize())
-			}
-
-			if machine.GetRotorCount() != preset.RotorCount {
-				t.Errorf("Preset %s: rotor count mismatch. Expected %d, got %d",
-					preset.Name, preset.RotorCount, machine.GetRotorCount())
-			}
-
-			if machine.GetPlugboardPairCount() != preset.PlugboardPairs {
-				t.Errorf("Preset %s: plugboard pairs mismatch. Expected %d, got %d",
-					preset.Name, preset.PlugboardPairs, machine.GetPlugboardPairCount())
-			}
-
-			// Test that the machine can actually encrypt/decrypt
-			testText := "HELLO"
-			encrypted, err := machine.Encrypt(testText)
-			if err != nil {
-				t.Errorf("Preset %s: encryption failed: %v", preset.Name, err)
-				return
-			}
-
-			// Reset and decrypt
-			if err := machine.Reset(); err != nil {
-				t.Fatalf("Reset failed: %v", err)
-			}
-			decrypted, err := machine.Decrypt(encrypted)
-			if err != nil {
-				t.Errorf("Preset %s: decryption failed: %v", preset.Name, err)
-				return
-			}
-
-			if decrypted != testText {
-				t.Errorf("Preset %s: round-trip failed. Expected %q, got %q",
-					preset.Name, testText, decrypted)
-			}
-		})
+func TestPresetList(t *testing.T) {
+	out, err := run(t, "preset", "--list")
+	if err != nil {
+		t.Fatal(err)
 	}
-}
-
-// TestPresetComplexityProgression tests that presets have increasing complexity.
-func TestPresetComplexityProgression(t *testing.T) {
-	presets := getAvailablePresets()
-
-	// Create a map for easy lookup
-	presetMap := make(map[string]PresetInfo)
-	for _, preset := range presets {
-		presetMap[preset.Name] = preset
-	}
-
-	// Define expected complexity progression
-	progression := []string{"classic", "simple", "high", "extreme"}
-
-	for i := 1; i < len(progression); i++ {
-		current := presetMap[progression[i]]
-		previous := presetMap[progression[i-1]]
-
-		// Current should have more or equal rotors
-		if current.RotorCount < previous.RotorCount {
-			t.Errorf("Preset %s should have >= rotors than %s. Got %d vs %d",
-				current.Name, previous.Name, current.RotorCount, previous.RotorCount)
+	for _, name := range []string{"m3", "m4", "low", "medium", "high", "extreme"} {
+		if !strings.Contains(out, name) {
+			t.Errorf("list missing %s:\n%s", name, out)
 		}
-
-		// Current should have more or equal plugboard pairs
-		if current.PlugboardPairs < previous.PlugboardPairs {
-			t.Errorf("Preset %s should have >= plugboard pairs than %s. Got %d vs %d",
-				current.Name, previous.Name, current.PlugboardPairs, previous.PlugboardPairs)
+	}
+	for _, gone := range []string{"classic", "simple"} {
+		if strings.Contains(out, gone) {
+			t.Errorf("list still mentions %s", gone)
 		}
 	}
 }
 
-// TestBoolToYesNo tests the utility function.
-func TestBoolToYesNo(t *testing.T) {
-	tests := []struct {
-		input    bool
-		expected string
-	}{
-		{true, "Yes"},
-		{false, "No"},
+func TestPresetDescribe(t *testing.T) {
+	out, err := run(t, "preset", "--describe", "m4")
+	if err != nil || !strings.Contains(out, "Beta") {
+		t.Errorf("describe m4: %v\n%s", err, out)
 	}
-
-	for _, tt := range tests {
-		result := boolToYesNo(tt.input)
-		if result != tt.expected {
-			t.Errorf("boolToYesNo(%v) = %q, expected %q", tt.input, result, tt.expected)
-		}
+	if _, err := run(t, "preset", "--describe", "classic"); err == nil {
+		t.Error("describe classic should fail")
 	}
 }
 
-// TestPresetExport tests that presets can be exported to JSON.
-func TestPresetExport(t *testing.T) {
-	presets := getAvailablePresets()
+func TestPresetExport_M3(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "m3.json")
+	if _, err := run(t, "preset", "--export", "m3", "--output", path); err != nil {
+		t.Fatal(err)
+	}
+	m, err := loadConfig(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out, _ := m.Encrypt("AAAAA"); out != "BDZGO" {
+		t.Errorf("exported m3 encrypts AAAAA to %s", out)
+	}
+	// M4 with Beta at A encrypts like M3, so also check the rotor set.
+	var names []string
+	for _, r := range m.Settings().Rotors {
+		names = append(names, r.Name)
+	}
+	if got := strings.Join(names, " "); got != "I II III" {
+		t.Errorf("exported rotors = %q, want %q", got, "I II III")
+	}
+}
 
-	for _, preset := range presets {
-		t.Run("export_"+preset.Name, func(t *testing.T) {
-			machine, err := createMachineFromPreset(preset.Name)
-			if err != nil {
-				t.Errorf("Failed to create machine from preset %s: %v", preset.Name, err)
-				return
-			}
+func TestKeygen_SeedDeterministic(t *testing.T) {
+	a, err := run(t, "keygen", "--preset", "m3", "--seed", "42")
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, _ := run(t, "keygen", "--preset", "m3", "--seed", "42")
+	c, _ := run(t, "keygen", "--preset", "m3", "--seed", "43")
+	if a != b {
+		t.Error("same seed produced different configurations")
+	}
+	if a == c {
+		t.Error("different seeds produced identical configurations")
+	}
+	s, err := enigoma.ParseSettings([]byte(a))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if s.Rotors[0].Position+s.Rotors[1].Position+s.Rotors[2].Position == "AAA" {
+		t.Error("seeded positions should not all be A (seed 42)")
+	}
+}
 
-			jsonData, err := machine.SaveSettingsToJSON()
-			if err != nil {
-				t.Errorf("Failed to export preset %s to JSON: %v", preset.Name, err)
-				return
-			}
+func TestKeygen_Counts(t *testing.T) {
+	out, err := run(t, "keygen", "--alphabet", "greek", "--rotors", "6", "--plugboard-pairs", "10")
+	if err != nil {
+		t.Fatal(err)
+	}
+	s, err := enigoma.ParseSettings([]byte(out))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(s.Rotors) != 6 || len(strings.Fields(s.Plugboard)) != 10 || s.Alphabet != enigoma.AlphabetGreek {
+		t.Errorf("rotors=%d pairs=%d alphabet=%q", len(s.Rotors), len(strings.Fields(s.Plugboard)), s.Alphabet)
+	}
+	if _, err := run(t, "keygen", "--alphabet", "klingon"); err == nil {
+		t.Error("unknown alphabet should fail")
+	}
+}
 
-			if jsonData == "" {
-				t.Errorf("Preset %s produced empty JSON export", preset.Name)
-				return
-			}
+func TestConfigValidate_V1(t *testing.T) {
+	path := writeFile(t, "old.json", v1Config)
+	_, err := run(t, "config", "--validate", path)
+	if err == nil || !strings.Contains(err.Error(), v1Message) || !strings.Contains(err.Error(), "enigoma keygen") {
+		t.Errorf("got %v", err)
+	}
+	if _, err := run(t, "config", "--convert", path, "--output", filepath.Join(t.TempDir(), "x.json")); err == nil || !strings.Contains(err.Error(), v1Message) {
+		t.Errorf("convert v1: %v", err)
+	}
+}
 
-			// Verify the JSON can be imported back
-			importedMachine, err := enigoma.NewFromJSON(jsonData)
-			if err != nil {
-				t.Errorf("Failed to import JSON for preset %s: %v", preset.Name, err)
-				return
-			}
-
-			// Verify imported machine has same properties
-			if importedMachine.GetAlphabetSize() != machine.GetAlphabetSize() {
-				t.Errorf("Preset %s: imported alphabet size mismatch", preset.Name)
-			}
-			if importedMachine.GetRotorCount() != machine.GetRotorCount() {
-				t.Errorf("Preset %s: imported rotor count mismatch", preset.Name)
-			}
-			if importedMachine.GetPlugboardPairCount() != machine.GetPlugboardPairCount() {
-				t.Errorf("Preset %s: imported plugboard pairs mismatch", preset.Name)
-			}
-		})
+func TestConfigShow_V2(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "m4.json")
+	if _, err := run(t, "preset", "--export", "m4", "--output", path); err != nil {
+		t.Fatal(err)
+	}
+	out, err := run(t, "config", "--show", path)
+	if err != nil || !strings.Contains(out, "Beta I II III") || !strings.Contains(out, "Plugboard") {
+		t.Errorf("show: %v\n%s", err, out)
+	}
+	out, err = run(t, "config", "--test", path)
+	if err != nil || !strings.Contains(out, "passed") {
+		t.Errorf("test: %v\n%s", err, out)
+	}
+	if _, err := run(t, "config", "--validate", path); err != nil {
+		t.Errorf("validate: %v", err)
 	}
 }

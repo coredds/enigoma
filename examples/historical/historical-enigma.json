@@ -1,67 +1,32 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "rotor_specs": [
+  "rotors": [
     {
-      "id": "I",
-      "forward_mapping": "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
-      "notches": ["Q"],
-      "position": 0,
-      "ring_setting": 0
+      "name": "I",
+      "wiring": "EKMFLGDQVZNTOWYHXUSPAIBRCJ",
+      "notches": "Q",
+      "ring": "A",
+      "position": "A"
     },
     {
-      "id": "II",
-      "forward_mapping": "AJDKSIRUXBLHWTMCQGZNPYFVOE",
-      "notches": ["E"],
-      "position": 0,
-      "ring_setting": 0
+      "name": "II",
+      "wiring": "AJDKSIRUXBLHWTMCQGZNPYFVOE",
+      "notches": "E",
+      "ring": "A",
+      "position": "A"
     },
     {
-      "id": "III",
-      "forward_mapping": "BDFHJLCPRTXVZNYEIWGAKMUSQO",
-      "notches": ["V"],
-      "position": 0,
-      "ring_setting": 0
+      "name": "III",
+      "wiring": "BDFHJLCPRTXVZNYEIWGAKMUSQO",
+      "notches": "V",
+      "ring": "A",
+      "position": "A"
     }
   ],
-  "reflector_spec": {
-    "id": "B",
-    "mapping": {
-      "A": "Y",
-      "B": "R",
-      "C": "U",
-      "D": "H",
-      "E": "Q",
-      "F": "S",
-      "G": "L",
-      "H": "D",
-      "I": "P",
-      "J": "X",
-      "K": "N",
-      "L": "G",
-      "M": "O",
-      "N": "K",
-      "O": "M",
-      "P": "I",
-      "Q": "E",
-      "R": "B",
-      "S": "F",
-      "T": "Z",
-      "U": "C",
-      "V": "W",
-      "W": "V",
-      "X": "J",
-      "Y": "A",
-      "Z": "T"
-    }
+  "reflector": {
+    "name": "B",
+    "wiring": "YRUHQSLDPXNGOKMIEBFZCWVJAT"
   },
-  "plugboard_pairs": {},
-  "current_rotor_positions": [0, 0, 0],
-  "metadata": {
-    "description": "Historical M3 Enigma machine configuration",
-    "created_at": "2025-08-14T12:00:00Z",
-    "created_by": "enigoma CLI",
-    "preset": "m3",
-    "tags": ["historical", "m3", "enigma"]
-  }
+  "plugboard": ""
 }

@@ -1,129 +1,67 @@
 {
-  "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "rotor_specs": [
+  "schema_version": 2,
+  "alphabet": "\n !\"#$%\u0026'()*+,-./0123456789:;\u003c=\u003e?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~",
+  "rotors": [
     {
-      "id": "R1",
-      "forward_mapping": "SZBDUCXIFEAGHOMVWPRJKYQLTN",
-      "notches": [
-        68
-      ],
-      "position": 19,
-      "ring_setting": 17
+      "name": "R1",
+      "wiring": "(otL\u003e%nJv-a?\"uSl@Q#=M7]0fOczdeAVX~wPEqTy;3^xRH[i9\u00268Z2g\n*pF hj_K{:+s16$Gmb\\C/`!B'4D5U)I.,N|}W\u003ckrY",
+      "notches": "kh",
+      "ring": "t",
+      "position": "v"
     },
     {
-      "id": "R2",
-      "forward_mapping": "GVXENJMPILWOFQZDBTUHYKRCAS",
-      "notches": [
-        70,
-        78,
-        88
-      ],
-      "position": 4,
-      "ring_setting": 0
+      "name": "R2",
+      "wiring": "mjF?{;:GZ2Dr=s#BqC@}cEh47oA\u003eH*JpXiR5+0dbaN_w~Vl'U9 eWTvgYyM`\")$.6xn\n(OQzf\u003cI[P\u0026^1t!,S\\|-]LK/u%8k3",
+      "notches": "ND2",
+      "ring": "1",
+      "position": "J"
     },
     {
-      "id": "R3",
-      "forward_mapping": "OTHGAPWNVBMLKSCZUIJFXQDRYE",
-      "notches": [
-        88,
-        69
-      ],
-      "position": 6,
-      "ring_setting": 23
+      "name": "R3",
+      "wiring": " oe'\u003c|FuU9kL$~arNOA56G8;s!y+,S*hD[B?7)-Q:CHlq\u003eM(/W_J^=K4I{}RtZz`0%\\@idpn2\nbEgc\u0026v#\"XxYVT]1fw.Pjm3",
+      "notches": "^",
+      "ring": "\\",
+      "position": "%"
     },
     {
-      "id": "R4",
-      "forward_mapping": "DYUGWIVSTQHMXEZCLAFKBJPONR",
-      "notches": [
-        75,
-        72,
-        81
-      ],
-      "position": 18,
-      "ring_setting": 7
+      "name": "R4",
+      "wiring": "H\\W\u0026JFx_:t9vcN5Mykn!4VS]-LOXUBs.Q{ Cu%~g2/ar*fTohz,A`jD\u003c^8lEm?|#\u003eeI\n}+0iK$=)@R\"6GPw[dYZqb(;p'371",
+      "notches": "pk",
+      "ring": "W",
+      "position": "g"
     },
     {
-      "id": "R5",
-      "forward_mapping": "ALKBOEMHRWVCXNYDZSUGJPFQIT",
-      "notches": [
-        66,
-        78,
-        83
-      ],
-      "position": 24,
-      "ring_setting": 24
+      "name": "R5",
+      "wiring": "YEg*#}3Rx1P?5z'hp\u003eT)ZF,\n~0Q=L\"KA!7@O-wt\u003cq/fXBVGWos]r_k^M6`dev[+lb:29ncS\\\u0026am H%DC4UI|N.8J$(uj{;iy",
+      "notches": "GH",
+      "ring": "=",
+      "position": "E"
     },
     {
-      "id": "R6",
-      "forward_mapping": "REGUYVNLAPJZKIXWMCTDOHQFBS",
-      "notches": [
-        89,
-        69
-      ],
-      "position": 20,
-      "ring_setting": 6
+      "name": "R6",
+      "wiring": "\"ePpj4nMUVX\\lA1I#8z65f\u003ew!{Zk$?+RD]~7\u0026E3*@}BKsa^/T-v'=,r9:2H[L(xo|\nN);`cdut.Qq0ygG_bS\u003c O%CWmYihFJ",
+      "notches": "T",
+      "ring": "g",
+      "position": "M"
     },
     {
-      "id": "R7",
-      "forward_mapping": "QPLNGHZEXJKDSMYUOIWVATFCBR",
-      "notches": [
-        75
-      ],
-      "position": 19,
-      "ring_setting": 18
+      "name": "R7",
+      "wiring": "Lf+ZT|YN~_87\u0026*!\ng@].n\"'O^trU1,j-#Be[Csa?253P\u003e%:d }ySzR\u003cvJ;{)VbF0=wxWoh\\qG9/`HpklMQ4I($6uicmDXAEK",
+      "notches": "ja",
+      "ring": "x",
+      "position": "|"
     },
     {
-      "id": "R8",
-      "forward_mapping": "MXLHCYRKVNBQIFTJSGWDPUOAEZ",
-      "notches": [
-        70,
-        73,
-        87
-      ],
-      "position": 12,
-      "ring_setting": 20
+      "name": "R8",
+      "wiring": "@Mp#IagqXW_}\\9(UJ!0H^mT5\u003e.\u0026hP8S\u003cf:u/Z\"Rw%C$2`?xbO~tFc- '=By]+n,1D{rKd)kYoAVvE\n67N4z3|iL[Gl;js*eQ",
+      "notches": "z@K",
+      "ring": "i",
+      "position": "s"
     }
   ],
-  "reflector_spec": {
-    "id": "UKW",
-    "mapping": "HYJVTKOAPCFSWQGINXLEZDMRBU"
+  "reflector": {
+    "name": "UKW",
+    "wiring": "-5(3'@1E#!:UGe\n9gt%C\"n \u003eSQ.)Ac}6J$;[2p\u0026b+s^?Vm`WZk8{7X*KNToOBuhIlMjF\u003c|,~/]raP_L4YDwiH0\\xqvzyRd=f"
   },
-  "plugboard_pairs": {
-    "A": "C",
-    "B": "L",
-    "C": "A",
-    "D": "S",
-    "E": "H",
-    "F": "I",
-    "G": "R",
-    "H": "E",
-    "I": "F",
-    "J": "P",
-    "K": "O",
-    "L": "B",
-    "M": "Y",
-    "N": "Q",
-    "O": "K",
-    "P": "J",
-    "Q": "N",
-    "R": "G",
-    "S": "D",
-    "T": "W",
-    "U": "V",
-    "V": "U",
-    "W": "T",
-    "X": "Z",
-    "Y": "M",
-    "Z": "X"
-  },
-  "current_rotor_positions": [
-    19,
-    4,
-    6,
-    18,
-    24,
-    20,
-    19,
-    12
-  ]
+  "plugboard": "!\" *\\ -~ 1q 4| 7h 9@ Aw Bz Jx N] Oo VY [c l}"
 }

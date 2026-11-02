@@ -244,7 +244,7 @@ func (p *Plugboard) PairCount() int {
 }
 
 // Clone creates a deep copy of the plugboard.
-func (p *Plugboard) Clone() (*Plugboard, error) {
+func (p *Plugboard) Clone() *Plugboard {
 	clone := &Plugboard{
 		alphabet: p.alphabet,
 		mapping:  make(map[int]int),
@@ -255,5 +255,5 @@ func (p *Plugboard) Clone() (*Plugboard, error) {
 		clone.mapping[k] = v
 	}
 
-	return clone, nil
+	return clone
 }

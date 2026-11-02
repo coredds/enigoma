@@ -23,6 +23,7 @@ type Rotor struct {
 	position    int
 	ringSetting int
 	size        int
+	fixed       bool
 }
 
 // NewRotor creates a new rotor with the specified parameters.
@@ -106,7 +107,8 @@ func RandomRotor(id string, alph *alphabet.Alphabet) (*Rotor, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate random notch count: %w", err)
 	}
-	numNotches := int(numNotchesBig.Int64()) + 1
+	// Notches must be distinct, so tiny alphabets cannot have more than size.
+	numNotches := min(int(numNotchesBig.Int64())+1, size)
 
 	notches := make([]rune, numNotches)
 	notchPositions := make(map[int]bool)
@@ -177,6 +179,16 @@ func (r *Rotor) IsAtNotch() bool {
 	return false
 }
 
+// SetFixed marks the rotor as non-stepping (e.g. the M4 Beta/Gamma thin rotors).
+func (r *Rotor) SetFixed(fixed bool) {
+	r.fixed = fixed
+}
+
+// IsFixed reports whether the rotor never steps.
+func (r *Rotor) IsFixed() bool {
+	return r.fixed
+}
+
 // Step advances the rotor position by one.
 func (r *Rotor) Step() {
 	r.position = (r.position + 1) % r.size
@@ -222,6 +234,7 @@ func (r *Rotor) Clone() *Rotor {
 		position:    r.position,
 		ringSetting: r.ringSetting,
 		size:        r.size,
+		fixed:       r.fixed,
 	}
 }
 
@@ -232,6 +245,7 @@ type RotorSpec struct {
 	Notches        []rune `json:"notches"`
 	Position       int    `json:"position"`
 	RingSetting    int    `json:"ring_setting"`
+	Fixed          bool   `json:"fixed,omitempty"`
 }
 
 // CreateFromSpec creates a rotor from a specification.
@@ -243,6 +257,7 @@ func CreateFromSpec(spec RotorSpec, alph *alphabet.Alphabet) (*Rotor, error) {
 
 	r.SetPosition(spec.Position)
 	r.SetRingSetting(spec.RingSetting)
+	r.SetFixed(spec.Fixed)
 
 	return r, nil
 }
@@ -274,5 +289,6 @@ func ToSpec(r *Rotor, alph *alphabet.Alphabet) (RotorSpec, error) {
 		Notches:        notches,
 		Position:       r.position,
 		RingSetting:    r.ringSetting,
+		Fixed:          r.fixed,
 	}, nil
 }

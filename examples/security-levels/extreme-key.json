@@ -1,171 +1,95 @@
 {
+  "schema_version": 2,
   "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "rotor_specs": [
+  "rotors": [
     {
-      "id": "R1",
-      "forward_mapping": "XYRFWACMQHLPJZOIEVKDBUTGSN",
-      "notches": [
-        75,
-        88,
-        69
-      ],
-      "position": 24,
-      "ring_setting": 20
+      "name": "R1",
+      "wiring": "OHDQVXLETCNBZARUWYSIPFGJMK",
+      "notches": "LF",
+      "ring": "A",
+      "position": "K"
     },
     {
-      "id": "R2",
-      "forward_mapping": "YNPGAXQVERDUTIBWOSCFKMLJHZ",
-      "notches": [
-        84,
-        69,
-        78
-      ],
-      "position": 24,
-      "ring_setting": 22
+      "name": "R2",
+      "wiring": "FIEVTRSBWGKOADPQLYUJCNMHXZ",
+      "notches": "Q",
+      "ring": "X",
+      "position": "H"
     },
     {
-      "id": "R3",
-      "forward_mapping": "UWEROSMIKJTHQZXABVCYLGDNPF",
-      "notches": [
-        71
-      ],
-      "position": 2,
-      "ring_setting": 21
+      "name": "R3",
+      "wiring": "JOYXZMCSPKELAUNQWFDHVBIGRT",
+      "notches": "YD",
+      "ring": "U",
+      "position": "P"
     },
     {
-      "id": "R4",
-      "forward_mapping": "IHLSRQBCXZTJOPEKAYUFDMVNWG",
-      "notches": [
-        83,
-        82
-      ],
-      "position": 12,
-      "ring_setting": 10
+      "name": "R4",
+      "wiring": "BLOZFANWSUEGRYHDJQMIKTPVXC",
+      "notches": "E",
+      "ring": "U",
+      "position": "L"
     },
     {
-      "id": "R5",
-      "forward_mapping": "VXMIAJFHENKCOWRDYQTZUGPSLB",
-      "notches": [
-        79,
-        86
-      ],
-      "position": 22,
-      "ring_setting": 12
+      "name": "R5",
+      "wiring": "QMWADUEPCJHFVTXLBNGZRIYKSO",
+      "notches": "GH",
+      "ring": "T",
+      "position": "G"
     },
     {
-      "id": "R6",
-      "forward_mapping": "OCDMNEGXIJKLYRVAQWFHUBSPZT",
-      "notches": [
-        79,
-        83,
-        66
-      ],
-      "position": 7,
-      "ring_setting": 24
+      "name": "R6",
+      "wiring": "TPQBWFJKUGXYOVIMRACEDNLSZH",
+      "notches": "I",
+      "ring": "Y",
+      "position": "I"
     },
     {
-      "id": "R7",
-      "forward_mapping": "LJWOCTVNMRPGBQSEAUXHKDFYZI",
-      "notches": [
-        69
-      ],
-      "position": 17,
-      "ring_setting": 20
+      "name": "R7",
+      "wiring": "VASUKBJNTPMELHGZROWYDCQXFI",
+      "notches": "P",
+      "ring": "X",
+      "position": "Y"
     },
     {
-      "id": "R8",
-      "forward_mapping": "FYVDZKRABMHICSNOTPUQGLXWJE",
-      "notches": [
-        80,
-        83,
-        69
-      ],
-      "position": 4,
-      "ring_setting": 12
+      "name": "R8",
+      "wiring": "RDULCXAGTPHOBZNJIQKESFMWVY",
+      "notches": "F",
+      "ring": "H",
+      "position": "G"
     },
     {
-      "id": "R9",
-      "forward_mapping": "ADVOJXYKLFHZIGETCNMRSWQUBP",
-      "notches": [
-        87,
-        65
-      ],
-      "position": 5,
-      "ring_setting": 20
+      "name": "R9",
+      "wiring": "VFDQUPZXCWALERTHYOINSGBKMJ",
+      "notches": "A",
+      "ring": "D",
+      "position": "B"
     },
     {
-      "id": "R10",
-      "forward_mapping": "EMXVNGKCZLBRAHPYUOJWSTQDIF",
-      "notches": [
-        79,
-        70
-      ],
-      "position": 21,
-      "ring_setting": 9
+      "name": "R10",
+      "wiring": "QLUFNJMEIZKHCATPGRBWDXYOVS",
+      "notches": "BTS",
+      "ring": "R",
+      "position": "R"
     },
     {
-      "id": "R11",
-      "forward_mapping": "NRWSEOHPJIALZQDXMUFBCTVYGK",
-      "notches": [
-        72
-      ],
-      "position": 22,
-      "ring_setting": 1
+      "name": "R11",
+      "wiring": "SPXQIFUDNOBETMHJVAYLGCWKZR",
+      "notches": "LGF",
+      "ring": "S",
+      "position": "R"
     },
     {
-      "id": "R12",
-      "forward_mapping": "OAWGRMQVDNCTIXUBEPJZSKLFYH",
-      "notches": [
-        83
-      ],
-      "position": 8,
-      "ring_setting": 7
+      "name": "R12",
+      "wiring": "VAZPOCGFMKDEXSNYBTURWQJIHL",
+      "notches": "ZR",
+      "ring": "W",
+      "position": "M"
     }
   ],
-  "reflector_spec": {
-    "id": "UKW",
-    "mapping": "BAWIUJTZDFQSXVRYKOLGENCMPH"
+  "reflector": {
+    "name": "UKW",
+    "wiring": "UFIPKBVSCWEQNMYDLTHRAGJZOX"
   },
-  "plugboard_pairs": {
-    "A": "R",
-    "B": "Y",
-    "C": "X",
-    "D": "Z",
-    "E": "I",
-    "F": "T",
-    "G": "W",
-    "H": "J",
-    "I": "E",
-    "J": "H",
-    "K": "V",
-    "L": "M",
-    "M": "L",
-    "N": "Q",
-    "O": "U",
-    "P": "S",
-    "Q": "N",
-    "R": "A",
-    "S": "P",
-    "T": "F",
-    "U": "O",
-    "V": "K",
-    "W": "G",
-    "X": "C",
-    "Y": "B",
-    "Z": "D"
-  },
-  "current_rotor_positions": [
-    24,
-    24,
-    2,
-    12,
-    22,
-    7,
-    17,
-    4,
-    5,
-    21,
-    22,
-    8
-  ]
+  "plugboard": "AM BV CP DL EZ FX GI HT JQ KS NW OR UY"
 }

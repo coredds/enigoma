@@ -560,3 +560,24 @@ func TestAlphabet_Runes(t *testing.T) {
 		t.Errorf("Runes() should return a copy, but modification affected original")
 	}
 }
+
+func TestDetectCovering(t *testing.T) {
+	for _, text := range []string{"a\r\nb", "hello\n", "  padded  ", "x", "tab\there", "日本語🙂"} {
+		a, err := DetectCovering(text)
+		if err != nil {
+			t.Errorf("%q: %v", text, err)
+			continue
+		}
+		if a.Size()%2 != 0 {
+			t.Errorf("%q: odd size %d", text, a.Size())
+		}
+		for _, r := range text {
+			if !a.Contains(r) {
+				t.Errorf("%q: alphabet misses %q", text, r)
+			}
+		}
+	}
+	if _, err := DetectCovering(""); err == nil {
+		t.Error("empty text should fail")
+	}
+}

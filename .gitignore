@@ -65,7 +65,7 @@ debug_*
 test_output.txt
 
 # enigoma CLI binaries (avoid committing compiled binaries)
-enigoma
+/enigoma
 enigoma.exe
 cmd/enigoma/enigoma
 cmd/enigoma/enigoma.exe
@@ -73,3 +73,5 @@ cmd/enigoma/enigoma.exe
 # Release artifacts (built locally for manual GitHub release upload)
 releases/
 release-notes.md 
+# Superpowers plugin docs (specs/plans)
+docs/superpowers/

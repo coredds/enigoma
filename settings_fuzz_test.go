@@ -1,36 +1,52 @@
 package enigoma
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 )
 
-// FuzzNewFromJSON fuzzes NewFromJSON to ensure it doesn't panic on arbitrary input
-// and that valid JSON round-trips when possible.
-func FuzzNewFromJSON(f *testing.F) {
-	// Seed with some interesting cases
-	f.Add("")
-	f.Add("not json")
-	f.Add("{}")
-	f.Add("{\"schema_version\":1}")
-	f.Add("{\"alphabet\":\"ABC\",\"rotor_specs\":[],\"reflector_spec\":{}}")
+func FuzzParseSettings(f *testing.F) {
+	f.Add([]byte(validV2JSON))
+	f.Add([]byte(`{"schema_version":1,"alphabet":"ABCD","rotor_specs":[]}`))
+	f.Add([]byte(`{"schema_version":2,"alphabet":"AB","rotors":[{"name":"R","wiring":"BA","notches":"A","ring":"","position":"B"}],"reflector":{"name":"U","wiring":"BA"},"plugboard":""}`))
 
-	f.Fuzz(func(t *testing.T, data string) {
-		// Function under test should never panic
-		m, err := NewFromJSON(data)
-		if err == nil && m != nil {
-			// If it parsed, try to serialize and parse again
-			jsonData, err := m.SaveSettingsToJSON()
-			if err != nil {
-				t.Fatalf("SaveSettingsToJSON failed after parse: %v", err)
-			}
-			m2, err := NewFromJSON(jsonData)
-			if err != nil {
-				t.Fatalf("Re-parse failed after save: %v", err)
-			}
-			// Light sanity checks
-			if m2.GetAlphabetSize() <= 0 {
-				t.Fatalf("Invalid alphabet size after round-trip")
-			}
+	f.Fuzz(func(t *testing.T, data []byte) {
+		s, err := ParseSettings(data)
+		if err != nil {
+			return
+		}
+		m, err := NewFromSettings(s)
+		if err != nil {
+			return
+		}
+		js, err := json.Marshal(m.Settings())
+		if err != nil {
+			t.Fatalf("marshal: %v", err)
+		}
+		s2, err := ParseSettings(js)
+		if err != nil {
+			t.Fatalf("re-parse of own settings failed: %v\n%s", err, js)
+		}
+		m2, err := NewFromSettings(s2)
+		if err != nil {
+			t.Fatalf("rebuild from own settings failed: %v\n%s", err, js)
+		}
+		probe := "HELLO"
+		if !allIn(probe, m.Alphabet()) {
+			probe = string([]rune(m.Alphabet())[:1])
+		}
+		if a, b := mustEncrypt(t, m, probe), mustEncrypt(t, m2, probe); a != b {
+			t.Fatalf("round-tripped machine diverged: %q vs %q", a, b)
 		}
 	})
+}
+
+func allIn(s, alphabet string) bool {
+	for _, r := range s {
+		if !strings.ContainsRune(alphabet, r) {
+			return false
+		}
+	}
+	return true
 }

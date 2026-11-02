@@ -1,0 +1,46 @@
+{
+  "schema_version": 2,
+  "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÁÂÃÇÉÊÍÓÔÕÚàáâãçéêíóôõú .,!?;:-'\"()",
+  "rotors": [
+    {
+      "name": "R1",
+      "wiring": "íqÚIS'w:gkÕ)YQõÀEDZãÇ.V-dàÃRBzépâe,?ntuL!\"boJóNK(ÍOCmvÁiÂaFúAMsX;ÓGêPÉôcjxWláfçyhH ÊUÔrT",
+      "notches": "Êl",
+      "ring": "â",
+      "position": "õ"
+    },
+    {
+      "name": "R2",
+      "wiring": "TéÀÇoU'ply;ãÁL.DÓÔÕd?êg)ÍqGàYNúÂ,sQõcZ\"EmiWÚAH!ReBkôÃx(âjf zbOaPÊvóíX:çnCr-wuFVÉtSJKhIMá",
+      "notches": "mP",
+      "ring": "X",
+      "position": "P"
+    },
+    {
+      "name": "R3",
+      "wiring": "HhX!)ÃbÊDv'lÓKsúêjAÕÉóácO;:oNLãMQRiÀzk,FUíâBÍÂrwTCaôugS.qWxZYym-G\"JÚdçfÁÔÇePVtE(Iéõ ?npà",
+      "notches": "êÔ",
+      "ring": "Y",
+      "position": "Í"
+    },
+    {
+      "name": "R4",
+      "wiring": "(uêhÀnv.ÍPiç,ÁWYjHdIq?y)ÉMÇíBÓÊkTpóôúRÚNsàGZÂ\"Xãg;eLx:!rwDCmF'f KÕAÔâ-õJlQzáUctboÃaéOSEV",
+      "notches": "dO",
+      "ring": "Q",
+      "position": "V"
+    },
+    {
+      "name": "R5",
+      "wiring": "huéjSmgkÇáwQÂDêqRtZÁÓBdciàâEC rG?:zÍxÊÚaJUNãe'ÉIÀ(MV,;)oOPÃpÔ\"sYLúXôçnHõyfvlFTAóÕ-.íbK!W",
+      "notches": "Ã,",
+      "ring": "Ç",
+      "position": "Ç"
+    }
+  ],
+  "reflector": {
+    "name": "UKW",
+    "wiring": "FIãaeATêBwâ? ÀhídçÔGVU;Ú)éDs.QEkpOuôf\"ÍÉrgÓobvitJÃ:óNÕúx(nõmqSÁX',KCRZHPzjÊÂMcá-LWy!àlÇY"
+  },
+  "plugboard": "AW BÃ Uú Vl XÔ ké ÉÓ ô)"
+}

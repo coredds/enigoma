@@ -1,87 +1,46 @@
 {
+  "schema_version": 2,
   "alphabet": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  "rotor_specs": [
+  "rotors": [
     {
-      "id": "R1",
-      "forward_mapping": "SCZDRLEVMYQGKHPATOXIUBFWNJ",
-      "notches": [
-        68,
-        84,
-        74
-      ],
-      "position": 12,
-      "ring_setting": 24
+      "name": "R1",
+      "wiring": "ODNBWPGRJKAFLIZYXSTHUVCMQE",
+      "notches": "U",
+      "ring": "U",
+      "position": "W"
     },
     {
-      "id": "R2",
-      "forward_mapping": "PENFLJTXQUHRMSGOIZDWAYKVBC",
-      "notches": [
-        78
-      ],
-      "position": 1,
-      "ring_setting": 3
+      "name": "R2",
+      "wiring": "EOZXUVQFHPCYAIKLSDWTBJNMGR",
+      "notches": "K",
+      "ring": "F",
+      "position": "A"
     },
     {
-      "id": "R3",
-      "forward_mapping": "YPAEQUOGBFDMZLKIJVWHNRTCSX",
-      "notches": [
-        65,
-        79,
-        70
-      ],
-      "position": 24,
-      "ring_setting": 2
+      "name": "R3",
+      "wiring": "YCVDIWTMKLANSQUHEPFJORBZGX",
+      "notches": "D",
+      "ring": "G",
+      "position": "K"
     },
     {
-      "id": "R4",
-      "forward_mapping": "HCUNSORVYXZQFKIAMTELGWPDJB",
-      "notches": [
-        82,
-        84,
-        81
-      ],
-      "position": 23,
-      "ring_setting": 3
+      "name": "R4",
+      "wiring": "ETJUYNGIVWFBHXRDCOAQLMZKSP",
+      "notches": "X",
+      "ring": "O",
+      "position": "S"
     },
     {
-      "id": "R5",
-      "forward_mapping": "FDLTEAQKNWIZPCORBMJXGVSUHY",
-      "notches": [
-        79,
-        82,
-        75
-      ],
-      "position": 8,
-      "ring_setting": 2
+      "name": "R5",
+      "wiring": "IQSZAMUTPWXGRLYDVNCBJHFOKE",
+      "notches": "Q",
+      "ring": "S",
+      "position": "J"
     }
   ],
-  "reflector_spec": {
-    "id": "UKW",
-    "mapping": "BALIVNPJDHQCSFYGKWMXZERTOU"
+  "reflector": {
+    "name": "UKW",
+    "wiring": "BAYWXLHGTOMFKZJVSUQIRPDECN"
   },
-  "plugboard_pairs": {
-    "B": "M",
-    "D": "Z",
-    "E": "F",
-    "F": "E",
-    "G": "P",
-    "I": "Q",
-    "J": "X",
-    "K": "R",
-    "M": "B",
-    "O": "Y",
-    "P": "G",
-    "Q": "I",
-    "R": "K",
-    "X": "J",
-    "Y": "O",
-    "Z": "D"
-  },
-  "current_rotor_positions": [
-    12,
-    1,
-    24,
-    23,
-    8
-  ]
+  "plugboard": "AC BJ ET KX LR NW PU YZ"
 }

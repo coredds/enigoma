@@ -194,6 +194,33 @@ func AutoDetectFromText(text string, options ...AutoDetectOption) (*Alphabet, er
 	return New(runes)
 }
 
+// DetectCovering builds an alphabet containing every rune of text exactly as
+// given (no line-ending normalization, trimming or control-character
+// filtering), so the text itself can always be encrypted losslessly. Runes are
+// sorted by code point; a padding rune is added when needed for an even size.
+func DetectCovering(text string) (*Alphabet, error) {
+	if text == "" {
+		return nil, fmt.Errorf("cannot detect an alphabet from empty text")
+	}
+	seen := make(map[rune]bool)
+	var runes []rune
+	for _, r := range text {
+		if !seen[r] {
+			seen[r] = true
+			runes = append(runes, r)
+		}
+	}
+	slices.Sort(runes)
+	if len(runes)%2 != 0 {
+		pad := rune(' ')
+		for seen[pad] {
+			pad++
+		}
+		runes = append(runes, pad)
+	}
+	return New(runes)
+}
+
 // autoDetectConfig holds configuration for auto-detection
 type autoDetectConfig struct {
 	maxSize        int
