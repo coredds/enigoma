@@ -304,7 +304,7 @@ func (m *Machine) Encrypt(s string) (string, error) {
 	alph := m.alphabet.Runes()
 	out := make([]rune, len(indices))
 	for i, idx := range indices {
-		out[i] = alph[m.press(idx)]
+		out[i] = alph[m.press(idx, nil)]
 	}
 	return string(out), nil
 }
@@ -315,17 +315,26 @@ func (m *Machine) Decrypt(s string) (string, error) {
 }
 
 // press steps the rotors and routes one contact index through the machine.
-func (m *Machine) press(idx int) int {
+// When rec is non-nil every hop is appended to it; Encrypt passes nil.
+func (m *Machine) press(idx int, rec *[]Hop) int {
 	m.step()
-	c := m.plugboard.Process(idx)
+	c := idx
+	hop := func(stage Stage, name string, out int) {
+		if rec != nil {
+			*rec = append(*rec, Hop{Stage: stage, Component: name, In: c, Out: out})
+		}
+		c = out
+	}
+	hop(StagePlugboardIn, "plugboard", m.plugboard.Process(c))
 	for i := len(m.rotors) - 1; i >= 0; i-- {
-		c = m.rotors[i].Forward(c)
+		hop(StageRotorForward, m.rotors[i].ID(), m.rotors[i].Forward(c))
 	}
-	c = m.reflector.Reflect(c)
+	hop(StageReflector, m.reflector.ID(), m.reflector.Reflect(c))
 	for i := 0; i < len(m.rotors); i++ {
-		c = m.rotors[i].Backward(c)
+		hop(StageRotorBackward, m.rotors[i].ID(), m.rotors[i].Backward(c))
 	}
-	return m.plugboard.Process(c)
+	hop(StagePlugboardOut, "plugboard", m.plugboard.Process(c))
+	return c
 }
 
 // step implements historical stepping, including the double-step. All notch
